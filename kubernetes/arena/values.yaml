@@ -1,3 +1,5 @@
+namespace: default
+
 docker:
   name: sarus
   registry: sarus.azurecr.io
@@ -21,11 +23,12 @@ cluster:
       # privateKeySecretRef: letsencrypt-prod
     secretName: letsencrypt-secret
 
-# Database configuration
-postgres:
+# PostgreSQL configuration
+postgresql:
   image: postgres
   password: ""
 
+# Redis configuration
 redis:
   image: redis
   password: ""
@@ -67,7 +70,6 @@ ingress-nginx:
 
 cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
   namespace: default
-  installCRDs: true
 
 # This is a bit legacy but let's keep it
 masking:

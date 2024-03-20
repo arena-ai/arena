@@ -3,6 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{.Values.cluster.tls.issuer.name}}
+  namespace: {{.Values.namespace}}
 spec:
   acme:
     server: {{.Values.cluster.tls.issuer.server}}
