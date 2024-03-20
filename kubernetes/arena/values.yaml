@@ -1,0 +1,110 @@
+docker:
+  name: sarus
+  registry: sarus.azurecr.io
+  tag: latest
+  username: sarus
+  password: ""
+
+cluster:
+  provider: AKS
+  ingress: nginx
+  host: proxy.sarus.app
+  tls:
+    enabled: true
+    issuer:
+      name: letsencrypt-staging
+      # name: letsencrypt-prod
+      server: https://acme-staging-v02.api.letsencrypt.org/directory
+      # server: https://acme-v02.api.letsencrypt.org/directory
+      email: ng@sarus.tech
+      privateKeySecretRef: letsencrypt-staging
+      # privateKeySecretRef: letsencrypt-prod
+    secretName: letsencrypt-secret
+
+# Database configuration
+postgres:
+  image: postgres
+  password: ""
+
+redis:
+  image: redis
+  password: ""
+
+# Backend configuration
+backend:
+  image: arena_backend
+  service:
+    type: ClusterIP
+    externalPort: 80
+    internalPort: 80
+    name: http
+
+worker:
+  image: arena_backend
+  service:
+    type: ClusterIP
+
+# Ingress values (see: https://github.com/kubernetes/ingress-nginx/blob/main/charts/ingress-nginx/values.yaml)
+ingress-nginx:
+  # namespaceOverride: sarus
+  controller:
+    replicaCount: 2
+    publishService:
+      enabled: true
+    nodeSelector:
+      kubernetes.io/os: linux
+    defaultBackend:
+      nodeSelector:
+        kubernetes.io/os: linux
+    admissionWebhooks:
+      patch:
+        nodeSelector:
+          kubernetes.io/os: linux
+    service:
+      externalTrafficPolicy: Local
+      # Defined in: https://portal.azure.com/#@sarus.tech/resource/subscriptions/67a5854f-71d3-4154-ad49-cb78d895dc62/resourcegroups/proxy/providers/Microsoft.Network/publicIPAddresses/sarus-proxy-ip/overview
+      loadBalancerIP: ""
+
+cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
+  namespace: default
+
+# This is a bit legacy but let's keep it
+masking:
+  presidio:
+    registry: mcr.microsoft.com
+    # The text analyzer
+    analyzer:
+      name: presidio-analyzer
+      replicas: 1
+      # imagePullPolicy: Always
+      container:
+        resources:
+          requests:
+            memory: "1500Mi"
+            cpu: "1500m"
+          limits:
+            memory: "3000Mi"
+            cpu: "2000m"
+      service:
+        type: ClusterIP
+        externalPort: 80
+        internalPort: 8080
+        name: http
+    # The text anonymizer
+    anonymizer:
+      name: presidio-anonymizer
+      replicas: 1
+      # imagePullPolicy: Always
+      container:
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "125m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      service:
+        type: ClusterIP
+        externalPort: 80
+        internalPort: 8080
+        name: http

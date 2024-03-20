@@ -1,0 +1,16 @@
+{{- if .Values.cluster.tls.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{.Values.cluster.tls.issuer.name}}
+spec:
+  acme:
+    server: {{.Values.cluster.tls.issuer.server}}
+    email: {{.Values.cluster.tls.issuer.email}}
+    privateKeySecretRef:
+      name: {{.Values.cluster.tls.issuer.privateKeySecretRef}}
+    solvers:
+    - http01:
+        ingress:
+          ingressClassName: nginx
+{{- end }}
