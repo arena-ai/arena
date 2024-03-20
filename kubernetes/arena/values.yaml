@@ -67,6 +67,7 @@ ingress-nginx:
 
 cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
   namespace: default
+  installCRDs: true
 
 # This is a bit legacy but let's keep it
 masking:

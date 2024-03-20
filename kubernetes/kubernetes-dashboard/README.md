@@ -7,7 +7,7 @@ helm upgrade --install kubernetes-dashboard kubernetes-dashboard \
 ```
 
 Then connect with:
-`http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:https/proxy/#/login`
+`https://localhost:8443`
 
 Get the token from the kube config:
 `cat ~/.kube/config`
