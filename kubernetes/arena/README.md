@@ -10,15 +10,15 @@ Then deploy the app:
 ```sh
 helm install ${RELEASE_NAME} arena \
 --set docker.password=${DOCKER_PASSWORD} \
---set postgresql.password=${POSTGRESQL_PASSWORD} \
+--set postgresql.password=${POSTGRES_PASSWORD} \
 --set redis.password=${REDIS_PASSWORD}
 ```
 
 Or if you use a `.env` file:
 
 ```sh
-source .env; helm upgrade --install ${RELEASE_NAME} arena \
+source ../.env; helm upgrade --install ${RELEASE_NAME} arena \
 --set docker.password=${DOCKER_PASSWORD} \
---set postgresql.password=${POSTGRESQL_PASSWORD} \
+--set postgresql.password=${POSTGRES_PASSWORD} \
 --set redis.password=${REDIS_PASSWORD}
 ```
