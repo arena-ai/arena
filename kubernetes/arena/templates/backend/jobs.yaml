@@ -13,6 +13,8 @@ spec:
       - name: {{.Release.Name}}-backend-setup
         image: {{.Values.docker.registry}}/{{.Values.backend.image}}
         imagePullPolicy: Always
+        command: ["/bin/bash"]
+        args: ["-c", "/app/prestart.sh"]
         env:
         - name: FIRST_SUPERUSER
           value: {{.Values.backend.firstSuperUser.user}}
@@ -22,7 +24,6 @@ spec:
           value: {{.Values.postgresql.password}}
         - name: POSTGRES_SERVER
           value: "{{.Release.Name}}-postgresql-service.{{.Values.namespace}}.svc.cluster.local"
-        command: ["." "/app/prestart.sh"]
       restartPolicy: Never
       imagePullSecrets:
       - name: {{ .Release.Name -}}-docker-registry-secret

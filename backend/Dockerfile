@@ -25,4 +25,6 @@ COPY ./tests-start.sh /app/
 
 COPY ./app /app/app
 
+RUN chmod +x /app/prestart.sh /app/tests-start.sh
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
