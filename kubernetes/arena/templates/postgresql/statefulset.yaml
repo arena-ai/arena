@@ -79,6 +79,10 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name -}}-postgresql-secret
                   key: postgresql-password
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_DB
+              value: app
             # Replication
             # Initdb
             # Standby

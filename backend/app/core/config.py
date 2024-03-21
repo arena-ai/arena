@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str
-    POSTGRES_DB: str = ""
+    POSTGRES_DB: str = "app"
 
     @computed_field  # type: ignore[misc]
     @property
