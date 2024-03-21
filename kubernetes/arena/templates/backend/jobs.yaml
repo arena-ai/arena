@@ -15,6 +15,10 @@ spec:
         imagePullPolicy: Always
         command: ["/bin/bash", "/app/prestart.sh"]
         env:
+        - name: FIRST_SUPERUSER
+          value: {{.Values.backend.firstSuperUser.user}}
+        - name: FIRST_SUPERUSER_PASSWORD
+          value: {{.Values.backend.firstSuperUser.password}}
         - name: POSTGRES_PASSWORD
           value: {{.Values.postgresql.password}}
         - name: POSTGRES_SERVER
