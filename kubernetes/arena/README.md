@@ -13,8 +13,8 @@ helm install ${RELEASE_NAME} arena \
 --set postgresql.user=${POSTGRES_USER} \
 --set postgresql.password=${POSTGRES_PASSWORD} \
 --set redis.password=${REDIS_PASSWORD} \
---set firstSuperUser.user=${FIRST_SUPERUSER} \
---set firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
+--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
+--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
 ```
 
 Or if you use a `.env` file:
@@ -25,6 +25,6 @@ source ../.env; helm upgrade --install ${RELEASE_NAME} arena \
 --set postgresql.user=${POSTGRES_USER} \
 --set postgresql.password=${POSTGRES_PASSWORD} \
 --set redis.password=${REDIS_PASSWORD} \
---set firstSuperUser.user=${FIRST_SUPERUSER} \
---set firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
+--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
+--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
 ```
