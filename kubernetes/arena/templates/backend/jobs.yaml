@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{.Release.Name}}-backend-setup-job
+  namespace: {{.Values.namespace}}
+spec:
+  template:
+    metadata:
+      name: {{.Release.Name}}-backend-setup
+      namespace: {{.Values.namespace}}
+    spec:
+      containers:
+      - name: {{.Release.Name}}-backend-setup
+        image: {{.Values.docker.registry}}/{{.Values.backend.image}}
+        imagePullPolicy: Always
+        command: ["/bin/bash", "/app/prestart.sh"]
+        env:
+        - name: POSTGRES_PASSWORD
+          value: {{.Values.postgresql.password}}
+        - name: POSTGRES_SERVER
+          value: "{{.Release.Name}}-postgresql-service.{{.Values.namespace}}.svc.cluster.local"
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: {{ .Release.Name -}}-docker-registry-secret

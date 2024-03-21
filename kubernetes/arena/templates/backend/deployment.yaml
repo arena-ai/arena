@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Release.Name}}-backend-deployment
+  namespace: {{.Values.namespace}}
+  labels:
+    app.kubernetes.io/instance: {{.Release.Name}}
+    app.kubernetes.io/name: {{.Chart.Name}}
+    app.kubernetes.io/version: {{.Chart.AppVersion}}
+    app.kubernetes.io/managed-by: {{.Release.Service}}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{.Release.Name}}
+      app.kubernetes.io/name: {{.Chart.Name}}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      name: {{.Release.Name}}-backend
+      namespace: {{.Values.namespace}}
+      labels:
+        app.kubernetes.io/instance: {{.Release.Name}}
+        app.kubernetes.io/name: {{.Chart.Name}}
+        app.kubernetes.io/version: {{.Chart.AppVersion}}
+        app.kubernetes.io/managed-by: {{.Release.Service}}
+        app.kubernetes.io/component: backend
+    spec:
+      containers:
+      - name: backend
+        image: {{.Values.docker.registry}}/{{.Values.backend.image}}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{.Values.backend.service.internalPort}}
+        env:
+        - name: SERVER_NAME
+          value: {{.Values.cluster.host}}
+        - name: SERVER_HOST
+        {{- if .Values.cluster.tls.enabled }}
+          value: "https://{{.Values.cluster.host}}"
+        {{- else }}
+          value: "http://{{.Values.cluster.host}}"
+        {{- end }}
+        - name: FIRST_SUPERUSER
+          value: {{.Values.backend.firstSuperUser.user}}
+        - name: FIRST_SUPERUSER_PASSWORD
+          value: {{.Values.backend.firstSuperUser.password}}
+        - name: POSTGRES_PASSWORD
+          value: {{.Values.postgresql.password}}
+        - name: POSTGRES_SERVER
+          value: "{{.Release.Name}}-postgresql-service.{{.Values.namespace}}.svc.cluster.local"
+        - name: REDIS_PASSWORD
+          value: {{.Values.redis.password}}
+        - name: REDIS_SERVER
+          value: "{{.Release.Name}}-redis-service.{{.Values.namespace}}.svc.cluster.local"
+        - name: PRESIDIO_ANALYZER_SERVER
+          value: "{{.Release.Name}}-presidio-analyser-service.{{.Values.namespace}}.svc.cluster.local"
+        - name: PRESIDIO_ANALYZER_PORT
+          value: {{.Values.masking.presidio.anonymizer.service.externalPort | quote}}
+        - name: PRESIDIO_ANONYMIZER_SERVER
+          value: "{{.Release.Name}}-presidio-anonymizer-service.{{.Values.namespace}}.svc.cluster.local"
+        - name: PRESIDIO_ANONYMIZER_PORT
+          value: {{.Values.masking.presidio.anonymizer.service.externalPort | quote}}
+      imagePullSecrets:
+      - name: {{ .Release.Name -}}-docker-registry-secret

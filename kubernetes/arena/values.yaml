@@ -41,6 +41,9 @@ backend:
     externalPort: 80
     internalPort: 80
     name: http
+  firstSuperUser:
+    user: ""
+    password: ""
 
 worker:
   image: arena_backend

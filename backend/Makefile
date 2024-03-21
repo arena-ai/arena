@@ -1,4 +1,4 @@
-IMAGE_NAME=backend
+IMAGE_NAME=arena_backend
 TAG=latest
 REGISTRY=sarus.azurecr.io
 
