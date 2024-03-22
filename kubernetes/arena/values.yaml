@@ -52,6 +52,14 @@ worker:
   service:
     type: ClusterIP
 
+frontend:
+  image: arena_frontend
+  service:
+    type: ClusterIP
+    externalPort: 80
+    internalPort: 80
+    name: http
+
 # Ingress values (see: https://github.com/kubernetes/ingress-nginx/blob/main/charts/ingress-nginx/values.yaml)
 ingress-nginx:
   # namespaceOverride: sarus

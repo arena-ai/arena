@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Release.Name}}-frontend-deployment
+  namespace: {{.Values.namespace}}
+  labels:
+    app.kubernetes.io/instance: {{.Release.Name}}
+    app.kubernetes.io/name: {{.Chart.Name}}
+    app.kubernetes.io/version: {{.Chart.AppVersion}}
+    app.kubernetes.io/managed-by: {{.Release.Service}}
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{.Release.Name}}
+      app.kubernetes.io/name: {{.Chart.Name}}
+      app.kubernetes.io/component: frontend
+  template:
+    metadata:
+      name: {{.Release.Name}}-frontend
+      namespace: {{.Values.namespace}}
+      labels:
+        app.kubernetes.io/instance: {{.Release.Name}}
+        app.kubernetes.io/name: {{.Chart.Name}}
+        app.kubernetes.io/version: {{.Chart.AppVersion}}
+        app.kubernetes.io/managed-by: {{.Release.Service}}
+        app.kubernetes.io/component: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: {{.Values.docker.registry}}/{{.Values.frontend.image}}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{.Values.frontend.service.internalPort}}
+        env:
+        - name: SERVER_NAME
+          value: {{.Values.cluster.host}}
+        - name: VITE_API_URL
+        {{- if .Values.cluster.tls.enabled }}
+          value: "https://{{.Values.cluster.host}}"
+        {{- else }}
+          value: "http://{{.Values.cluster.host}}"
+        {{- end }}
+        - name: NODE_ENV
+          value: production
+      imagePullSecrets:
+      - name: {{ .Release.Name -}}-docker-registry-secret
