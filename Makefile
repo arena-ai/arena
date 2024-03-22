@@ -4,10 +4,10 @@ PYTHON_CLIENT_VERSION=$(VERSION)
 # Default target
 all: build
 
-build: build-backend
+build: build-backend build-frontend
 	@echo "Build version: $(VERSION)"
 
-push: version push-backend
+push: version push-backend push-frontend
 	@echo "Push version: $(VERSION)"
 
 version:
@@ -24,9 +24,18 @@ build-backend:
 push-backend:
 	$(MAKE) -C backend push
 
+# Target to build the backend Docker image
+build-frontend:
+	$(MAKE) -C frontend build
+
+# Target to push the backend Docker image
+push-frontend:
+	$(MAKE) -C frontend push
+
 # Target to remove built Docker image from local machine
 clean:
 	$(MAKE) -C backend clean
+	$(MAKE) -C frontend clean
 
 kubernetes:
 	source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
@@ -38,4 +47,4 @@ kubernetes:
 	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
 
 
-.PHONY: all build push version build-backend push-backend clean kubernetes
+.PHONY: all build push version build-backend push-backend build-frontend push-frontend clean kubernetes
