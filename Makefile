@@ -1,3 +1,4 @@
+include .env
 VERSION=$(shell cat VERSION)
 PYTHON_CLIENT_VERSION=$(VERSION)
 
@@ -38,7 +39,7 @@ clean:
 	$(MAKE) -C frontend clean
 
 kubernetes:
-	source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 	--set docker.password=${DOCKER_PASSWORD} \
 	--set postgresql.user=${POSTGRES_USER} \
 	--set postgresql.password=${POSTGRES_PASSWORD} \
