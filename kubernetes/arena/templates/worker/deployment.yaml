@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Release.Name}}-worker-deployment
+  namespace: {{.Values.namespace}}
+  labels:
+    app.kubernetes.io/instance: {{.Release.Name}}
+    app.kubernetes.io/name: {{.Chart.Name}}
+    app.kubernetes.io/version: {{.Chart.AppVersion}}
+    app.kubernetes.io/managed-by: {{.Release.Service}}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{.Release.Name}}
+      app.kubernetes.io/name: {{.Chart.Name}}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      name: {{.Release.Name}}-worker
+      namespace: {{.Values.namespace}}
+      labels:
+        app.kubernetes.io/instance: {{.Release.Name}}
+        app.kubernetes.io/name: {{.Chart.Name}}
+        app.kubernetes.io/version: {{.Chart.AppVersion}}
+        app.kubernetes.io/managed-by: {{.Release.Service}}
+        app.kubernetes.io/component: worker
+    spec:
+      containers:
+      - name: worker
+        image: {{.Values.docker.registry}}/{{.Values.worker.image}}
+        imagePullPolicy: Always
+        command: ["celery"]
+        args: ["-A", "worker", "worker", "-l", "INFO", "-I", "worker.evaluation"]
+        env:
+        - name: POSTGRES_PASSWORD
+          value: {{.Values.postgresql.password}}
+        - name: POSTGRES_SERVER
+          value: "{{.Release.Name}}-postgresql-service.{{.Values.namespace}}.svc.cluster.local"
+        - name: REDIS_PASSWORD
+          value: {{.Values.redis.password}}
+        - name: REDIS_SERVER
+          value: "{{.Release.Name}}-redis-service.{{.Values.namespace}}.svc.cluster.local"
+      imagePullSecrets:
+      - name: {{ .Release.Name -}}-docker-registry-secret

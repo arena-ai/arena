@@ -26,6 +26,8 @@ sqlmodel = "^0.0.16"
 bcrypt = "4.0.1"
 pydantic-settings = "^2.2.1"
 sentry-sdk = {extras = ["fastapi"], version = "^1.40.6"}
+celery = {extras = ["redis"], version = "^5.3.6"}
+redis = "^5.0.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
