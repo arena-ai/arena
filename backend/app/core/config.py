@@ -7,10 +7,11 @@ from pydantic import (
     BeforeValidator,
     HttpUrl,
     PostgresDsn,
+    RedisDsn,
     computed_field,
     model_validator,
 )
-from pydantic_core import MultiHostUrl
+from pydantic_core import MultiHostUrl, Url
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
@@ -64,6 +65,21 @@ class Settings(BaseSettings):
             host=self.POSTGRES_SERVER,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
+        )
+
+    REDIS_SERVER: str
+    REDIS_PASSWORD: str
+    
+    @computed_field  # type: ignore[misc]
+    @property
+    def CELERY_STORE_URI(self) -> RedisDsn:
+        return Url.build(
+            scheme="redis",
+            username="",
+            password=self.REDIS_PASSWORD,
+            host=self.REDIS_SERVER,
+            port=6379,
+            path="0",
         )
 
     SMTP_TLS: bool = True
