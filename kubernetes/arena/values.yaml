@@ -10,23 +10,25 @@ docker:
 cluster:
   provider: AKS
   ingress: nginx
-  host: proxy.sarus.app
+  host: arena.sarus.app
   tls:
     enabled: true
     issuer:
-      name: letsencrypt-staging
-      # name: letsencrypt-prod
-      server: https://acme-staging-v02.api.letsencrypt.org/directory
-      # server: https://acme-v02.api.letsencrypt.org/directory
+      # name: letsencrypt-staging
+      name: letsencrypt-prod
+      # server: https://acme-staging-v02.api.letsencrypt.org/directory
+      server: https://acme-v02.api.letsencrypt.org/directory
       email: ng@sarus.tech
-      privateKeySecretRef: letsencrypt-staging
-      # privateKeySecretRef: letsencrypt-prod
+      # privateKeySecretRef: letsencrypt-staging
+      privateKeySecretRef: letsencrypt-prod
     secretName: letsencrypt-secret
 
 # PostgreSQL configuration
 postgresql:
   image: postgres
+  user: postgres
   password: ""
+  db: app
 
 # Redis configuration
 redis:
@@ -68,8 +70,7 @@ ingress-nginx:
           kubernetes.io/os: linux
     service:
       externalTrafficPolicy: Local
-      # Defined in: https://portal.azure.com/#@sarus.tech/resource/subscriptions/67a5854f-71d3-4154-ad49-cb78d895dc62/resourcegroups/proxy/providers/Microsoft.Network/publicIPAddresses/sarus-proxy-ip/overview
-      loadBalancerIP: ""
+      loadBalancerIP: "4.176.1.227"
 
 cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
   namespace: default

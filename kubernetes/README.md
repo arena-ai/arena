@@ -8,7 +8,7 @@ Following [cert-manager](https://cert-manager.io/docs/installation/helm/#option-
 Then deploy the app:
 
 ```sh
-helm install ${RELEASE_NAME} arena \
+helm install ${RELEASE_NAME} kubernetes/arena \
 --set docker.password=${DOCKER_PASSWORD} \
 --set postgresql.user=${POSTGRES_USER} \
 --set postgresql.password=${POSTGRES_PASSWORD} \
@@ -20,11 +20,23 @@ helm install ${RELEASE_NAME} arena \
 Or if you use a `.env` file:
 
 ```sh
-source ../.env; helm upgrade --install ${RELEASE_NAME} arena \
+source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set docker.password=${DOCKER_PASSWORD} \
 --set postgresql.user=${POSTGRES_USER} \
 --set postgresql.password=${POSTGRES_PASSWORD} \
 --set redis.password=${REDIS_PASSWORD} \
 --set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
 --set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
+```
+
+To uninstall:
+
+```sh
+helm uninstall ${RELEASE_NAME}
+```
+
+Or:
+
+```sh
+source .env; helm uninstall ${RELEASE_NAME}
 ```
