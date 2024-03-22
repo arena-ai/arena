@@ -23,10 +23,24 @@ spec:
   - host: {{.Values.cluster.host}}
     http:
       paths:
-      - path: /
+      - path: /api
         pathType: Prefix
         backend:
           service:
             name: {{.Release.Name}}-backend-service
             port:
               number: {{.Values.backend.service.externalPort}}
+      - path: /docs
+        pathType: Prefix
+        backend:
+          service:
+            name: {{.Release.Name}}-backend-service
+            port:
+              number: {{.Values.backend.service.externalPort}}
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{.Release.Name}}-frontend-service
+            port:
+              number: {{.Values.frontend.service.externalPort}}
