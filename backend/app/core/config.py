@@ -92,8 +92,8 @@ class Settings(BaseSettings):
     # TODO: update type to EmailStr when sqlmodel supports it
     EMAIL_TEST_USER: str = "test@example.com"
     # TODO: update type to EmailStr when sqlmodel supports it
-    FIRST_SUPERUSER: str
-    FIRST_SUPERUSER_PASSWORD: str
+    FIRST_SUPERUSER: str = "admin@sarus.tech"
+    FIRST_SUPERUSER_PASSWORD: str = "Password"
     USERS_OPEN_REGISTRATION: bool = False
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:

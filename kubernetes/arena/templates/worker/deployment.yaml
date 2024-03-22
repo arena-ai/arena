@@ -32,7 +32,7 @@ spec:
         image: {{.Values.docker.registry}}/{{.Values.worker.image}}
         imagePullPolicy: Always
         command: ["celery"]
-        args: ["-A", "worker", "worker", "-l", "INFO", "-I", "worker.evaluation"]
+        args: ["-A", "app.worker", "worker", "-l", "INFO", "-I", "app.worker.evaluation"]
         env:
         - name: POSTGRES_PASSWORD
           value: {{.Values.postgresql.password}}
