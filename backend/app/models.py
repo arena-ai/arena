@@ -106,8 +106,9 @@ class Event(EventBase, table=True):
     timestamp: datetime =  Field(default=func.now())
     owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
     parent_id: int | None = Field(index=True, foreign_key="event.id")
-    # owner: User | None = Relationship(back_populates="events")
-    # parent: Optional["Event"] = Relationship(back_populates="events")
+    owner: User | None = Relationship(back_populates="events")
+    parent: Optional["Event"] = Relationship(back_populates="children")
+    children: list["Event"] = Relationship(back_populates="parent")
 
 
 # Properties to return via API, id is always required
