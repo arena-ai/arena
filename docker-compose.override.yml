@@ -39,11 +39,12 @@ services:
       - traefik.http.middlewares.https-redirect.contenttype.autodetect=false
 
   db:
-    restart: "no"
+    # restart: "no"
     ports:
       - "5432:5432"
   
   redis:
+    # restart: "no"
     ports:
       - "6379:6379"
 

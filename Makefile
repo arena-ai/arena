@@ -38,6 +38,10 @@ clean:
 	$(MAKE) -C backend clean
 	$(MAKE) -C frontend clean
 
+# Dev environment
+dev:
+	docker compose up -d
+
 kubernetes:
 	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 	--set docker.password=${DOCKER_PASSWORD} \
@@ -48,4 +52,4 @@ kubernetes:
 	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
 
 
-.PHONY: all build push version build-backend push-backend build-frontend push-frontend clean kubernetes
+.PHONY: all build push version build-backend push-backend build-frontend push-frontend clean dev kubernetes
