@@ -42,6 +42,10 @@ services:
     restart: "no"
     ports:
       - "5432:5432"
+  
+  redis:
+    ports:
+      - "6379:6379"
 
   adminer:
     restart: "no"
@@ -61,6 +65,16 @@ services:
         INSTALL_DEV: ${INSTALL_DEV-true}
     # command: sleep infinity  # Infinite loop to keep container alive doing nothing
     command: /start-reload.sh
+  
+  worker:
+    restart: "no"
+    volumes:
+      - ./backend/:/app
+    build:
+      context: ./backend
+      dockerfile: dev.Dockerfile
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-true}
 
   frontend:
     restart: "no"
