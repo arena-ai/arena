@@ -1,5 +1,6 @@
-from sqlmodel import Field, Relationship, SQLModel
-
+from typing import Optional
+from datetime import datetime
+from sqlmodel import Field, Relationship, SQLModel, func
 
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
@@ -44,7 +45,7 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     hashed_password: str
-    events: list["Event"] = Relationship(back_populates="owner")
+    # events: list["Event"] = Relationship(back_populates="owner")
 
 
 # Properties to return via API, id is always required
@@ -76,3 +77,46 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str
+
+
+# Shared properties
+class EventBase(SQLModel):
+    name: str
+    content: str
+    parent_id: int | None
+
+
+# Properties to receive on event creation
+class EventCreate(EventBase):
+    name: str
+    content: str
+    parent_id: int | None
+
+
+# Properties to receive on item update
+class EventUpdate(EventBase):
+    name: str | None
+    content: str | None
+    parent_id: int | None
+
+
+# Database model, database table inferred from class name
+class Event(EventBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    timestamp: datetime =  Field(default=func.now())
+    owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
+    parent_id: int | None = Field(index=True, foreign_key="event.id")
+    # owner: User | None = Relationship(back_populates="events")
+    # parent: Optional["Event"] = Relationship(back_populates="events")
+
+
+# Properties to return via API, id is always required
+class EventOut(EventBase):
+    id: int
+    timestamp: datetime
+    owner_id: int
+
+
+class EventsOut(SQLModel):
+    data: list[EventOut]
+    count: int

@@ -21,8 +21,8 @@ from app.models import (
     UsersOut,
     UserUpdate,
     UserUpdateMe,
+    Event,
 )
-from app.events.models import Event
 from app.utils import generate_new_account_email, send_email
 
 router = APIRouter()

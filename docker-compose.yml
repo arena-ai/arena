@@ -15,11 +15,11 @@ services:
 
   redis:
     image: redis
+    command: 'redis-server --requirepass ${REDIS_PASSWORD}'
     restart: always
     env_file:
       - .env
     environment:
-      - REDIS_SERVER=${REDIS_SERVER?Variable not set}
       - REDIS_PASSWORD=${REDIS_PASSWORD?Variable not set}
 
   adminer:
@@ -72,7 +72,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
-      - REDIS_SERVER=${REDIS_SERVER}
+      - REDIS_SERVER=redis
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SENTRY_DSN=${SENTRY_DSN}
 
@@ -126,8 +126,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
-      - REDIS_SERVER=${REDIS_SERVER}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_SERVER=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
 
     build:
