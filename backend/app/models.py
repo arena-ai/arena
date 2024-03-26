@@ -107,7 +107,7 @@ class Event(EventBase, table=True):
     owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
     parent_id: int | None = Field(index=True, foreign_key="event.id")
     owner: User | None = Relationship(back_populates="events")
-    # parent: Optional["Event"] = Relationship(back_populates="children", sa_relationship_kwargs={"remote_side":[Event.id]})
+    parent: Optional["Event"] = Relationship(back_populates="children", sa_relationship_kwargs={"remote_side": lambda: Event.id})
     children: list["Event"] = Relationship(back_populates="parent")
 
 
