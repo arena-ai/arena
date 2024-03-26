@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import datetime
-from sqlmodel import Field, Relationship, SQLModel, func
+from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func
 
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
@@ -107,6 +107,8 @@ class Event(EventBase, table=True):
     owner: User | None = Relationship(back_populates="events")
     parent: Optional["Event"] = Relationship(back_populates="children", sa_relationship_kwargs={"remote_side": lambda: Event.id})
     children: list["Event"] = Relationship(back_populates="parent")
+    identifiers: list["EventIdentifier"] = Relationship(back_populates="event")
+    attributes: list["EventAttribute"] = Relationship(back_populates="event")
 
 
 # Properties to return via API, id is always required
@@ -119,3 +121,28 @@ class EventOut(EventBase):
 class EventsOut(SQLModel):
     data: list[EventOut]
     count: int
+
+
+# Database model, database table inferred from class name
+class EventIdentifier(SQLModel, table=True):
+    id: str | None = Field(default=None, primary_key=True)
+    event_id: int | None = Field(default=None, foreign_key="event.id", nullable=False)
+    event: Event = Relationship(back_populates="identifiers")
+
+
+# Database model, database table inferred from class name
+class EventAttribute(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint("event_id", "attribute_id"), )
+    id: int | None = Field(default=None, primary_key=True)
+    event_id: int | None = Field(default=None, foreign_key="event.id", nullable=False)
+    attribute_id: int | None = Field(default=None, foreign_key="attribute.id", nullable=False)
+    value: str
+    event: Event = Relationship(back_populates="attributes")
+    attribute: "Attribute" = Relationship(back_populates="event")
+
+
+# Database model, database table inferred from class name
+class Attribute(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(index=True)
+    event: EventAttribute = Relationship(back_populates="attribute")
