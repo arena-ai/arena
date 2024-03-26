@@ -12,15 +12,15 @@ from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         init_db(session)
         yield session
         statement = delete(Event)
-        session.execute(statement)
+        session.exec(statement)
         statement = delete(User)
-        session.execute(statement)
+        session.exec(statement)
         session.commit()
 
 

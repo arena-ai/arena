@@ -98,7 +98,7 @@ def test_update_event(
 def test_update_event_not_found(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    data = {"title": "Updated title", "description": "Updated description"}
+    data = {"name": "Updated title", "content": "Updated description"}
     response = client.put(
         f"{settings.API_V1_STR}/events/999",
         headers=superuser_token_headers,
@@ -113,7 +113,7 @@ def test_update_event_not_enough_permissions(
     client: TestClient, normal_user_token_headers: dict[str, str], db: Session
 ) -> None:
     event = create_random_event(db)
-    data = {"title": "Updated title", "description": "Updated description"}
+    data = {"name": "Updated title", "content": "Updated description"}
     response = client.put(
         f"{settings.API_V1_STR}/events/{event.id}",
         headers=normal_user_token_headers,

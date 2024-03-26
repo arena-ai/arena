@@ -1,8 +1,8 @@
-"""first migration
+"""Add events
 
-Revision ID: e81950cc523d
+Revision ID: e6f03a9f395b
 Revises: 
-Create Date: 2024-03-25 17:07:03.256070
+Create Date: 2024-03-26 14:03:36.072240
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision = 'e81950cc523d'
+revision = 'e6f03a9f395b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,7 +33,7 @@ def upgrade():
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('content', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('timestamp', sa.DateTime(), nullable=False),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.Column('owner_id', sa.Integer(), nullable=False),
     sa.Column('parent_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['owner_id'], ['user.id'], ),
