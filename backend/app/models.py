@@ -45,6 +45,7 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     hashed_password: str
+    settings: list["Setting"] = Relationship(back_populates="owner")
     events: list["Event"] = Relationship(back_populates="owner")
 
 
@@ -78,6 +79,37 @@ class NewPassword(SQLModel):
     token: str
     new_password: str
 
+
+# Settings
+
+# Shared properties
+class SettingBase(SQLModel):
+    name: str
+    content: str
+
+
+# Properties to receive on event creation
+class SettingCreate(SettingBase):
+    name: str
+    content: str
+
+
+# Database model, database table inferred from class name
+class Setting(SettingBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    timestamp: datetime | None =  Field(default=func.now())
+    owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
+    owner: User | None = Relationship(back_populates="settings")
+
+
+# Properties to return via API, id is always required
+class SettingOut(SettingBase):
+    id: int
+    timestamp: datetime
+    owner_id: int
+
+
+# Events
 
 # Shared properties
 class EventBase(SQLModel):
