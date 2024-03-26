@@ -60,6 +60,7 @@ def create_event(
     """
     Create new event.
     """
+    print(f"DEBUG {event_in}")
     event = Event.model_validate(event_in, update={"owner_id": current_user.id})
     session.add(event)
     session.commit()

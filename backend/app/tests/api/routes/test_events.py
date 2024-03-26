@@ -8,7 +8,7 @@ from app.tests.utils.event import create_random_event
 def test_create_event(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    data = {"title": "Foo", "description": "Fighters"}
+    data = {"name": "Foo", "content": "Fighters"}
     response = client.post(
         f"{settings.API_V1_STR}/events/",
         headers=superuser_token_headers,
@@ -16,8 +16,8 @@ def test_create_event(
     )
     assert response.status_code == 200
     content = response.json()
-    assert content["title"] == data["title"]
-    assert content["description"] == data["description"]
+    assert content["name"] == data["name"]
+    assert content["content"] == data["content"]
     assert "id" in content
     assert "owner_id" in content
 
@@ -32,8 +32,8 @@ def test_read_event(
     )
     assert response.status_code == 200
     content = response.json()
-    assert content["title"] == event.title
-    assert content["description"] == event.description
+    assert content["name"] == event.name
+    assert content["content"] == event.content
     assert content["id"] == event.id
     assert content["owner_id"] == event.owner_id
 
@@ -81,7 +81,7 @@ def test_update_event(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     event = create_random_event(db)
-    data = {"title": "Updated title", "description": "Updated description"}
+    data = {"name": "Updated title", "content": "Updated description"}
     response = client.put(
         f"{settings.API_V1_STR}/events/{event.id}",
         headers=superuser_token_headers,
@@ -89,8 +89,8 @@ def test_update_event(
     )
     assert response.status_code == 200
     content = response.json()
-    assert content["title"] == data["title"]
-    assert content["description"] == data["description"]
+    assert content["name"] == data["name"]
+    assert content["content"] == data["content"]
     assert content["id"] == event.id
     assert content["owner_id"] == event.owner_id
 

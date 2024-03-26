@@ -86,6 +86,7 @@ def test_get_existing_user_current_user(client: TestClient, db: Session) -> None
     }
     r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
     tokens = r.json()
+    print(f"DEBUG {tokens}")
     a_token = tokens["access_token"]
     headers = {"Authorization": f"Bearer {a_token}"}
 

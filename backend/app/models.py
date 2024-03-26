@@ -83,27 +83,25 @@ class NewPassword(SQLModel):
 class EventBase(SQLModel):
     name: str
     content: str
-    parent_id: int | None
+    parent_id: int | None = None
 
 
 # Properties to receive on event creation
 class EventCreate(EventBase):
     name: str
     content: str
-    parent_id: int | None
-
 
 # Properties to receive on item update
 class EventUpdate(EventBase):
-    name: str | None
-    content: str | None
-    parent_id: int | None
+    name: str | None = None
+    content: str | None = None
+    parent_id: int | None = None
 
 
 # Database model, database table inferred from class name
 class Event(EventBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    timestamp: datetime =  Field(default=func.now())
+    timestamp: datetime | None =  Field(default=func.now())
     owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
     parent_id: int | None = Field(index=True, foreign_key="event.id")
     owner: User | None = Relationship(back_populates="events")
