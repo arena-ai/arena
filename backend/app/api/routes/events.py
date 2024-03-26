@@ -101,3 +101,18 @@ def delete_event(session: SessionDep, current_user: CurrentUser, id: int) -> Mes
     session.delete(event)
     session.commit()
     return Message(message="Event deleted successfully")
+
+
+@router.post("/attribute", response_model=EventOut)
+def create_event(
+    *, session: SessionDep, current_user: CurrentUser, attribute_in: str
+) -> Any:
+    """
+    Create new event.
+    """
+    print(f"DEBUG {event_in}")
+    event = Event.model_validate(event_in, update={"owner_id": current_user.id})
+    session.add(event)
+    session.commit()
+    session.refresh(event)
+    return event

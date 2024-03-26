@@ -162,13 +162,25 @@ class EventIdentifier(SQLModel, table=True):
     event: Event = Relationship(back_populates="identifiers")
 
 
+# Shared properties
+class EventAttributeBase(SQLModel):
+    event_id: int
+    attribute_id: int
+    value: str | None
+
+# Properties to receive on event creation
+class EventAttributeCreate(EventAttributeBase):
+    event_id: int
+    attribute_id: int
+    value: str | None = None
+
 # Database model, database table inferred from class name
-class EventAttribute(SQLModel, table=True):
+class EventAttribute(EventAttributeBase, table=True):
     __table_args__ = (UniqueConstraint("event_id", "attribute_id"), )
     id: int | None = Field(default=None, primary_key=True)
     event_id: int | None = Field(default=None, foreign_key="event.id", nullable=False)
     attribute_id: int | None = Field(default=None, foreign_key="attribute.id", nullable=False)
-    value: str
+    value: str | None = Field(default=None)
     event: Event = Relationship(back_populates="attributes")
     attribute: "Attribute" = Relationship(back_populates="event")
 
@@ -176,5 +188,5 @@ class EventAttribute(SQLModel, table=True):
 # Database model, database table inferred from class name
 class Attribute(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    name: str = Field(index=True)
+    name: str = Field(index=True, unique=True)
     event: EventAttribute = Relationship(back_populates="attribute")

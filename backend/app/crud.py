@@ -3,8 +3,7 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import User, UserCreate, UserUpdate, Event, EventCreate
-
+from app.models import User, UserCreate, UserUpdate, Setting, SettingCreate, Event, EventCreate, EventIdentifier, EventAttribute, EventAttributeCreate, Attribute
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     db_obj = User.model_validate(
@@ -45,6 +44,16 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
+# Settings
+def create_setting(*, session: Session, setting_in: SettingCreate, owner_id: int) -> Setting:
+    db_setting = Setting.model_validate(setting_in, update={"owner_id": owner_id})
+    session.add(db_setting)
+    session.commit()
+    session.refresh(db_setting)
+    return db_setting
+
+
+# Events
 def create_event(*, session: Session, event_in: EventCreate, owner_id: int) -> Event:
     db_event = Event.model_validate(event_in, update={"owner_id": owner_id})
     session.add(db_event)
@@ -52,9 +61,43 @@ def create_event(*, session: Session, event_in: EventCreate, owner_id: int) -> E
     session.refresh(db_event)
     return db_event
 
-def with_attribute(*, session: Session, event_in: Event, owner_id: int) -> Event:
-    db_event = Event.model_validate(event_in, update={"owner_id": owner_id})
-    session.add(db_event)
+
+def create_event_identifier(*, session: Session, event_identifier_in: str, event: Event, owner_id: int) -> EventIdentifier:
+    db_event_identifier = EventIdentifier(id=event_identifier_in, event_id=event.id)
+    session.add(db_event_identifier)
     session.commit()
-    session.refresh(db_event)
-    return db_event
+    session.refresh(db_event_identifier)
+    return db_event_identifier
+
+
+def create_attribute(*, session: Session, attribute_in: str) -> Attribute:
+    db_attribute = Attribute(name=attribute_in)
+    session.add(db_attribute)
+    session.commit()
+    session.refresh(db_attribute)
+    return db_attribute
+
+
+def create_attribute_if_not_exist(*, session: Session, attribute_in: str) -> Attribute:
+    statement = select(Attribute).where(Attribute.name == attribute_in)
+    db_attribute = session.exec(statement).one()
+    if db_attribute is None:
+        db_attribute = Attribute(name=attribute_in)
+        session.add(db_attribute)
+        session.commit()
+        session.refresh(db_attribute)
+    return db_attribute
+
+
+def create_event_attribute(*, session: Session, event_attribute_in: EventAttributeCreate) -> EventAttribute:
+    db_event_attribute = EventAttribute.model_validate(event_attribute_in)
+    session.add(db_event_attribute)
+    session.commit()
+    session.refresh(db_event_attribute)
+    return db_event_attribute
+
+
+def create_event_attribute_from_name_value(*, session: Session, attribute_in: str, value_in: str, event: Event) -> EventAttribute:
+    db_attribute = create_attribute_if_not_exist(session=session, attribute_in=attribute_in)
+    db_event_attribute = EventAttribute(event_id=event.id, attribute_id=db_attribute.id, value=value_in)
+    return create_event_attribute(session=session, event_attribute_in=db_event_attribute)
