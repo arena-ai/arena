@@ -126,7 +126,7 @@ def create_event_identifier_get(
     """
     Create new event identifier.
     """
-    return crud.create_event_identifier(session=session, event_identifier_in=identifier, event_id=id)
+    return crud.create_event_identifier(session=session, event_identifier=identifier, event_id=id)
 
 
 @router.post("/identifier", response_model=EventIdentifier)
@@ -136,7 +136,22 @@ def create_event_identifier(
     """
     Create new event identifier.
     """
-    return crud.create_event_identifier(session=session, event_identifier_in=event_identifier.id, event_id=event_identifier.event_id)
+    return crud.create_event_identifier(session=session, event_identifier=event_identifier.id, event_id=event_identifier.event_id)
+
+
+@router.delete("/{id}")
+def delete_event_identifier(session: SessionDep, current_user: CurrentUser, event_identifier_id: str) -> Message:
+    """
+    Delete an event identifier.
+    """
+    event = session.get(EventIdentifier, event_identifier_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    if not current_user.is_superuser and (event.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+    session.delete(event)
+    session.commit()
+    return Message(message="Event deleted successfully")
 
 
 @router.get("/{id}/attribute/{name}", response_model=EventAttribute)
@@ -146,7 +161,7 @@ def create_event_attribute_get(
     """
     Create new event attribute.
     """
-    return crud.create_event_attribute_from_name_value(session=session, attribute_in=name, event_id=id)
+    return crud.create_event_attribute_from_name_value(session=session, attribute=name, event_id=id)
 
 
 @router.get("/{id}/attribute/{name}/{value}", response_model=EventAttribute)
@@ -156,7 +171,7 @@ def create_event_attribute_get_with_value(
     """
     Create new event attribute.
     """
-    return crud.create_event_attribute_from_name_value(session=session, attribute_in=name, value_in=value, event_id=id)
+    return crud.create_event_attribute_from_name_value(session=session, attribute=name, value=value, event_id=id)
 
 
 @router.post("/attribute", response_model=EventAttribute)
