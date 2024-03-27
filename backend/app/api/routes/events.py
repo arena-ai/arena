@@ -139,19 +139,19 @@ def create_event_identifier(
     return crud.create_event_identifier(session=session, event_identifier=event_identifier.id, event_id=event_identifier.event_id)
 
 
-@router.delete("/{id}")
-def delete_event_identifier(session: SessionDep, current_user: CurrentUser, event_identifier_id: str) -> Message:
+@router.delete("/identifier/{identifier}")
+def delete_event_identifier(session: SessionDep, current_user: CurrentUser, identifier: str) -> Message:
     """
     Delete an event identifier.
     """
-    event = session.get(EventIdentifier, event_identifier_id)
-    if not event:
-        raise HTTPException(status_code=404, detail="Event not found")
-    if not current_user.is_superuser and (event.owner_id != current_user.id):
+    event_identifier = session.get(EventIdentifier, identifier)
+    if not event_identifier:
+        raise HTTPException(status_code=404, detail="Event identifier not found")
+    if not current_user.is_superuser and (event_identifier.event.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    session.delete(event)
+    session.delete(event_identifier)
     session.commit()
-    return Message(message="Event deleted successfully")
+    return Message(message="Event identifier deleted successfully")
 
 
 @router.get("/{id}/attribute/{name}", response_model=EventAttribute)
@@ -182,3 +182,18 @@ def create_event_attribute(
     Create new event attribute.
     """
     return crud.create_event_attribute(session=session, event_attribute_in=event_attribute)
+
+
+@router.delete("/{id}/attribute/{name}")
+def delete_event_attribute(session: SessionDep, current_user: CurrentUser, id: int, name: str) -> Message:
+    """
+    Delete an event attribute.
+    """
+    event_attribute = crud.get_event_attribute(session=session, attribute=name, event_id=id)
+    if not event_attribute:
+        raise HTTPException(status_code=404, detail="Event attribute not found")
+    if not current_user.is_superuser and (event_attribute.event.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+    session.delete(event_attribute)
+    session.commit()
+    return Message(message="Event attribute deleted successfully")
