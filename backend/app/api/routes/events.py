@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import Message, Event, EventCreate, EventOut, EventsOut, EventUpdate
+from app.models import Message, Event, EventCreate, EventOut, EventsOut, EventUpdate, EventIdentifier
 
 router = APIRouter()
 
@@ -60,7 +60,6 @@ def create_event(
     """
     Create new event.
     """
-    print(f"DEBUG {event_in}")
     event = Event.model_validate(event_in, update={"owner_id": current_user.id})
     session.add(event)
     session.commit()
@@ -103,16 +102,56 @@ def delete_event(session: SessionDep, current_user: CurrentUser, id: int) -> Mes
     return Message(message="Event deleted successfully")
 
 
-@router.post("/attribute", response_model=EventOut)
-def create_event(
-    *, session: SessionDep, current_user: CurrentUser, attribute_in: str
+@router.get("/identifier/{identifier}", response_model=EventIdentifier)
+def read_event_by_identifier(
+    *, session: SessionDep, current_user: CurrentUser, id: int, identifier: str
 ) -> Any:
     """
-    Create new event.
+    Get event by identifier.
     """
-    print(f"DEBUG {event_in}")
-    event = Event.model_validate(event_in, update={"owner_id": current_user.id})
-    session.add(event)
-    session.commit()
-    session.refresh(event)
+    statement = select(Event).join(EventIdentifier).where(EventIdentifier.id == identifier)
+    event = session.exec(statement).first()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    if not current_user.is_superuser and (event.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail="Not enough permissions")
     return event
+
+@router.get("/{id}/identifier/{identifier}", response_model=EventIdentifier)
+def create_event_identifier_get(
+    *, session: SessionDep, current_user: CurrentUser, id: int, identifier: str
+) -> Any:
+    """
+    Create new event identifier.
+    """
+    event_identifier = EventIdentifier(id=identifier, event_id=id)
+    session.add(event_identifier)
+    session.commit()
+    session.refresh(event_identifier)
+    return event_identifier
+
+
+@router.post("/identifier", response_model=EventIdentifier)
+def create_event_identifier(
+    *, session: SessionDep, current_user: CurrentUser, event_identifier: EventIdentifier
+) -> Any:
+    """
+    Create new event identifier.
+    """
+    session.add(event_identifier)
+    session.commit()
+    session.refresh(event_identifier)
+    return event_identifier
+
+
+@router.post("/attribute", response_model=EventIdentifier)
+def create_event_identifier(
+    *, session: SessionDep, current_user: CurrentUser, event_identifier: EventIdentifier
+) -> Any:
+    """
+    Create new event identifier.
+    """
+    session.add(event_identifier)
+    session.commit()
+    session.refresh(event_identifier)
+    return event_identifier
