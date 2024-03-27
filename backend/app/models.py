@@ -109,6 +109,11 @@ class SettingOut(SettingBase):
     owner_id: int
 
 
+class SettingsOut(SQLModel):
+    data: list[SettingOut]
+    count: int
+
+
 # Events
 
 # Shared properties
