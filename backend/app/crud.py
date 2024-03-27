@@ -74,6 +74,12 @@ def get_event_identifier(*, session: Session, event_identifier_in: str) -> Event
     return db_event_identifier
 
 
+def get_event_identifiers(*, session: Session, event_id: int) -> list[EventIdentifier]:
+    statement = select(EventAttribute).join(Event).where(Event.id == event_id)
+    db_event_identifiers = session.exec(statement).all()
+    return db_event_identifiers
+
+
 def create_event_identifier(*, session: Session, event_identifier_in: str, event_id: int) -> EventIdentifier:
     db_event_identifier = EventIdentifier(id=event_identifier_in, event_id=event_id)
     session.add(db_event_identifier)
@@ -121,6 +127,12 @@ def get_event_attribute(*, session: Session, attribute_in: str, event_id: int) -
     statement = select(EventAttribute).join(Event).join(Attribute).where((Event.id == event_id) and (Attribute.name == attribute_in))
     db_event_attribute = session.exec(statement).first()
     return db_event_attribute
+
+
+def get_event_attributes(*, session: Session, event_id: int) -> list[EventAttribute]:
+    statement = select(EventAttribute).join(Event).where(Event.id == event_id)
+    db_event_attributes = session.exec(statement).all()
+    return db_event_attributes
 
 
 def create_event_attribute(*, session: Session, event_attribute_in: EventAttributeCreate) -> EventAttribute:
