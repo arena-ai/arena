@@ -182,11 +182,11 @@ class EventAttribute(EventAttributeBase, table=True):
     attribute_id: int | None = Field(default=None, foreign_key="attribute.id", nullable=False)
     value: str | None = Field(default=None)
     event: Event = Relationship(back_populates="attributes")
-    attribute: "Attribute" = Relationship(back_populates="event")
+    attribute: "Attribute" = Relationship(back_populates="events")
 
 
 # Database model, database table inferred from class name
 class Attribute(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, unique=True)
-    event: EventAttribute = Relationship(back_populates="attribute")
+    events: EventAttribute = Relationship(back_populates="attribute")

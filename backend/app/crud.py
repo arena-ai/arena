@@ -67,12 +67,32 @@ def create_event(*, session: Session, event_in: EventCreate, owner_id: int) -> E
     return db_event
 
 
+# Event Identifier
+def get_event_identifier(*, session: Session, event_identifier_in: str) -> EventIdentifier | None:
+    statement = select(EventIdentifier).where(EventIdentifier.id == event_identifier_in)
+    db_event_identifier = session.exec(statement).first()
+    return db_event_identifier
+
+
 def create_event_identifier(*, session: Session, event_identifier_in: str, event_id: int) -> EventIdentifier:
     db_event_identifier = EventIdentifier(id=event_identifier_in, event_id=event_id)
     session.add(db_event_identifier)
     session.commit()
     session.refresh(db_event_identifier)
     return db_event_identifier
+
+
+def delete_event_identifier(*, session: Session, event_identifier_in: str) -> None:
+    db_event_identifier = get_event_identifier(session=session, event_identifier_in=event_identifier_in)
+    session.delete(db_event_identifier)
+    session.commit()
+
+
+# Attribute
+def get_attribute(*, session: Session, attribute_in: str) -> Attribute | None:
+    statement = select(Attribute).where(Attribute.name == attribute_in)
+    db_attribute = session.exec(statement).first()
+    return db_attribute
 
 
 def create_attribute(*, session: Session, attribute_in: str) -> Attribute:
@@ -84,14 +104,23 @@ def create_attribute(*, session: Session, attribute_in: str) -> Attribute:
 
 
 def create_attribute_if_not_exist(*, session: Session, attribute_in: str) -> Attribute:
-    statement = select(Attribute).where(Attribute.name == attribute_in)
-    db_attribute = session.exec(statement).first()
+    db_attribute = get_attribute(session=session, attribute_in=attribute_in)
     if db_attribute is None:
-        db_attribute = Attribute(name=attribute_in)
-        session.add(db_attribute)
-        session.commit()
-        session.refresh(db_attribute)
+        db_attribute = create_attribute(session=session, attribute_in=attribute_in)
     return db_attribute
+
+
+def delete_attribute(*, session: Session, attribute_in: str) -> None:
+    db_attribute = get_attribute(session=session, attribute_in=attribute_in)
+    session.delete(db_attribute)
+    session.commit()
+
+
+# Event Attribute
+def get_event_attribute(*, session: Session, attribute_in: str, event_id: int) -> EventAttribute | None:
+    statement = select(EventAttribute).join(Event).join(Attribute).where((Event.id == event_id) and (Attribute.name == attribute_in))
+    db_event_attribute = session.exec(statement).first()
+    return db_event_attribute
 
 
 def create_event_attribute(*, session: Session, event_attribute_in: EventAttributeCreate) -> EventAttribute:
@@ -106,3 +135,9 @@ def create_event_attribute_from_name_value(*, session: Session, attribute_in: st
     db_attribute = create_attribute_if_not_exist(session=session, attribute_in=attribute_in)
     db_event_attribute = EventAttributeCreate(event_id=event_id, attribute_id=db_attribute.id, value=value_in)
     return create_event_attribute(session=session, event_attribute_in=db_event_attribute)
+
+
+def delete_event_attribute(*, session: Session, attribute_in: str, event_id: int) -> None:
+    db_event_attribute = get_attribute(session=session, attribute_in=attribute_in, event_id=event_id)
+    session.delete(db_event_attribute)
+    session.commit()

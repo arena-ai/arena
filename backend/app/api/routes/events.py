@@ -126,11 +126,7 @@ def create_event_identifier_get(
     """
     Create new event identifier.
     """
-    event_identifier = EventIdentifier(id=identifier, event_id=id)
-    session.add(event_identifier)
-    session.commit()
-    session.refresh(event_identifier)
-    return event_identifier
+    return crud.create_event_identifier(session=session, event_identifier_in=identifier, event_id=id)
 
 
 @router.post("/identifier", response_model=EventIdentifier)
@@ -140,10 +136,7 @@ def create_event_identifier(
     """
     Create new event identifier.
     """
-    session.add(event_identifier)
-    session.commit()
-    session.refresh(event_identifier)
-    return event_identifier
+    return crud.create_event_identifier(session=session, event_identifier_in=event_identifier.id, event_id=event_identifier.event_id)
 
 
 @router.get("/{id}/attribute/{name}", response_model=EventAttribute)
@@ -173,7 +166,4 @@ def create_event_attribute(
     """
     Create new event attribute.
     """
-    session.add(event_attribute)
-    session.commit()
-    session.refresh(event_attribute)
-    return event_attribute
+    return crud.create_event_attribute(session=session, event_attribute_in=event_attribute)
