@@ -4,7 +4,8 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import Message, Event, EventCreate, EventOut, EventsOut, EventUpdate, EventIdentifier
+from app import crud
+from app.models import Message, Event, EventCreate, EventOut, EventsOut, EventUpdate, EventIdentifier, EventAttribute, EventAttributeCreate
 
 router = APIRouter()
 
@@ -102,9 +103,9 @@ def delete_event(session: SessionDep, current_user: CurrentUser, id: int) -> Mes
     return Message(message="Event deleted successfully")
 
 
-@router.get("/identifier/{identifier}", response_model=EventIdentifier)
+@router.get("/identifier/{identifier}", response_model=EventOut)
 def read_event_by_identifier(
-    *, session: SessionDep, current_user: CurrentUser, id: int, identifier: str
+    *, session: SessionDep, current_user: CurrentUser, identifier: str
 ) -> Any:
     """
     Get event by identifier.
@@ -116,6 +117,7 @@ def read_event_by_identifier(
     if not current_user.is_superuser and (event.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
     return event
+
 
 @router.get("/{id}/identifier/{identifier}", response_model=EventIdentifier)
 def create_event_identifier_get(
@@ -144,14 +146,34 @@ def create_event_identifier(
     return event_identifier
 
 
-@router.post("/attribute", response_model=EventIdentifier)
-def create_event_identifier(
-    *, session: SessionDep, current_user: CurrentUser, event_identifier: EventIdentifier
+@router.get("/{id}/attribute/{name}", response_model=EventAttribute)
+def create_event_attribute_get(
+    *, session: SessionDep, current_user: CurrentUser, id: int, name: str
 ) -> Any:
     """
-    Create new event identifier.
+    Create new event attribute.
     """
-    session.add(event_identifier)
+    return crud.create_event_attribute_from_name_value(session=session, attribute_in=name, event_id=id)
+
+
+@router.get("/{id}/attribute/{name}/{value}", response_model=EventAttribute)
+def create_event_attribute_get_with_value(
+    *, session: SessionDep, current_user: CurrentUser, id: int, name: str, value: str
+) -> Any:
+    """
+    Create new event attribute.
+    """
+    return crud.create_event_attribute_from_name_value(session=session, attribute_in=name, value_in=value, event_id=id)
+
+
+@router.post("/attribute", response_model=EventAttribute)
+def create_event_attribute(
+    *, session: SessionDep, current_user: CurrentUser, event_attribute: EventAttributeCreate
+) -> Any:
+    """
+    Create new event attribute.
+    """
+    session.add(event_attribute)
     session.commit()
-    session.refresh(event_identifier)
-    return event_identifier
+    session.refresh(event_attribute)
+    return event_attribute

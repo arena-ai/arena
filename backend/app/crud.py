@@ -102,7 +102,7 @@ def create_event_attribute(*, session: Session, event_attribute_in: EventAttribu
     return db_event_attribute
 
 
-def create_event_attribute_from_name_value(*, session: Session, attribute_in: str, value_in: str, event_id: int) -> EventAttribute:
+def create_event_attribute_from_name_value(*, session: Session, attribute_in: str, value_in: str | None = None, event_id: int) -> EventAttribute:
     db_attribute = create_attribute_if_not_exist(session=session, attribute_in=attribute_in)
     db_event_attribute = EventAttributeCreate(event_id=event_id, attribute_id=db_attribute.id, value=value_in)
     return create_event_attribute(session=session, event_attribute_in=db_event_attribute)
