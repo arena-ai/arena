@@ -24,6 +24,10 @@ spec:
           value: {{.Values.postgresql.password}}
         - name: POSTGRES_SERVER
           value: "{{.Release.Name}}-postgresql-service.{{.Values.namespace}}.svc.cluster.local"
+        - name: REDIS_PASSWORD
+          value: {{.Values.redis.password}}
+        - name: REDIS_SERVER
+          value: "{{.Release.Name}}-redis-service.{{.Values.namespace}}.svc.cluster.local"
       restartPolicy: Never
       imagePullSecrets:
       - name: {{ .Release.Name -}}-docker-registry-secret
