@@ -54,7 +54,7 @@ def read_event(session: SessionDep, current_user: CurrentUser, id: int) -> Any:
     return event
 
 
-@router.post("/", response_model=EventOut)
+@router.post("/", response_model=EventOut, operation_id="create_event")
 def create_event(
     *, session: SessionDep, current_user: CurrentUser, event_in: EventCreate
 ) -> Any:
@@ -129,7 +129,7 @@ def create_event_identifier_get(
     return crud.create_event_identifier(session=session, event_identifier=identifier, event_id=id)
 
 
-@router.post("/identifier", response_model=EventIdentifier)
+@router.post("/identifier", response_model=EventIdentifier, operation_id="create_event_identifier")
 def create_event_identifier(
     *, session: SessionDep, current_user: CurrentUser, event_identifier: EventIdentifier
 ) -> Any:
@@ -154,7 +154,7 @@ def delete_event_identifier(session: SessionDep, current_user: CurrentUser, iden
     return Message(message="Event identifier deleted successfully")
 
 
-@router.get("/{id}/attribute/{name}", response_model=EventAttribute)
+@router.get("/{id}/attribute/{name}", response_model=EventAttribute, operation_id="event_attribute")
 def create_event_attribute_get(
     *, session: SessionDep, current_user: CurrentUser, id: int, name: str
 ) -> Any:
@@ -164,7 +164,7 @@ def create_event_attribute_get(
     return crud.create_event_attribute_from_name_value(session=session, attribute=name, event_id=id)
 
 
-@router.get("/{id}/attribute/{name}/{value}", response_model=EventAttribute)
+@router.get("/{id}/attribute/{name}/{value}", response_model=EventAttribute, operation_id="event_attribute_value")
 def create_event_attribute_get_with_value(
     *, session: SessionDep, current_user: CurrentUser, id: int, name: str, value: str
 ) -> Any:
@@ -174,7 +174,7 @@ def create_event_attribute_get_with_value(
     return crud.create_event_attribute_from_name_value(session=session, attribute=name, value=value, event_id=id)
 
 
-@router.post("/attribute", response_model=EventAttribute)
+@router.post("/attribute", response_model=EventAttribute, operation_id="create_event_attribute")
 def create_event_attribute(
     *, session: SessionDep, current_user: CurrentUser, event_attribute: EventAttributeCreate
 ) -> Any:
