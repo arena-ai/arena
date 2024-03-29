@@ -10,7 +10,7 @@ from app.models import Message, SettingCreate, Setting, SettingsOut, SettingOut
 router = APIRouter()
 
 
-@router.get("/", response_model=SettingsOut)
+@router.get("/openai/", response_model=SettingsOut)
 def read_settings(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
 ) -> Any:

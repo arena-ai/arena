@@ -14,7 +14,6 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 tenacity = "^8.2.3"
 pydantic = ">2.0"
 emails = "^0.6"
-
 gunicorn = "^21.2.0"
 jinja2 = "^3.1.2"
 alembic = "^1.12.1"
@@ -38,6 +37,9 @@ pre-commit = "^3.6.2"
 pytest-mock = "^3.12.0"
 types-python-jose = "^3.3.4.20240106"
 types-passlib = "^1.7.7.20240106"
+# To test integrations
+openai = "^1.14"
+mistralai = "^0.1"
 
 [tool.isort]
 multi_line_output = 3
