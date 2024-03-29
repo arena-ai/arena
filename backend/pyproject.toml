@@ -27,6 +27,10 @@ pydantic-settings = "^2.2.1"
 sentry-sdk = {extras = ["fastapi"], version = "^1.40.6"}
 celery = {extras = ["redis"], version = "^5.3.6"}
 redis = "^5.0.3"
+# For integrations
+openai = "^1.14"
+anthropic = "^0.21"
+mistralai = "^0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
@@ -37,9 +41,6 @@ pre-commit = "^3.6.2"
 pytest-mock = "^3.12.0"
 types-python-jose = "^3.3.4.20240106"
 types-passlib = "^1.7.7.20240106"
-# To test integrations
-openai = "^1.14"
-mistralai = "^0.1"
 
 [tool.isort]
 multi_line_output = 3

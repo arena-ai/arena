@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Literal
 from datetime import datetime
 from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func
 
@@ -84,13 +84,21 @@ class NewPassword(SQLModel):
 
 # Shared properties
 class SettingBase(SQLModel):
-    name: str
+    name: Literal[
+        "OPENAI_API_KEY",
+        "MISTRAL_API_KEY",
+        "ANTHROPIC_API_KEY",
+    ]
     content: str
 
 
 # Properties to receive on event creation
 class SettingCreate(SettingBase):
-    name: str
+    name: Literal[
+        "OPENAI_API_KEY",
+        "MISTRAL_API_KEY",
+        "ANTHROPIC_API_KEY",
+    ]
     content: str
 
 

@@ -3,7 +3,7 @@ from typing import Any
 from sqlmodel import Session, select, desc
 
 from app.core.security import get_password_hash, verify_password
-from app.models import User, UserCreate, UserUpdate, Setting, SettingCreate, Event, EventCreate, EventIdentifier, EventAttribute, EventAttributeCreate, Attribute
+from app.models import User, UserCreate, UserUpdate, SettingName, Setting, SettingCreate, Event, EventCreate, EventIdentifier, EventAttribute, EventAttributeCreate, Attribute
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     db_obj = User.model_validate(
@@ -53,7 +53,7 @@ def create_setting(*, session: Session, setting_in: SettingCreate, owner_id: int
     return db_setting
 
 
-def get_setting(*, session: Session, setting_name: str, owner_id: int) -> Setting | None:
+def get_setting(*, session: Session, setting_name: SettingName, owner_id: int) -> Setting | None:
     statement = select(Setting).where((Setting.owner_id == owner_id) and (Setting.name == setting_name)).order_by(desc(Setting.timestamp))
     setting = session.exec(statement).first()
     return setting

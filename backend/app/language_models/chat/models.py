@@ -82,6 +82,12 @@ class Choice(BaseModel):
     message: ChatCompletionMessage
 
 
+class CompletionUsage(BaseModel):
+    completion_tokens: int
+    prompt_tokens: int
+    total_tokens: int
+
+
 class ChatCompletion(BaseModel):
     id: str
     choices: list[Choice]
