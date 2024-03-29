@@ -84,11 +84,7 @@ class NewPassword(SQLModel):
 
 # Shared properties
 class SettingBase(SQLModel):
-    name: Literal[
-        "OPENAI_API_KEY",
-        "MISTRAL_API_KEY",
-        "ANTHROPIC_API_KEY",
-    ]
+    name: str
     content: str
 
 
