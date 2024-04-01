@@ -5,7 +5,7 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
-from app.language_models.chat.models import ChatCompletion, CreateChatCompletion
+from app.lm.models import ChatCompletion, CreateChatCompletion
 
 from openai import OpenAI
 
