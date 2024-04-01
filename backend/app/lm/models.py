@@ -1,6 +1,9 @@
 from typing import Literal
 from pydantic import BaseModel
 
+# Inspired by https://github.com/mistralai/client-python/tree/main/src/mistralai/models
+# And: https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/types
+# And: https://github.com/openai/openai-python/tree/main/src/openai/types
 
 class Message(BaseModel):
     role: str
@@ -41,7 +44,7 @@ class CreateChatCompletion(BaseModel):
     max_tokens: int | None = None
     n: int | None = None
     presence_penalty: float | None = None
-    response_format: ResponseFormat
+    response_format: ResponseFormat | None = None
     seed: int | None = None
     stop: str | list[str] | None = None
     tool_choice: Literal["none", "auto"] | ChatCompletionNamedToolChoiceParam | None = None
@@ -57,6 +60,8 @@ class CreateChatCompletion(BaseModel):
 class ChatCompletionMessage(BaseModel):
     content: str | None = None
     role: Literal["assistant"]
+    function_call: None = None
+    tool_calls: None = None
 
 
 class TopLogprob(BaseModel):

@@ -16,8 +16,134 @@ Content-Type: application/x-www-form-urlencoded
 
 grant_type=&username={{username}}&password={{password}}&scope=&client_id=&client_secret=
 
-### A basic query
-GET http://localhost/api/v1/openapi.json HTTP/1.1
+### Create events
+POST {{gateway}}/api/v1/events HTTP/1.1
+Accept: application/json
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
-### Docs
-GET http://localhost/docs HTTP/1.1
+{
+  "name": "test",
+  "content": "event5"
+}
+### Get events
+GET {{gateway}}/api/v1/events/?skip=0&limit=100 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+### Get setting
+GET {{gateway}}/api/v1/settings/OPENAI_API_KEY HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+### Get setting
+GET {{gateway}}/api/v1/settings/MISTRAL_API_KEY HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Create OPENAI_API_KEY setting
+POST {{gateway}}/api/v1/settings HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "OPENAI_API_KEY",
+  "content": "{{openai_api_key}}"
+}
+### Create MISTRAL_API_KEY setting
+POST {{gateway}}/api/v1/settings HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "MISTRAL_API_KEY",
+  "content": "{{mistral_api_key}}"
+}
+
+### Test proxy openai post
+POST {{gateway}}/api/v1/lm/openai/chat/completions HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant."
+        },
+        {
+            "role": "user",
+            "content": "Who is Victor Hugo? Where does he live?"
+        }
+    ]
+}
+
+### Test proxy mistral post
+POST {{gateway}}/api/v1/lm/mistral/v1/chat/completions HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "model": "mistral-medium",
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant."
+        },
+        {
+            "role": "user",
+            "content": "Who is Victor Hugo? Where does he live?"
+        }
+    ]
+}
+
+### Test openai get
+GET https://api.openai.com/v1/models HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{openai_api_key}}
+
+### Test openai post
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{openai_api_key}}
+
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant."
+        },
+        {
+            "role": "user",
+            "content": "Who is Victor Hugo? Where does he live?"
+        }
+    ]
+}
+
+### Test mistral get
+GET https://api.mistral.ai/v1/models HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{mistral_api_key}}
+
+### Test mistral post
+POST https://api.mistral.ai/v1/chat/completions HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{mistral_api_key}}
+
+{
+    "model": "mistral-medium",
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant."
+        },
+        {
+            "role": "user",
+            "content": "Who is Victor Hugo? Where does he live?"
+        }
+    ]
+}

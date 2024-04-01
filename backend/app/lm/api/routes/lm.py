@@ -19,8 +19,9 @@ def openai_chat_completion(
     """
     OpenAI integration
     """
-    openai_api_key = crud.get_setting(session=session, setting_name="OPENAI_API_KEY")
-    client = OpenAI(api_key=openai_api_key)
-    chat_completion = client.chat.completions(completions=CreateChatCompletion)
+    openai_api_key = crud.get_setting(session=session, setting_name="OPENAI_API_KEY", owner_id=current_user.id)
+    client = OpenAI(api_key=openai_api_key.content)
+    chat_completion = client.chat.completions.create(**chat_completion_in.model_dump(exclude_none=True))
+    print(chat_completion)
     return ChatCompletion.model_validate(chat_completion)
 
