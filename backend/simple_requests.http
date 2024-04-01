@@ -1,0 +1,23 @@
+# Basic authentication
+@username = {{$dotenv FIRST_SUPERUSER}}
+@password = {{$dotenv FIRST_SUPERUSER_PASSWORD}}
+# OpenAi authentication
+@openai_api_key = {{$dotenv OPENAI_API_KEY}}
+# Mistral authentication
+@mistral_api_key = {{$dotenv MISTRAL_API_KEY}}
+@gateway = http://localhost
+# @gateway = https://proxy.sarus.app
+@authToken = {{login.response.body.access_token}}
+### Get bearer token
+# @name login
+POST {{gateway}}/api/v1/login/access-token HTTP/1.1
+Accept: application/json
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=&username={{username}}&password={{password}}&scope=&client_id=&client_secret=
+
+### A basic query
+GET http://localhost/api/v1/openapi.json HTTP/1.1
+
+### Docs
+GET http://localhost/docs HTTP/1.1

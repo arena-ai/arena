@@ -10,4 +10,4 @@ api_router.include_router(utils.router, prefix="/utils", tags=["utils"])
 api_router.include_router(events.router, prefix="/events", tags=["events"])
 api_router.include_router(settings.router, prefix="/settings", tags=["settings"])
 # Include language_models
-api_router.include_router(lm.router, prefix="/lm/", tags=["language-models"])
+api_router.include_router(lm.router, prefix="/lm", tags=["language-models"])

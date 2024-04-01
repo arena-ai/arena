@@ -1,5 +1,0 @@
-### A basic query
-GET http://localhost/api/v1/openapi.json HTTP/1.1
-
-### Docs
-GET http://localhost/docs HTTP/1.1
