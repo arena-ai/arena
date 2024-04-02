@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Literal, Any
 from pydantic import BaseModel
 
@@ -80,8 +81,15 @@ class ChoiceLogprobs(BaseModel):
     content: list[ChatCompletionTokenLogprob] | None = None
 
 
+class FinishReason(str, Enum):
+    stop = "stop"
+    length = "length"
+    error = "error"
+    tool_calls = "tool_calls"
+
+
 class Choice(BaseModel):
-    finish_reason: Literal["stop", "length", "tool_calls", "content_filter", "function_call"]
+    finish_reason: Literal["stop", "length", "tool_calls", "content_filter", "function_call"] | FinishReason | None = None
     index: int
     logprobs: ChoiceLogprobs | None = None
     message: ChatCompletionMessage
