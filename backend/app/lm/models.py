@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Any
 from pydantic import BaseModel
 
 # Inspired by https://github.com/mistralai/client-python/tree/main/src/mistralai/models
@@ -60,8 +60,8 @@ class CreateChatCompletion(BaseModel):
 class ChatCompletionMessage(BaseModel):
     content: str | None = None
     role: Literal["assistant"]
-    function_call: None = None
-    tool_calls: None = None
+    function_call: Any | None = None
+    tool_calls: Any | None = None
 
 
 class TopLogprob(BaseModel):

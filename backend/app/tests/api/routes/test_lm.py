@@ -3,11 +3,12 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.core.config import settings
-from app.tests.utils.event import create_random_event
+
 
 def test_openai(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
+    
     # Setup a token
     client.post(
         f"{settings.API_V1_STR}/settings/",
@@ -33,5 +34,33 @@ def test_openai(
     )
     assert response.status_code == 200
     content = response.json()
-    print(content)
-    
+    assert len(content["choices"]) == 1
+
+def test_mistral(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    # Setup a token
+    client.post(
+        f"{settings.API_V1_STR}/settings/",
+        headers=superuser_token_headers,
+        json={"name": "MISTRAL_API_KEY", "content": os.getenv("MISTRAL_API_KEY")},
+    )
+    response = client.post(
+        f"{settings.API_V1_STR}/lm/mistral/chat/completions",
+        headers=superuser_token_headers,
+        json={
+            "model": "mistral-small",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant."
+                },
+                {
+                    "role": "user",
+                    "content": "Who is Victor Hugo? Where does he live?"
+                }
+            ]
+        },
+    )
+    assert response.status_code == 200
+    content = response.json()

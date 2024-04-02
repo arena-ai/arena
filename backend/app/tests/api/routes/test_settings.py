@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.core.config import settings
-from app.tests.utils.event import create_random_event
+
 
 def test_create_setting(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
