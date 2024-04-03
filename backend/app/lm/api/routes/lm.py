@@ -5,7 +5,7 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
-from app.lm.models import ChatCompletion, CreateChatCompletion
+from app.lm.models import ChatCompletion, CreateChatCompletion, CreateChatCompletionOpenAI
 
 from openai import OpenAI
 from mistralai.client import MistralClient
@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.post("/openai/chat/completions", response_model=ChatCompletion)
 def openai_chat_completion(
-    session: SessionDep, current_user: CurrentUser, chat_completion_in: CreateChatCompletion
+    session: SessionDep, current_user: CurrentUser, chat_completion_in: CreateChatCompletionOpenAI
 ) -> Any:
     """
     OpenAI integration
@@ -49,5 +49,5 @@ def mistral_chat_completion(
     """
     anthropic_api_key = crud.get_setting(session=session, setting_name="ANTHROPIC_API_KEY", owner_id=current_user.id)
     client = Anthropic(api_key=anthropic_api_key.content)
-    chat_completion = client.messages.create(**chat_completion_in.model_dump(exclude_none=True))
-    return ChatCompletion.model_validate(chat_completion, strict=False, from_attributes=True)
+    message = client.messages.create(**chat_completion_in.model_dump(exclude_none=True))
+    return ChatCompletion.from_anthropic(message)

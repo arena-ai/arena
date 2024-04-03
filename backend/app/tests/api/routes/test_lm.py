@@ -11,7 +11,7 @@ def test_openai(
     
     # Setup a token
     client.post(
-        f"{settings.API_V1_STR}/settings/",
+        f"{settings.API_V1_STR}/settings",
         headers=superuser_token_headers,
         json={"name": "OPENAI_API_KEY", "content": os.getenv("OPENAI_API_KEY")},
     )
@@ -42,7 +42,7 @@ def test_mistral(
 ) -> None:
     # Setup a token
     client.post(
-        f"{settings.API_V1_STR}/settings/",
+        f"{settings.API_V1_STR}/settings",
         headers=superuser_token_headers,
         json={"name": "MISTRAL_API_KEY", "content": os.getenv("MISTRAL_API_KEY")},
     )
@@ -72,7 +72,7 @@ def test_anthropic(
 ) -> None:
     # Setup a token
     client.post(
-        f"{settings.API_V1_STR}/settings/",
+        f"{settings.API_V1_STR}/settings",
         headers=superuser_token_headers,
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ANTHROPIC_API_KEY")},
     )
@@ -80,18 +80,17 @@ def test_anthropic(
         f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
         headers=superuser_token_headers,
         json={
-            "model": "mistral-small",
+            "model": "claude-3-opus-20240229",
             "messages": [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant."
-                },
                 {
                     "role": "user",
                     "content": "Who is Victor Hugo? Where does he live?"
                 }
-            ]
+            ],
+            "max_tokens": 1584,
+            "temperature": 0.5
         },
     )
+    print(response)
     assert response.status_code == 200
     content = response.json()
