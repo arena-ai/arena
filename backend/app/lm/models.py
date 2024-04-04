@@ -2,8 +2,12 @@ from enum import Enum
 from typing import Literal, Any
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
+from openai.types.completion import Completion
 from openai.types.completion_choice import CompletionChoice
-from mistralai.models.chat_completion import ChatCompletionResponseChoice
+
+from mistralai.models.chat_completion import ChatCompletionResponse, ChatCompletionResponseChoice, FinishReason
+
+from anthropic.types import Message as AnthropicMessage, ContentBlock
 from anthropic import Anthropic
 
 # Inspired by https://github.com/mistralai/client-python/tree/main/src/mistralai/models
@@ -99,38 +103,34 @@ class ChatCompletionTokenLogprob(BaseModel):
 class ChoiceLogprobs(BaseModel):
     content: list[ChatCompletionTokenLogprob] | None = None
 
- # TODO remove FinishReason
-class FinishReason(str, Enum):
-    stop = "stop"
-    length = "length"
-    error = "error"
-    tool_calls = "tool_calls"
 
-
-class Choice(BaseModel):
-    model_config = ConfigDict(strict=False, from_attributes=True)
-    
-    finish_reason: Literal["stop", "length", "tool_calls", "content_filter", "function_call"] | None = None
+class Choice(BaseModel):    
+    finish_reason: Literal["stop", "length", "tool_calls", "content_filter", "function_call", "error"] | None = None
     index: int
     logprobs: ChoiceLogprobs | None = None
     message: ChatCompletionMessage
 
-    @model_validator(mode='before')
-    @classmethod
-    def convert(cls, v: Any) -> Any:
-        if isinstance(v, CompletionChoice):
-            return Choice.model_validate(v, strict=False, from_attributes=True)
-        elif isinstance(v, ChatCompletionResponseChoice):
-            return Choice.model_validate(v, strict=False, from_attributes=True)
-        else:
-            return Choice(index=0, message=ChatCompletionMessage())
-
     @field_validator('finish_reason', mode='before')
     @classmethod
-    def convert_finish_reason(cls, v):
+    def convert_finish_reason(cls, v) -> str:
         if isinstance(v, FinishReason):
             return v.value
         return v
+
+    @classmethod
+    def from_openai(cls, v: CompletionChoice) -> "Choice":
+        return Choice.model_validate(v, strict=False, from_attributes=True)
+
+    @classmethod
+    def from_mistral(cls, v: ChatCompletionResponseChoice) -> "Choice":
+        return Choice.model_validate(v, strict=False, from_attributes=True)
+        # return Choice(finish_reason=v.finish_reason, index=v.index, message=v.message)
+
+    @classmethod
+    def from_anthropic(cls, v: CompletionChoice) -> "Choice":
+        return Choice(index=0, message=ChatCompletionMessage())
+
+    
 
 
 class CompletionUsage(BaseModel):
@@ -148,35 +148,22 @@ class ChatCompletion(BaseModel):
     system_fingerprint: str | None = None
     usage: CompletionUsage | None = None
 
-    @staticmethod
-    def from_chat_completion(chat_completion: Any) -> "ChatCompletion":
+    @classmethod
+    def from_openai(cls, chat_completion: Completion) -> "ChatCompletion":
         return ChatCompletion.model_validate(chat_completion, strict=False, from_attributes=True)
 
-    @staticmethod
-    def from_openai(chat_completion: Any) -> "ChatCompletion":
-        return ChatCompletion.from_chat_completion(chat_completion)
-
-    @staticmethod
-    def from_mistral(chat_completion: Any) -> "ChatCompletion":
-        return ChatCompletion.from_chat_completion(chat_completion)
+    @classmethod
+    def from_mistral(cls, chat_completion: ChatCompletionResponse) -> "ChatCompletion":
+        return ChatCompletion(
+            id=chat_completion.id,
+            choices=[Choice.from_mistral(choice) for choice in chat_completion.choices],
+            model=chat_completion.model,
+        )
     
-    @staticmethod
-    def from_anthropic(message) -> "ChatCompletion":
+    @classmethod
+    def from_anthropic(cls, message: AnthropicMessage) -> "ChatCompletion":
         return ChatCompletion(
             id=message.id,
             choices=[Choice.from_anthropic(choice) for choice in message.content],
             model=message.model,
         )
-    
-    # @model_validator(mode='before')
-    # @classmethod
-    # def convert(cls, v: Any) -> Any:
-    #     if isinstance(v, Completion):
-    #         return Choice.model_validate(v, strict=False, from_attributes=True)
-    #     elif isinstance(v, Completion):
-    #         return Choice.model_validate(v, strict=False, from_attributes=True)
-    #     else:
-    #         return ChatCompletion(
-    #         id=message.id,
-    #         choices=message.content,
-    #         model=message.model,
