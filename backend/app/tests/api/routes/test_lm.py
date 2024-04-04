@@ -47,7 +47,7 @@ def test_openai_client_arena_endpoint(
         headers=superuser_token_headers,
         json={"name": "OPENAI_API_KEY", "content": os.getenv("OPENAI_API_KEY")},
     )
-    openai_client = OpenAI(api_key=superuser_token_headers["Authorization"][7:], base_url=f"http://localhost/api/v1/lm/openai/")
+    openai_client = OpenAI(api_key=superuser_token_headers["Authorization"][7:], base_url=f"http://localhost/api/v1/lm/openai")
     response =  openai_client.chat.completions.create(**chat_input("gpt-3.5-turbo"))
     assert len(response.choices) == 1
 
@@ -90,7 +90,7 @@ def test_mistral_client_arena_endpoint(
         headers=superuser_token_headers,
         json={"name": "MISTRAL_API_KEY", "content": os.getenv("MISTRAL_API_KEY")},
     )
-    mistral_client = MistralClient(api_key=superuser_token_headers["Authorization"][7:], base_url=f"http://localhost/api/v1/lm/mistral/")
+    mistral_client = MistralClient(api_key=superuser_token_headers["Authorization"][7:], endpoint=f"http://localhost/api/v1/lm/mistral")
     response =  mistral_client.chat(**chat_input("mistral-small"))
     print(response)
     assert len(response.choices) == 1
@@ -106,7 +106,7 @@ def test_mistral(
         json={"name": "MISTRAL_API_KEY", "content": os.getenv("MISTRAL_API_KEY")},
     )
     response = client.post(
-        f"{settings.API_V1_STR}/lm/mistral/chat/completions",
+        f"{settings.API_V1_STR}/lm/mistral/v1/chat/completions",
         headers=superuser_token_headers,
         json=chat_input("mistral-small"),
     )
