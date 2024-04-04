@@ -4,11 +4,58 @@ from sqlmodel import Session
 
 from app.core.config import settings
 
+from openai import OpenAI
+from mistralai.client import MistralClient
+from anthropic import Anthropic
+
+def chat_input(model: str, system=True):
+    """A Standard chat input"""
+    return {
+        "model": model,
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant."
+            },
+            {
+                "role": "user",
+                "content": "Who is Victor Hugo? Where does he live?"
+            }
+        ] if system else [
+            {
+                "role": "user",
+                "content": "Who is Victor Hugo? Where does he live?"
+            }
+        ]
+    }
+
+
+def test_native_openai_client() -> None:
+    """Test the native openai client"""
+    openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    response =  openai_client.chat.completions.create(**chat_input("gpt-3.5-turbo"))
+    assert len(response.choices) == 1
+
+
+def test_openai_client_arena_endpoint(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    """Test the native openai client with arena in proxy mode"""
+    # Setup a token
+    client.post(
+        f"{settings.API_V1_STR}/settings",
+        headers=superuser_token_headers,
+        json={"name": "OPENAI_API_KEY", "content": os.getenv("OPENAI_API_KEY")},
+    )
+    openai_client = OpenAI(api_key=superuser_token_headers["Authorization"][7:], base_url=f"http://localhost/api/v1/lm/openai/")
+    response =  openai_client.chat.completions.create(**chat_input("gpt-3.5-turbo"))
+    assert len(response.choices) == 1
+
 
 def test_openai(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    
+    """Test arena openai"""
     # Setup a token
     client.post(
         f"{settings.API_V1_STR}/settings",
@@ -18,23 +65,35 @@ def test_openai(
     response = client.post(
         f"{settings.API_V1_STR}/lm/openai/chat/completions",
         headers=superuser_token_headers,
-        json={
-            "model": "gpt-3.5-turbo",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant."
-                },
-                {
-                    "role": "user",
-                    "content": "Who is Victor Hugo? Where does he live?"
-                }
-            ]
-        },
+        json=chat_input("gpt-3.5-turbo"),
     )
     assert response.status_code == 200
     content = response.json()
     assert len(content["choices"]) == 1
+
+
+
+def test_native_mistral_client() -> None:
+    """Test the native mistral client"""
+    mistral_client = MistralClient(api_key=os.getenv("MISTRAL_API_KEY"))
+    response =  mistral_client.chat(**chat_input("mistral-small"))
+    assert len(response.choices) == 1
+
+
+def test_mistral_client_arena_endpoint(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    """Test the native mistral client with arena in proxy mode"""
+    # Setup a token
+    client.post(
+        f"{settings.API_V1_STR}/settings",
+        headers=superuser_token_headers,
+        json={"name": "MISTRAL_API_KEY", "content": os.getenv("MISTRAL_API_KEY")},
+    )
+    mistral_client = MistralClient(api_key=superuser_token_headers["Authorization"][7:], base_url=f"http://localhost/api/v1/lm/mistral/")
+    response =  mistral_client.chat(**chat_input("mistral-small"))
+    print(response)
+    assert len(response.choices) == 1
 
 
 def test_mistral(
@@ -49,19 +108,7 @@ def test_mistral(
     response = client.post(
         f"{settings.API_V1_STR}/lm/mistral/chat/completions",
         headers=superuser_token_headers,
-        json={
-            "model": "mistral-small",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant."
-                },
-                {
-                    "role": "user",
-                    "content": "Who is Victor Hugo? Where does he live?"
-                }
-            ]
-        },
+        json=chat_input("mistral-small"),
     )
     assert response.status_code == 200
     content = response.json()
@@ -79,18 +126,7 @@ def test_anthropic(
     response = client.post(
         f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
         headers=superuser_token_headers,
-        json={
-            "model": "claude-3-opus-20240229",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": "Who is Victor Hugo? Where does he live?"
-                }
-            ],
-            "max_tokens": 1584,
-            "temperature": 0.5
-        },
+        json=(chat_input("claude-2.1", system=False) | {"max_tokens": 1584, "temperature": 0.5}),
     )
-    print(response)
     assert response.status_code == 200
     content = response.json()
