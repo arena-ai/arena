@@ -6,7 +6,7 @@ from sqlmodel import func, select
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
 from app.lm.models import (ChatCompletion,
-    ChatCompletionOpenAI, ChatCompletionMistral, ChatCompletionAnthropic,
+    ChatCompletionOpenAI, ChatCompletionMistral, ChatCompletionAnthropic, CreateChatCompletion,
     CreateChatCompletionOpenAI, CreateChatCompletionMistral, CreateChatCompletionAnthropic)
 
 from openai import OpenAI
@@ -16,9 +16,9 @@ from anthropic import Anthropic
 router = APIRouter()
 
 
-@router.post("/openai/chat/completions", response_model=ChatCompletionOpenAI)
+@router.post("/openai/chat/completions", response_model=ChatCompletion)
 def openai_chat_completion(
-    session: SessionDep, current_user: CurrentUser, chat_completion_in: CreateChatCompletionOpenAI
+    session: SessionDep, current_user: CurrentUser, chat_completion_in: CreateChatCompletion
 ) -> Any:
     """
     OpenAI integration
@@ -28,9 +28,9 @@ def openai_chat_completion(
     return client.chat.completions.create(**chat_completion_in.model_dump(exclude_none=True))
 
 
-@router.post("/mistral/v1/chat/completions", response_model=ChatCompletionMistral)
+@router.post("/mistral/v1/chat/completions", response_model=ChatCompletion)
 def mistral_chat_completion(
-    session: SessionDep, current_user: CurrentUser, chat_completion_in: CreateChatCompletionMistral
+    session: SessionDep, current_user: CurrentUser, chat_completion_in: CreateChatCompletion
 ) -> Any:
     """
     Mistral integration
@@ -40,9 +40,9 @@ def mistral_chat_completion(
     return client.chat(**chat_completion_in.model_dump(exclude_none=True))
 
 
-@router.post("/anthropic/v1/messages", response_model=ChatCompletionAnthropic)
+@router.post("/anthropic/v1/messages", response_model=ChatCompletion)
 def mistral_chat_completion(
-    session: SessionDep, current_user: CurrentUser, chat_completion_in: CreateChatCompletionAnthropic
+    session: SessionDep, current_user: CurrentUser, chat_completion_in: CreateChatCompletion
 ) -> Any:
     """
     Anthropic integration

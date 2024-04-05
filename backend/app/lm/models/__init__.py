@@ -1,13 +1,13 @@
 from enum import Enum
 from typing import Literal, Any
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, field_validator, model_validator
 
+from openai.types.chat.completion_create_params import CompletionCreateParams as CreateChatCompletionOpenAI
 from openai.types.chat.chat_completion import ChatCompletion as ChatCompletionOpenAI, Choice as ChoiceOpenAI
 
-from mistralai.models.chat_completion import ChatCompletionResponse as ChatCompletionMistral, ChatCompletionResponseChoice, FinishReason
+from mistralai.models.chat_completion import ChatMessage as CreateChatCompletionMistral, ChatCompletionResponse as ChatCompletionMistral, ChatCompletionResponseChoice, FinishReason
 
-from anthropic.types import Message as ChatCompletionAnthropic
-from anthropic import Anthropic
+from anthropic.types import MessageCreateParams as CreateChatCompletionAnthropic, Message as ChatCompletionAnthropic
 
 # Inspired by https://github.com/mistralai/client-python/tree/main/src/mistralai/models
 # And: https://github.com/anthropics/anthropic-sdk-python/tree/main/src/anthropic/types
@@ -73,16 +73,6 @@ class CreateChatCompletion(CreateChatCompletionBase):
     top_logprobs: int | None = None
     user: str | None = None
     safe_prompt: bool | None = None
-
-
-class CreateChatCompletionOpenAI(CreateChatCompletion):
-    messages: list[MessageOpenAI]
-
-class CreateChatCompletionMistral(CreateChatCompletion):
-    pass
-
-class CreateChatCompletionAnthropic(CreateChatCompletion):
-    stream: bool | None = None
 
 
 class ChatCompletionMessage(BaseModel):
