@@ -1,34 +1,34 @@
-# from typing import Any
-# import pytest
+import pytest
 
-from app.lm.models.models import (
+from app.lm.models import (
+    ChatCompletionCreate,
     Choice, FinishReason,
-    # ChatCompletionMessage,
+    ChatCompletionMessage,
     # CreateChatCompletion, CreateChatCompletionOpenAI, CreateChatCompletionMistral, CreateChatCompletionAnthropic,
     # ChatCompletionOpenAI, ChatCompletionMistral, ChatCompletionAnthropic, ChatCompletion
     )
 
 # Testing CreateChatCompletion -> CreateChatCompletionXXX
 
-# @pytest.fixture
-# def create_chat_completion_openai() -> Any:
-#     return {
-#         "model": "gpt-4",
-#         "messages": [
-#             {"role": "user", "content": "Write a short poem about the beauty of nature."}
-#         ],
-#         "max_tokens": 100,
-#         "temperature": 0.9,
-#         "top_p": 0.9,
-#         "frequency_penalty": 0.5,
-#         "presence_penalty": 0.5,
-#         "n": 3
-#     }
+@pytest.fixture
+def chat_completion_create_openai() -> ChatCompletionCreate:
+    return ChatCompletionCreate(**{
+        "model": "gpt-4",
+        "messages": [
+            {"role": "user", "content": "Write a short poem about the beauty of nature."}
+        ],
+        "max_tokens": 100,
+        "temperature": 0.9,
+        "top_p": 0.9,
+        "frequency_penalty": 0.5,
+        "presence_penalty": 0.5,
+        "n": 3
+    })
 
-# # Test openai
+# Test openai
 
-# def test_create_chat_completion_openai(create_chat_completion_openai) -> None:
-#     print(create_chat_completion_openai)
+def test_chat_completion_create_openai(chat_completion_create_openai) -> None:
+    print(chat_completion_create_openai)
 
 
 # Testing finish_reason
