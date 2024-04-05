@@ -2,8 +2,6 @@ from enum import Enum
 from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel, field_validator, model_validator
 
-from openai.types.chat.completion_create_params import CompletionCreateParams as CreateChatCompletionOpenAI
-from openai.types.chat.chat_completion import ChatCompletion as ChatCompletionOpenAI, Choice as ChoiceOpenAI
 
 """ChatCompletionCreate"""
 

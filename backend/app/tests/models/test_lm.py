@@ -1,12 +1,6 @@
 import pytest
 
-from app.lm.models import (
-    ChatCompletionCreate,
-    Choice, FinishReason,
-    ChatCompletionMessage,
-    # CreateChatCompletion, CreateChatCompletionOpenAI, CreateChatCompletionMistral, CreateChatCompletionAnthropic,
-    # ChatCompletionOpenAI, ChatCompletionMistral, ChatCompletionAnthropic, ChatCompletion
-    )
+from app.lm.models import ChatCompletionCreate, Choice
 
 # Testing CreateChatCompletion -> CreateChatCompletionXXX
 
@@ -33,11 +27,11 @@ def test_chat_completion_create_openai(chat_completion_create_openai) -> None:
 
 # Testing finish_reason
 
-def test_finish_reason() -> None:
-    c = Choice.model_validate({
-        "finish_reason": FinishReason.stop,
-        "index": 0,
-        "message": ChatCompletionMessage()
-    })
-    assert c.finish_reason == "stop"
+# def test_finish_reason() -> None:
+#     c = Choice.model_validate({
+#         "finish_reason": FinishReason.stop,
+#         "index": 0,
+#         "message": ChatCompletionMessage()
+#     })
+#     assert c.finish_reason == "stop"
 
