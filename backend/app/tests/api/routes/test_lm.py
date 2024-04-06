@@ -96,6 +96,15 @@ def test_mistral_client_arena_endpoint(
     assert len(response.choices) == 1
 
 
+def test_mistral_models(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    """Test the native mistral client"""
+    mistral_client = MistralClient(api_key=os.getenv("MISTRAL_API_KEY"))
+    response =  mistral_client.list_models()
+    print(response)
+
+
 def test_mistral(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
