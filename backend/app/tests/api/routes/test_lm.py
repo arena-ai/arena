@@ -21,16 +21,11 @@ def chat_input(model: str, system=True):
                 "role": "user",
                 "content": "Who is Victor Hugo? Where does he live?"
             }
-        ] if system else [
-            {
-                "role": "user",
-                "content": "Who is Victor Hugo? Where does he live?"
-            }
         ]
     }
 
 
-def test_native_openai_client() -> None:
+def test_openai_client() -> None:
     """Test the native openai client"""
     openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     response =  openai_client.chat.completions.create(**chat_input("gpt-3.5-turbo"))
@@ -73,7 +68,7 @@ def test_openai(
 
 
 
-def test_native_mistral_client() -> None:
+def test_mistral_client() -> None:
     """Test the native mistral client"""
     mistral_client = MistralClient(api_key=os.getenv("MISTRAL_API_KEY"))
     response =  mistral_client.chat(**chat_input("mistral-small"))
@@ -92,7 +87,6 @@ def test_mistral_client_arena_endpoint(
     )
     mistral_client = MistralClient(api_key=superuser_token_headers["Authorization"][7:], endpoint=f"http://localhost/api/v1/lm/mistral")
     response =  mistral_client.chat(**chat_input("mistral-small"))
-    print(response)
     assert len(response.choices) == 1
 
 
@@ -103,6 +97,7 @@ def test_mistral_models(
     mistral_client = MistralClient(api_key=os.getenv("MISTRAL_API_KEY"))
     response =  mistral_client.list_models()
     print(response)
+    assert False
 
 
 def test_mistral(
@@ -123,6 +118,29 @@ def test_mistral(
     content = response.json()
 
 
+
+def test_anthropic_client() -> None:
+    """Test the native anthropic client"""
+    anthropic_client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    response =  anthropic_client.messages.create(**chat_input("claude-2.1"))
+    assert len(response.choices) == 1
+
+
+def test_anthropic_client_arena_endpoint(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    """Test the native mistral client with arena in proxy mode"""
+    # Setup a token
+    client.post(
+        f"{settings.API_V1_STR}/settings",
+        headers=superuser_token_headers,
+        json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ANTHROPIC_API_KEY")},
+    )
+    anthropic_client = MistralClient(api_key=superuser_token_headers["Authorization"][7:], endpoint=f"http://localhost/api/v1/lm/mistral")
+    response =  anthropic_client.messages.create(**chat_input("claude-2.1"))
+    assert len(response.choices) == 1
+
+
 def test_anthropic(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
@@ -135,7 +153,7 @@ def test_anthropic(
     response = client.post(
         f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
         headers=superuser_token_headers,
-        json=(chat_input("claude-2.1", system=False) | {"max_tokens": 1584, "temperature": 0.5}),
+        json=(chat_input("claude-2.1") | {"max_tokens": 1584, "temperature": 0.5}),
     )
     assert response.status_code == 200
     content = response.json()
