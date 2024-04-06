@@ -1,13 +1,87 @@
-from typing import Literal
+from typing import Literal, Sequence
 
 from app.lm import models
 
-from anthropic.types import MessageCreateParams, Message
+from anthropic.types import MessageCreateParams, MessageParam, Message, ContentBlock, Usage
+from anthropic.types.message_create_params import MessageCreateParamsStreaming, MessageCreateParamsNonStreaming, Metadata
 
 """
-ChatCompletionCreate -> anthropic MessageCreateParams -> opeanthropicnai Message -> ChatCompletion
+ChatCompletionCreate -> anthropic MessageCreateParams -> anthropic Message -> ChatCompletion
 """
 
-class Message(models.Message):
-    role: Literal["user", "assistant"]
-    content: str
+def message_param(message: models.Message) -> MessageParam | str:
+    match message.role:
+        case "system":
+            return message.content
+        case "user":
+            return MessageParam(role="user", content=message.content)
+        case "assistant":
+            return MessageParam(role="assistant", content=message.content)
+        case _:
+            return message.content
+
+
+def chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreateParams:
+    all_messages: Sequence[MessageParam | str] = [message_param(msg) for msg in ccc.messages]
+    messages: Sequence[MessageParam] = [msg for msg in all_messages if not isinstance(msg, str)]
+    system: Sequence[str] = [msg for msg in messages if isinstance(msg, str)]
+    if ccc.stream:
+        return MessageCreateParamsStreaming(
+            messages=messages,
+            model=ccc.model,
+            max_tokens=ccc.max_tokens,
+            metadata=Metadata(user_id=ccc.user),
+            stop_sequences=ccc.stop,
+            system=None if len(system)==0 else system[0],
+            temperature=ccc.temperature,
+            top_k=ccc.top_logprobs,
+            top_p=ccc.top_p,
+            streaming=True
+            )
+    else:
+        return MessageCreateParamsNonStreaming(
+            messages=messages,
+            model=ccc.model,
+            max_tokens=ccc.max_tokens,
+            metadata=Metadata(user_id=ccc.user),
+            stop_sequences=ccc.stop,
+            system=None if len(system)==0 else system[0],
+            temperature=ccc.temperature,
+            top_k=ccc.top_logprobs,
+            top_p=ccc.top_p,
+            streaming=ccc.stream
+            )
+
+
+def completion_usage(u: Usage) -> models.CompletionUsage:
+    return models.CompletionUsage(
+        completion_tokens=u.output_tokens,
+        prompt_tokens=u.input_tokens,
+        total_tokens=u.input_tokens+u.output_tokens
+    )
+
+
+def finish_reason(sr: Literal['end_turn', 'max_tokens', 'stop_sequence'] | None) -> Literal['stop', 'length', 'tool_calls', 'content_filter', 'function_call', 'error'] | None:
+    match sr:
+        case 'end_turn':
+            return 'tool_calls'
+        case 'max_tokens':
+            return 'length'
+        case 'stop_sequence':
+            return 'stop'
+        case _:
+            return None
+
+
+def chat_completion(m: Message) -> models.ChatCompletion:
+    return models.ChatCompletion(
+        id=m.id,
+        choices=[models.Choice(
+            finish_reason=finish_reason(m.stop_reason),
+            index=i,
+            logprobs=None,
+            message=models.Message(role="assistant", content=cb.text)
+        ) for i,cb in enumerate(m.content)],
+        model=m.model,
+        usage=completion_usage(m.usage),
+    )
