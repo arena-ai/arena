@@ -157,14 +157,3 @@ def test_chat_completion_create_anthropic(chat_completion_create_anthropic) -> N
 
 def test_chat_completion_anthropic(chat_completion_anthropic) -> None:
     cc: models.ChatCompletion = anthropic.chat_completion(chat_completion_anthropic)
-
-# Testing finish_reason
-
-# def test_finish_reason() -> None:
-#     c = Choice.model_validate({
-#         "finish_reason": FinishReason.stop,
-#         "index": 0,
-#         "message": ChatCompletionMessage()
-#     })
-#     assert c.finish_reason == "stop"
-
