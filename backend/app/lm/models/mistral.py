@@ -2,7 +2,7 @@ from typing import Literal, Mapping, Any
 
 from app.lm import models
 
-from mistralai.models.chat_completion import ChatMessage, ChatCompletionResponse, ChatCompletionResponseChoice, FinishReason
+from mistralai.models.chat_completion import ChatMessage, ChatCompletionResponse, ChatCompletionResponseChoice, FinishReason, UsageInfo
 
 """
 ChatCompletionCreate -> mistral CompletionCreateParams -> mistral ChatCompletionResponse -> ChatCompletion
@@ -24,57 +24,39 @@ def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any
     }
 
 
-# def message(ccm: ChatCompletionMessage) -> models.Message:
-#     return models.Message(
-#         role=ccm.role,
-#         content=ccm.content
-#     )
+def message(cm: ChatMessage) -> models.Message:
+    return models.Message(
+        role=cm.role,
+        content=cm.content
+    )
 
 
-# def top_logprob(tl: TopLogprob) -> models.TopLogprob:
-#     return models.TopLogprob(
-#         token=tl.token,
-#         bytes=tl.bytes,
-#         logprob=tl.logprob
-#     )
+def finish_reason(fr: FinishReason) -> Literal['stop', 'length', 'tool_calls', 'content_filter', 'function_call', 'error']:
+    return fr.value
 
 
-# def chat_completion_token_logprob(cctl: ChatCompletionTokenLogprob) -> models.ChatCompletionTokenLogprob:
-#     return models.ChatCompletionTokenLogprob(
-#         token=cctl.token,
-#         logprob=cctl.logprob,
-#         top_logprobs=[top_logprob(tl) for tl in cctl.top_logprobs]
-#     )
+def choice(ccrc: ChatCompletionResponseChoice) -> models.Choice:
+    return models.Choice(
+        finish_reason=finish_reason(ccrc.finish_reason) if ccrc.finish_reason else None,
+        index=ccrc.index,
+        message=message(ccrc.message),
+    )
 
 
-# def choice_logprobs(cl: ChoiceLogprobs) -> models.ChoiceLogprobs:
-#     return models.ChoiceLogprobs(content=[chat_completion_token_logprob(cctl) for cctl in cl.content] if cl else None)
+def completion_usage(ui: UsageInfo) -> models.CompletionUsage:
+    return models.CompletionUsage(
+        completion_tokens=ui.completion_tokens,
+        prompt_tokens=ui.prompt_tokens,
+        total_tokens=ui.total_tokens
+    )
 
 
-# def choice(c: Choice) -> models.Choice:
-#     return models.Choice(
-#         finish_reason=c.finish_reason,
-#         index=c.index,
-#         logprobs=choice_logprobs(c.logprobs) if c.logprobs else None,
-#         message=message(c.message),
-#     )
-
-
-# def completion_usage(cu: CompletionUsage) -> models.CompletionUsage:
-#     return models.CompletionUsage(
-#         completion_tokens=cu.completion_tokens,
-#         prompt_tokens=cu.prompt_tokens,
-#         total_tokens=cu.total_tokens
-#     )
-
-
-# def chat_completion(cc: ChatCompletion) -> models.ChatCompletion:
-#     return models.ChatCompletion(
-#         id=cc.id,
-#         choices=[choice(c) for c in cc.choices],
-#         created=cc.created,
-#         model=cc.model,
-#         object=cc.object,
-#         system_fingerprint=cc.system_fingerprint,
-#         usage=completion_usage(cc.usage),
-#     )
+def chat_completion(ccr: ChatCompletionResponse) -> models.ChatCompletion:
+    return models.ChatCompletion(
+        id=ccr.id,
+        choices=[choice(c) for c in ccr.choices],
+        created=ccr.created,
+        model=ccr.model,
+        object=ccr.object,
+        usage=completion_usage(ccr.usage),
+    )

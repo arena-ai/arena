@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import pytest
 
@@ -7,7 +8,8 @@ from app.lm.models import openai, mistral
 
 from openai.types.chat.completion_create_params import CompletionCreateParams
 from openai.types.chat.chat_completion import ChatCompletion, ChoiceLogprobs, ChatCompletionTokenLogprob, ChatCompletionMessage, CompletionUsage, Choice
-from mistralai.client import MistralClient
+from mistralai.client import ChatCompletionResponse
+from mistralai.models.chat_completion import ChatMessage, ChatCompletionResponse, ChatCompletionResponseChoice, FinishReason, UsageInfo, ToolCall, FunctionCall
 from anthropic import Anthropic
 
 # Testing CreateChatCompletion -> CreateChatCompletionXXX
@@ -82,6 +84,27 @@ def chat_completion_create_mistral() -> models.ChatCompletionCreate:
         "n": 3
     })
 
+
+@pytest.fixture
+def chat_completion_mistral() -> ChatCompletionResponse:
+    # Let's create instances of the nested classes first
+    function_call = FunctionCall(name="function_name", arguments="function_arguments")
+    tool_call = ToolCall(id="tool_id", function=function_call)
+    chat_message = ChatMessage(role="assistant", content="This is a message content", name="Assistant", tool_calls=[tool_call])
+    finish_reason = FinishReason.stop
+    chat_completion_response_choice = ChatCompletionResponseChoice(index=0, message=chat_message, finish_reason=finish_reason)
+    usage_info = UsageInfo(prompt_tokens=10, completion_tokens=20, total_tokens=30)
+    # Now, let's create an instance of ChatCompletionResponse
+    chat_completion_response = ChatCompletionResponse(
+        id="cmpl-123",
+        object="chat.completion",
+        created=int(datetime.now().timestamp()),
+        model="text-davinci-002",
+        choices=[chat_completion_response_choice],
+        usage=usage_info
+    )
+    return chat_completion_response
+
 # Test openai
 
 def test_chat_completion_create_openai(chat_completion_create_openai) -> None:
@@ -93,8 +116,8 @@ def test_chat_completion_openai(chat_completion_openai) -> None:
 def test_chat_completion_create_mistral(chat_completion_create_mistral) -> None:
     ccc: CompletionCreateParams = mistral.chat_completion_create(chat_completion_create_mistral)
 
-# def test_chat_completion_openai(chat_completion_openai) -> None:
-#     cc: models.ChatCompletion = chat_completion(chat_completion_openai)
+def test_chat_completion_mistral(chat_completion_mistral) -> None:
+    cc: models.ChatCompletion = mistral.chat_completion(chat_completion_mistral)
 
 # Testing finish_reason
 
