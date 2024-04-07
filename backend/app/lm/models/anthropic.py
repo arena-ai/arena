@@ -24,7 +24,7 @@ def message_param(message: models.Message) -> MessageParam | str:
 def chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreateParams:
     all_messages: Sequence[MessageParam | str] = [message_param(msg) for msg in ccc.messages]
     messages: Sequence[MessageParam] = [msg for msg in all_messages if not isinstance(msg, str)]
-    system: Sequence[str] = [msg for msg in messages if isinstance(msg, str)]
+    system: Sequence[str] = [msg for msg in all_messages if isinstance(msg, str)]
     if ccc.stream:
         return MessageCreateParamsStreaming(
             messages=messages,
@@ -36,7 +36,7 @@ def chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreatePar
             temperature=ccc.temperature,
             top_k=ccc.top_logprobs,
             top_p=ccc.top_p,
-            streaming=True
+            stream=True
             )
     else:
         return MessageCreateParamsNonStreaming(
@@ -49,7 +49,7 @@ def chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreatePar
             temperature=ccc.temperature,
             top_k=ccc.top_logprobs,
             top_p=ccc.top_p,
-            streaming=ccc.stream
+            stream=ccc.stream
             )
 
 

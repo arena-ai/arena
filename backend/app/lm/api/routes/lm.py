@@ -11,7 +11,7 @@ from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion as ChatCompletionOpenAI
 from openai.types.chat.completion_create_params import CompletionCreateParams as ChatCompletionCreateOpenAI
 
-from mistralai.client import MistralClient
+from mistralai.client import MistralClient, MistralException
 from mistralai.models.chat_completion import ChatCompletionResponse as ChatCompletionMistral
 
 from anthropic import Anthropic
@@ -42,7 +42,11 @@ def mistral_chat_completion(
     """
     mistral_api_key = crud.get_setting(session=session, setting_name="MISTRAL_API_KEY", owner_id=current_user.id)
     client = MistralClient(api_key=mistral_api_key.content)
-    return client.chat(**chat_completion_in)
+    request = client._make_chat_request(**chat_completion_in)
+    single_response = client._request("post", request, "v1/chat/completions")
+    for response in single_response:
+        return ChatCompletionMistral(**response)
+    raise MistralException("No response received")
 
 
 @router.post("/anthropic/v1/messages", response_model=ChatCompletionAnthropic)
@@ -69,7 +73,10 @@ def chat_completion(
             openai_api_key = crud.get_setting(session=session, setting_name="OPENAI_API_KEY", owner_id=current_user.id)
             client = OpenAI(api_key=openai_api_key.content)
             return client.chat.completions.create(**chat_completion_in.model_dump(exclude_none=True))
-        # case 
+        case "mistral-embed" | "mistral-large-2402" | "mistral-large-latest" | "mistral-medium" | "mistral-medium-2312" | "mistral-medium-latest" | "mistral-small" | "mistral-small-2312" | "mistral-small-2402" | "mistral-small-latest" | "mistral-tiny" | "mistral-tiny-2312" | "open-mistral-7b" | "open-mixtral-8x7b":
+            mistral_api_key = crud.get_setting(session=session, setting_name="MISTRAL_API_KEY", owner_id=current_user.id)
+            client = MistralClient(api_key=mistral_api_key.content)
+            return client.chat(**chat_completion_in)
         case "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-haiku-20240307" | "claude-2.1" | "claude-2.0" | "claude-instant-1.2":
             anthropic_api_key = crud.get_setting(session=session, setting_name="ANTHROPIC_API_KEY", owner_id=current_user.id)
             client = Anthropic(api_key=anthropic_api_key.content)

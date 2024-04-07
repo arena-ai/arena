@@ -3,12 +3,13 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.core.config import settings
+from app.lm.models import openai, mistral, anthropic, ChatCompletionCreate
 
 from openai import OpenAI
 from mistralai.client import MistralClient
 from anthropic import Anthropic
 
-def chat_input(model: str, system=True):
+def chat_input(model: str):
     """A Standard chat input"""
     return {
         "model": model,
@@ -21,7 +22,9 @@ def chat_input(model: str, system=True):
                 "role": "user",
                 "content": "Who is Victor Hugo? Where does he live?"
             }
-        ]
+        ],
+        "temperature": 1.0,
+        "max_tokens": 1000
     }
 
 
@@ -96,8 +99,7 @@ def test_mistral_models(
     """Test the native mistral client"""
     mistral_client = MistralClient(api_key=os.getenv("MISTRAL_API_KEY"))
     response =  mistral_client.list_models()
-    print(response)
-    assert False
+    print(sorted([m["id"] for m in response.model_dump()["data"]]))
 
 
 def test_mistral(
@@ -122,7 +124,8 @@ def test_mistral(
 def test_anthropic_client() -> None:
     """Test the native anthropic client"""
     anthropic_client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    response =  anthropic_client.messages.create(**chat_input("claude-2.1"))
+    ccc = anthropic.chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
+    response =  anthropic_client.messages.create(**ccc)
     assert len(response.choices) == 1
 
 
@@ -136,8 +139,8 @@ def test_anthropic_client_arena_endpoint(
         headers=superuser_token_headers,
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ANTHROPIC_API_KEY")},
     )
-    anthropic_client = MistralClient(api_key=superuser_token_headers["Authorization"][7:], endpoint=f"http://localhost/api/v1/lm/mistral")
-    response =  anthropic_client.messages.create(**chat_input("claude-2.1"))
+    anthropic_client = Anthropic(api_key=superuser_token_headers["Authorization"][7:], endpoint=f"http://localhost/api/v1/lm/mistral")
+    response =  anthropic_client.messages.create(**anthropic.chat_completion_create(chat_input("claude-2.1")))
     assert len(response.choices) == 1
 
 
@@ -153,7 +156,7 @@ def test_anthropic(
     response = client.post(
         f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
         headers=superuser_token_headers,
-        json=(chat_input("claude-2.1") | {"max_tokens": 1584, "temperature": 0.5}),
+        json=anthropic.chat_completion_create(chat_input("claude-2.1")),
     )
     assert response.status_code == 200
     content = response.json()
