@@ -126,7 +126,7 @@ def test_anthropic_client() -> None:
     anthropic_client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     ccc = anthropic.chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
     response =  anthropic_client.messages.create(**ccc)
-    assert len(response.choices) == 1
+    assert len(response.content) == 1
 
 
 def test_anthropic_client_arena_endpoint(
@@ -140,8 +140,9 @@ def test_anthropic_client_arena_endpoint(
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ANTHROPIC_API_KEY")},
     )
     anthropic_client = Anthropic(api_key=superuser_token_headers["Authorization"][7:], endpoint=f"http://localhost/api/v1/lm/mistral")
-    response =  anthropic_client.messages.create(**anthropic.chat_completion_create(chat_input("claude-2.1")))
-    assert len(response.choices) == 1
+    ccc = anthropic.chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
+    response =  anthropic_client.messages.create(**ccc)
+    assert len(response.content) == 1
 
 
 def test_anthropic(
@@ -153,10 +154,11 @@ def test_anthropic(
         headers=superuser_token_headers,
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ANTHROPIC_API_KEY")},
     )
+    ccc = anthropic.chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
     response = client.post(
         f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
-        headers=superuser_token_headers,
-        json=anthropic.chat_completion_create(chat_input("claude-2.1")),
+        headers = superuser_token_headers,
+        json = ccc,
     )
     assert response.status_code == 200
     content = response.json()

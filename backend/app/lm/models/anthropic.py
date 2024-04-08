@@ -34,8 +34,6 @@ def chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreatePar
             stop_sequences=ccc.stop,
             system=None if len(system)==0 else system[0],
             temperature=ccc.temperature,
-            top_k=ccc.top_logprobs,
-            top_p=ccc.top_p,
             stream=True
             )
     else:
@@ -47,9 +45,7 @@ def chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreatePar
             stop_sequences=ccc.stop,
             system=None if len(system)==0 else system[0],
             temperature=ccc.temperature,
-            top_k=ccc.top_logprobs,
-            top_p=ccc.top_p,
-            stream=ccc.stream
+            stream=False
             )
 
 
