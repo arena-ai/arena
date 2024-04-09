@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Release.Name}}-presidio-anonymizer-deployment
+  namespace: {{.Values.namespace}}
+  labels:
+    app.kubernetes.io/instance: {{.Release.Name}}
+    app.kubernetes.io/name: {{.Chart.Name}}
+    app.kubernetes.io/version: {{.Chart.AppVersion}}
+    app.kubernetes.io/managed-by: {{.Release.Service}}
+    app.kubernetes.io/component: presidio-anonymizer
+spec:
+  replicas: {{.Values.masking.presidio.anonymizer.replicas}}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{.Release.Name}}
+      app.kubernetes.io/name: {{.Chart.Name}}
+      app.kubernetes.io/component: presidio-anonymizer
+  template:
+    metadata:
+      name: {{.Release.Name}}-presidio-anonymizer
+      namespace: {{.Values.namespace}}
+      labels:
+        app.kubernetes.io/instance: {{.Release.Name}}
+        app.kubernetes.io/name: {{.Chart.Name}}
+        app.kubernetes.io/version: {{.Chart.AppVersion}}
+        app.kubernetes.io/managed-by: {{.Release.Service}}
+        app.kubernetes.io/component: presidio-anonymizer
+    spec:
+      containers:
+      - name: presidio-analyser
+        image: "{{.Values.masking.presidio.registry}}/{{.Values.masking.presidio.anonymizer.name }}:{{ default .Chart.AppVersion .Values.docker.tag }}"
+        imagePullPolicy: {{ default "IfNotPresent" .Values.masking.presidio.analyzer.imagePullPolicy }}
+        ports:
+        - containerPort: {{ .Values.masking.presidio.anonymizer.service.internalPort }}
+        resources:
+          requests:
+            memory: {{ .Values.masking.presidio.anonymizer.container.resources.requests.memory }}
+            cpu: {{ .Values.masking.presidio.anonymizer.container.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.masking.presidio.anonymizer.container.resources.limits.memory }}
+            cpu: {{ .Values.masking.presidio.anonymizer.container.resources.limits.cpu }}
+        env:
+          - name: PORT
+            value: {{ .Values.masking.presidio.anonymizer.service.internalPort | quote }}

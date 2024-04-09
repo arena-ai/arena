@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Release.Name}}-presidio-analyser-service
+  namespace: {{.Values.namespace}}
+  labels:
+    app.kubernetes.io/instance: {{.Release.Name}}
+    app.kubernetes.io/name: {{.Chart.Name}}
+    app.kubernetes.io/version: {{.Chart.AppVersion}}
+    app.kubernetes.io/managed-by: {{.Release.Service}}
+    app.kubernetes.io/component: presidio-analyser
+spec:
+  type: {{.Values.masking.presidio.analyzer.service.type}}
+  ports:
+  - port: {{.Values.masking.presidio.analyzer.service.externalPort}}
+    targetPort: {{.Values.masking.presidio.analyzer.service.internalPort}}
+    protocol: TCP
+    name: {{.Values.masking.presidio.analyzer.service.name}}
+  selector:
+    app.kubernetes.io/instance: {{.Release.Name}}
+    app.kubernetes.io/name: {{.Chart.Name}}
+    app.kubernetes.io/component: presidio-analyser
