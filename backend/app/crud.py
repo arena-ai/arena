@@ -54,7 +54,7 @@ def create_setting(*, session: Session, setting_in: SettingCreate, owner_id: int
 
 
 def get_setting(*, session: Session, setting_name: str, owner_id: int) -> Setting | None:
-    statement = select(Setting).where((Setting.owner_id == owner_id) and (Setting.name == setting_name)).order_by(desc(Setting.timestamp))
+    statement = select(Setting).where(Setting.owner_id == owner_id).where(Setting.name == setting_name).order_by(desc(Setting.timestamp))
     setting = session.exec(statement).first()
     return setting
 
@@ -135,7 +135,7 @@ def delete_attribute(*, session: Session, attribute: str) -> None:
 
 # Event Attribute
 def get_event_attribute(*, session: Session, attribute: str, event_id: int) -> EventAttribute | None:
-    statement = select(EventAttribute).join(Event).join(Attribute).where((Event.id == event_id) and (Attribute.name == attribute))
+    statement = select(EventAttribute).join(Event).join(Attribute).where(Event.id == event_id).where(Attribute.name == attribute)
     db_event_attribute = session.exec(statement).first()
     return db_event_attribute
 

@@ -43,7 +43,6 @@ class Mistral:
             return ChatCompletionMistral(**response)
         raise MistralException("No response received")
 
-
     def call(self, ccc: ChatCompletionCreate) -> ChatCompletion:
         return mistral.chat_completion(self.native(mistral.chat_completion_create(ccc)))
 

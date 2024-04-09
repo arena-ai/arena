@@ -74,7 +74,7 @@ def _chat_completion_create(ccc: models.ChatCompletionCreate) -> CompletionCreat
 
 
 def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:
-    _chat_completion_create(ccc)
+    return _chat_completion_create(ccc)
 
 def _message(ccm: ChatCompletionMessage) -> models.Message:
     return models.Message(

@@ -170,14 +170,15 @@ def test_arena(
 ) -> None:
     # Setup all tokens
     for api in ["OPENAI", "MISTRAL", "ANTHROPIC"]:
+        print(f"Set {api} token")
         client.post(
             f"{settings.API_V1_STR}/settings",
             headers=superuser_token_headers,
             json={"name": f"{api}_API_KEY", "content": os.getenv(f"ARENA_{api}_API_KEY")},
         )
     for ccc in [
-        # (ChatCompletionCreate(**chat_input("gpt-3.5-turbo"))),
-        # (ChatCompletionCreate(**chat_input("mistral-small"))),
+        (ChatCompletionCreate(**chat_input("gpt-3.5-turbo"))),
+        (ChatCompletionCreate(**chat_input("mistral-small"))),
         (ChatCompletionCreate(**chat_input("claude-2.1"))),
         ]:
         # Call Arena
@@ -186,4 +187,4 @@ def test_arena(
             headers = superuser_token_headers,
             json = ccc.model_dump(mode="json")
         )
-        # assert response.status_code == 200
+        assert response.status_code == 200

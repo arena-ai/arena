@@ -63,9 +63,8 @@ def chat_completion(
             response = OpenAI(api_key=openai_api_key.content).call(ccc=chat_completion_in)
         case "mistral-embed" | "mistral-large-2402" | "mistral-large-latest" | "mistral-medium" | "mistral-medium-2312" | "mistral-medium-latest" | "mistral-small" | "mistral-small-2312" | "mistral-small-2402" | "mistral-small-latest" | "mistral-tiny" | "mistral-tiny-2312" | "open-mistral-7b" | "open-mixtral-8x7b":
             mistral_api_key = crud.get_setting(session=session, setting_name="MISTRAL_API_KEY", owner_id=current_user.id)
-            response =  Mistral(api_key=mistral_api_key.content).native(ccc=chat_completion_in)
+            response =  Mistral(api_key=mistral_api_key.content).call(ccc=chat_completion_in)
         case "claude-3-opus-20240229" | "claude-3-sonnet-20240229" | "claude-3-haiku-20240307" | "claude-2.1" | "claude-2.0" | "claude-instant-1.2":
             anthropic_api_key = crud.get_setting(session=session, setting_name="ANTHROPIC_API_KEY", owner_id=current_user.id)
-            response = Anthropic(api_key=anthropic_api_key.content).native(ccc=chat_completion_in)
-    print(f"\nDEBUG response {response}")
+            response = Anthropic(api_key=anthropic_api_key.content).call(ccc=chat_completion_in)
     return response

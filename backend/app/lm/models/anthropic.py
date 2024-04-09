@@ -50,7 +50,7 @@ def _chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreatePa
 
 
 def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:
-    _chat_completion_create(ccc)
+    return _chat_completion_create(ccc)
 
 
 def _completion_usage(u: Usage) -> models.CompletionUsage:

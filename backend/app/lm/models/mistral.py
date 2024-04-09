@@ -10,18 +10,11 @@ ChatCompletionCreate -> mistral CompletionCreateParams -> mistral ChatCompletion
 
 
 def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:
-    return {
-        "messages": ccc.messages,
-        "model": ccc.model,
-        "tools": ccc.tools if ccc.tools else None,
-        "temperature": ccc.temperature,
-        "max_tokens": ccc.max_tokens,
-        "top_p": ccc.top_p,
-        "random_seed": ccc.seed,
-        "safe_prompt": ccc.safe_prompt,
-        "tool_choice": ccc.tool_choice,
-        "response_format": ccc.response_format
-    }
+    ccc = ccc.model_dump(mode="json", exclude_none=True)
+    if "seed" in ccc:
+        ccc["random_seed"] = ccc["seed"]
+        del ccc["seed"]
+    return ccc
 
 
 def _message(cm: ChatMessage) -> models.Message:
