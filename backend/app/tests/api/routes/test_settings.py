@@ -8,7 +8,7 @@ from app.core.config import settings
 def test_create_setting(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    data = {"name": "OPENAI_API_KEY", "content": os.getenv("OPENAI_API_KEY")}
+    data = {"name": "OPENAI_API_KEY", "content": os.getenv("ARENA_OPENAI_API_KEY")}
     response = client.post(
         f"{settings.API_V1_STR}/settings/",
         headers=superuser_token_headers,
