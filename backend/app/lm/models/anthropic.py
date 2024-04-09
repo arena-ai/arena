@@ -1,4 +1,4 @@
-from typing import Literal, Sequence
+from typing import Literal, Sequence, Mapping, Any
 
 from app.lm import models
 
@@ -9,7 +9,7 @@ from anthropic.types.message_create_params import MessageCreateParamsStreaming, 
 ChatCompletionCreate -> anthropic MessageCreateParams -> anthropic Message -> ChatCompletion
 """
 
-def message_param(message: models.Message) -> MessageParam | str:
+def _message_param(message: models.Message) -> MessageParam | str:
     match message.role:
         case "system":
             return message.content
@@ -21,8 +21,8 @@ def message_param(message: models.Message) -> MessageParam | str:
             return message.content
 
 
-def chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreateParams:
-    all_messages: Sequence[MessageParam | str] = [message_param(msg) for msg in ccc.messages]
+def _chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreateParams:
+    all_messages: Sequence[MessageParam | str] = [_message_param(msg) for msg in ccc.messages]
     messages: Sequence[MessageParam] = [msg for msg in all_messages if not isinstance(msg, str)]
     system: Sequence[str] = [msg for msg in all_messages if isinstance(msg, str)]
     if ccc.stream:
@@ -49,7 +49,11 @@ def chat_completion_create(ccc: models.ChatCompletionCreate) -> MessageCreatePar
             )
 
 
-def completion_usage(u: Usage) -> models.CompletionUsage:
+def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:
+    _chat_completion_create(ccc)
+
+
+def _completion_usage(u: Usage) -> models.CompletionUsage:
     return models.CompletionUsage(
         completion_tokens=u.output_tokens,
         prompt_tokens=u.input_tokens,
@@ -57,7 +61,7 @@ def completion_usage(u: Usage) -> models.CompletionUsage:
     )
 
 
-def finish_reason(sr: Literal['end_turn', 'max_tokens', 'stop_sequence'] | None) -> Literal['stop', 'length', 'tool_calls', 'content_filter', 'function_call', 'error'] | None:
+def _finish_reason(sr: Literal['end_turn', 'max_tokens', 'stop_sequence'] | None) -> Literal['stop', 'length', 'tool_calls', 'content_filter', 'function_call', 'error'] | None:
     match sr:
         case 'end_turn':
             return 'tool_calls'
@@ -73,11 +77,11 @@ def chat_completion(m: Message) -> models.ChatCompletion:
     return models.ChatCompletion(
         id=m.id,
         choices=[models.Choice(
-            finish_reason=finish_reason(m.stop_reason),
+            finish_reason=_finish_reason(m.stop_reason),
             index=i,
             logprobs=None,
             message=models.Message(role="assistant", content=cb.text)
         ) for i,cb in enumerate(m.content)],
         model=m.model,
-        usage=completion_usage(m.usage),
+        usage=_completion_usage(m.usage),
     )

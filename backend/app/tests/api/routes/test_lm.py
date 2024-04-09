@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.core.config import settings
-from app.lm.models import openai, mistral, anthropic, ChatCompletionCreate
+from app.lm.models import anthropic, ChatCompletionCreate
 
 from openai import OpenAI
 from mistralai.client import MistralClient
@@ -27,6 +27,7 @@ def chat_input(model: str):
         "max_tokens": 1000
     }
 
+# Open AI
 
 def test_openai_client() -> None:
     """Test the native openai client"""
@@ -124,7 +125,7 @@ def test_mistral(
 def test_anthropic_client() -> None:
     """Test the native anthropic client"""
     anthropic_client = Anthropic(api_key=os.getenv("ARENA_ANTHROPIC_API_KEY"))
-    ccc = anthropic.chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
+    ccc = anthropic._chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
     response =  anthropic_client.messages.create(**ccc)
     assert len(response.content) == 1
 
@@ -140,7 +141,7 @@ def test_anthropic_client_arena_endpoint(
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ARENA_ANTHROPIC_API_KEY")},
     )
     anthropic_client = Anthropic(auth_token=superuser_token_headers["Authorization"][7:], base_url=f"http://localhost/api/v1/lm/anthropic")
-    ccc = anthropic.chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
+    ccc = anthropic._chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
     response =  anthropic_client.messages.create(**ccc)
     assert len(response.content) == 1
 
@@ -154,7 +155,7 @@ def test_anthropic(
         headers=superuser_token_headers,
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ARENA_ANTHROPIC_API_KEY")},
     )
-    ccc = anthropic.chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
+    ccc = anthropic._chat_completion_create(ChatCompletionCreate(**chat_input("claude-2.1")))
     response = client.post(
         f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
         headers = superuser_token_headers,
@@ -162,3 +163,27 @@ def test_anthropic(
     )
     assert response.status_code == 200
     content = response.json()
+
+
+def test_arena(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    # Setup all tokens
+    for api in ["OPENAI", "MISTRAL", "ANTHROPIC"]:
+        client.post(
+            f"{settings.API_V1_STR}/settings",
+            headers=superuser_token_headers,
+            json={"name": f"{api}_API_KEY", "content": os.getenv(f"ARENA_{api}_API_KEY")},
+        )
+    for ccc in [
+        # (ChatCompletionCreate(**chat_input("gpt-3.5-turbo"))),
+        # (ChatCompletionCreate(**chat_input("mistral-small"))),
+        (ChatCompletionCreate(**chat_input("claude-2.1"))),
+        ]:
+        # Call Arena
+        response = client.post(
+            f"{settings.API_V1_STR}/lm/chat/completions",
+            headers = superuser_token_headers,
+            json = ccc.model_dump(mode="json")
+        )
+        # assert response.status_code == 200

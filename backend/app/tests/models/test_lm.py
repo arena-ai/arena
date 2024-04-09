@@ -141,7 +141,7 @@ def chat_completion_anthropic() -> Message:
 # Test openai
 
 def test_chat_completion_create_openai(chat_completion_create_openai) -> None:
-    ccc: CompletionCreateParams = openai.chat_completion_create(chat_completion_create_openai)
+    ccc: CompletionCreateParams = openai._chat_completion_create(chat_completion_create_openai)
 
 def test_chat_completion_openai(chat_completion_openai) -> None:
     cc: models.ChatCompletion = openai.chat_completion(chat_completion_openai)
@@ -153,7 +153,7 @@ def test_chat_completion_mistral(chat_completion_mistral) -> None:
     cc: models.ChatCompletion = mistral.chat_completion(chat_completion_mistral)
 
 def test_chat_completion_create_anthropic(chat_completion_create_anthropic) -> None:
-    mcp: MessageCreateParams = anthropic.chat_completion_create(chat_completion_create_anthropic)
+    mcp: MessageCreateParams = anthropic._chat_completion_create(chat_completion_create_anthropic)
 
 def test_chat_completion_anthropic(chat_completion_anthropic) -> None:
     cc: models.ChatCompletion = anthropic.chat_completion(chat_completion_anthropic)

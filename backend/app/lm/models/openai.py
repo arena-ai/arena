@@ -1,4 +1,4 @@
-from typing import Literal, Sequence
+from typing import Mapping, Any
 
 from app.lm import models
 
@@ -16,7 +16,7 @@ from openai.types.chat.completion_create_params import CompletionCreateParams, C
 ChatCompletionCreate -> openai CompletionCreateParams -> openai ChatCompletion -> ChatCompletion
 """
 
-def chat_completion_message_param(message: models.Message) -> ChatCompletionMessageParam:
+def _chat_completion_message_param(message: models.Message) -> ChatCompletionMessageParam:
     match message.role:
         case "system":
             return ChatCompletionSystemMessageParam(role="system", content=message.content)
@@ -28,10 +28,10 @@ def chat_completion_message_param(message: models.Message) -> ChatCompletionMess
             return ChatCompletionUserMessageParam(role="user", content=message.content)
 
 
-def chat_completion_create(ccc: models.ChatCompletionCreate) -> CompletionCreateParams:
+def _chat_completion_create(ccc: models.ChatCompletionCreate) -> CompletionCreateParams:
     if ccc.stream:
         return CompletionCreateParamsStreaming(
-            messages=[chat_completion_message_param(msg) for msg in ccc.messages],
+            messages=[_chat_completion_message_param(msg) for msg in ccc.messages],
             model=ccc.model,
             frequency_penalty=ccc.frequency_penalty,
             logit_bias=ccc.logit_bias,
@@ -48,11 +48,11 @@ def chat_completion_create(ccc: models.ChatCompletionCreate) -> CompletionCreate
             top_logprobs=ccc.top_logprobs,
             top_p=ccc.top_p,
             user=ccc.user,
-            streaming=True
+            stream=True
             )
     else:
         return CompletionCreateParamsNonStreaming(
-            messages=[chat_completion_message_param(msg) for msg in ccc.messages],
+            messages=[_chat_completion_message_param(msg) for msg in ccc.messages],
             model=ccc.model,
             frequency_penalty=ccc.frequency_penalty,
             logit_bias=ccc.logit_bias,
@@ -69,18 +69,21 @@ def chat_completion_create(ccc: models.ChatCompletionCreate) -> CompletionCreate
             top_logprobs=ccc.top_logprobs,
             top_p=ccc.top_p,
             user=ccc.user,
-            streaming=ccc.stream
+            stream=ccc.stream
             )
 
 
-def message(ccm: ChatCompletionMessage) -> models.Message:
+def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:
+    _chat_completion_create(ccc)
+
+def _message(ccm: ChatCompletionMessage) -> models.Message:
     return models.Message(
         role=ccm.role,
         content=ccm.content
     )
 
 
-def top_logprob(tl: TopLogprob) -> models.TopLogprob:
+def _top_logprob(tl: TopLogprob) -> models.TopLogprob:
     return models.TopLogprob(
         token=tl.token,
         bytes=tl.bytes,
@@ -88,28 +91,28 @@ def top_logprob(tl: TopLogprob) -> models.TopLogprob:
     )
 
 
-def chat_completion_token_logprob(cctl: ChatCompletionTokenLogprob) -> models.ChatCompletionTokenLogprob:
+def _chat_completion_token_logprob(cctl: ChatCompletionTokenLogprob) -> models.ChatCompletionTokenLogprob:
     return models.ChatCompletionTokenLogprob(
         token=cctl.token,
         logprob=cctl.logprob,
-        top_logprobs=[top_logprob(tl) for tl in cctl.top_logprobs]
+        top_logprobs=[_top_logprob(tl) for tl in cctl.top_logprobs]
     )
 
 
-def choice_logprobs(cl: ChoiceLogprobs) -> models.ChoiceLogprobs:
-    return models.ChoiceLogprobs(content=[chat_completion_token_logprob(cctl) for cctl in cl.content] if cl else None)
+def _choice_logprobs(cl: ChoiceLogprobs) -> models.ChoiceLogprobs:
+    return models.ChoiceLogprobs(content=[_chat_completion_token_logprob(cctl) for cctl in cl.content] if cl else None)
 
 
-def choice(c: Choice) -> models.Choice:
+def _choice(c: Choice) -> models.Choice:
     return models.Choice(
         finish_reason=c.finish_reason,
         index=c.index,
-        logprobs=choice_logprobs(c.logprobs) if c.logprobs else None,
-        message=message(c.message),
+        logprobs=_choice_logprobs(c.logprobs) if c.logprobs else None,
+        message=_message(c.message),
     )
 
 
-def completion_usage(cu: CompletionUsage) -> models.CompletionUsage:
+def _completion_usage(cu: CompletionUsage) -> models.CompletionUsage:
     return models.CompletionUsage(
         completion_tokens=cu.completion_tokens,
         prompt_tokens=cu.prompt_tokens,
@@ -120,10 +123,10 @@ def completion_usage(cu: CompletionUsage) -> models.CompletionUsage:
 def chat_completion(cc: ChatCompletion) -> models.ChatCompletion:
     return models.ChatCompletion(
         id=cc.id,
-        choices=[choice(c) for c in cc.choices],
+        choices=[_choice(c) for c in cc.choices],
         created=cc.created,
         model=cc.model,
         object=cc.object,
         system_fingerprint=cc.system_fingerprint,
-        usage=completion_usage(cc.usage),
+        usage=_completion_usage(cc.usage),
     )
