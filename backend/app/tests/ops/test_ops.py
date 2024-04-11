@@ -4,7 +4,7 @@ from sqlmodel import Session
 
 from app import crud
 from app.models import UserCreate, EventCreate
-from app.ops import Op, Const, Rand
+from app.ops import Op, Const, Rand, RandInt
 from app.ops.events import LogRequest, RequestCreate
 from app.tests.utils.utils import random_email, random_lower_string
 
@@ -33,13 +33,14 @@ def test_basic_op_def() -> None:
     print(f"Sum 1 2 = {s12}")
     print(f"Sum 1 2 = {s12.evaluate()} {s12}")
 
+
 def test_random() -> None:
     class Sum(Op[tuple[float, float], float]):
         name: str = "sum"
         
         def call(self, a: float, b: float) -> float:
             return a+b
-
+    
     s = Sum()
     a = Const(20)()
     r = Rand()()
@@ -50,7 +51,33 @@ def test_random() -> None:
     d._evaluate()
     print(f"d = {d}")
     print(f"d = {d.evaluate()}")
-    print(f"d {d.evaluate()}")
+    print(f"d = {d.evaluate()}")
+
+
+def test_randint() -> None:
+    class Diff(Op[tuple[float, float], float]):
+        name: str = "diff"
+        
+        def call(self, a: float, b: float) -> float:
+            return a-b
+    
+    d = Diff()
+    a = Const(0)()
+    b = Const(20)()
+    r = RandInt()(a, b)
+    c = Const(5.5)()
+    e = d(r, c)
+    f = d(e, r)
+    print(f"e = {e}")
+    e._evaluate()
+    print(f"e = {e}")
+    print(f"e = {e.evaluate()}")
+    print(f"e = {e.evaluate()}")
+    print(f"f = {f}")
+    f._evaluate()
+    print(f"f = {f}")
+    print(f"f = {f.evaluate()}")
+    print(f"f = {f.evaluate()}")
 
 
 # def test_closure_op_def() -> None:
