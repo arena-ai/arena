@@ -4,7 +4,7 @@ from sqlmodel import Session
 
 from app import crud
 from app.models import UserCreate, EventCreate
-from app.ops import Op, Const, Rand, RandInt
+from app.ops import Op, Const, cst, Rand, rnd, rndi
 from app.ops.events import LogRequest, RequestCreate
 from app.tests.utils.utils import random_email, random_lower_string
 
@@ -25,7 +25,7 @@ def test_basic_op_def() -> None:
     s = Sum()
     print(f"Sum = {s.model_dump_json()}")
     print(f"Call Sum 1 2 = {s.call(1,2)}")
-    s12 = s(Const(1)(), Const(2)())
+    s12 = s(cst(1), cst(2))
     print(f"Sum 1 2 = {s12}")
     s12._evaluate()
     print(f"Sum 1 2 = {s12}")
@@ -42,8 +42,8 @@ def test_random() -> None:
             return a+b
     
     s = Sum()
-    a = Const(20)()
-    r = Rand()()
+    a = cst(20)
+    r = rnd()
     b = s(r, a)
     c = s(a, b)
     d = s(c, r)
@@ -62,10 +62,8 @@ def test_randint() -> None:
             return a-b
     
     d = Diff()
-    a = Const(0)()
-    b = Const(20)()
-    r = RandInt()(a, b)
-    c = Const(5.5)()
+    r = rndi(0, 20)
+    c = cst(5.5)
     e = d(r, c)
     f = d(e, r)
     print(f"e = {e}")
