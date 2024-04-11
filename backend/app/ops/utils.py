@@ -1,23 +1,14 @@
-from typing import TypeVar
+from typing import TypeVar, Generic, Callable
 from random import random, randint
 
 from app.ops.computation import Op, Computation
 # Utility classes
 
+A = TypeVar('A')
 B = TypeVar('B')
 
-class Var(Op[tuple[B], B]):
-    """A variable op"""
-    name: str = "var"
 
-    def call(self, value: B) -> B:
-        return value
-
-def var(value: B) -> Computation[B]:
-    return Var()(value)
-
-
-class Const(Op[tuple[()], B]):
+class Const(Op[tuple[()], B], Generic[B]):
     """A constant op"""
     name: str
     value: B
@@ -31,6 +22,28 @@ class Const(Op[tuple[()], B]):
 def cst(value: B) -> Computation[B]:
     return Const(value)()
 
+
+class Var(Op[tuple[B], B], Generic[B]):
+    """A variable op"""
+    name: str
+
+    def call(self, value: B) -> B:
+        return value
+
+def var(name: str, value: B) -> Computation[B]:
+    return Var(name=name)(cst(value))
+
+
+class Fun(Op[tuple[A], B], Generic[A, B]):
+    """A variable op"""
+    name: str
+    fun: Callable[[A], B]
+
+    def call(self, a: A) -> B:
+        return self.fun(a)
+
+def fun(f: Callable[[A], B], a: Computation[A]) -> Computation[B]:
+    return Fun(f)(a)
 
 class Rand(Op[tuple[()], float]):
     name: str = "rand"

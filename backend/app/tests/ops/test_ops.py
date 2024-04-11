@@ -4,8 +4,9 @@ from sqlmodel import Session
 
 from app import crud
 from app.models import UserCreate, EventCreate
-from app.ops import Op, Const, cst, Rand, rnd, rndi
-from app.ops.events import LogRequest, RequestCreate
+from app.ops import Op, Var, var, Const, cst, Rand, rnd, rndi
+from app.ops.events import LogRequest, Request
+from app.ops.session import session, user
 from app.tests.utils.utils import random_email, random_lower_string
 
 def test_const_op() -> None:
@@ -78,44 +79,11 @@ def test_randint() -> None:
     print(f"f = {f.evaluate()}")
 
 
-# def test_closure_op_def() -> None:
-#     class CallOnX(Op[Callable[[float], float], float]):
-#         name: str = "call_on_x"
-#         x: float
-        
-#         def call(self, input: Callable[[float], float]) -> float:
-#             return input(self.x)
-
-#     s = CallOnX(x=10)
-#     print(f"CallOnX = {s.model_dump_json()}")
-#     print(f"CallOnX lambda x: 2*x= {s.call(lambda x: 2*x)}")
-
-
-# def test_composition() -> None:
-#     class PlusX(Op[float, float]):
-#         name: str = "plus_x"
-#         x: float
-        
-#         def call(self, input: float) -> float:
-#             return input + self.x
-    
-#     class TimesX(Op[float, float]):
-#         name: str = "times_x"
-#         x: float
-        
-#         def call(self, input: float) -> float:
-#             return input * self.x
-
-#     s = PlusX(x=10).then(TimesX(x=2).then(PlusX(x=2))).then(PlusX(x=3))
-#     print(f"Comp = {s.model_dump()}")
-#     print(f"Comp 5 {s.call(5)}")
-
-
-# def test_log_requests(db: Session) -> None:
-#     user = crud.create_user(session=db, user_create=UserCreate(email=random_email(), password=random_lower_string()))
-#     log_request = LogRequest(name="log_parent_request").then(LogRequest(name="log_request_again"))
-#     (_,_,events,_) = log_request.call((db, user, [], RequestCreate(
-#         method="POST", url="http://localhost", headers={}, content='{}'
-#         )))
-#     assert len(events) == 2
-#     print(f"events {events}")
+def test_log_requests(db: Session) -> None:
+    user = crud.create_user(session=db, user_create=UserCreate(email=random_email(), password=random_lower_string()))
+    req = Request(method="POST", url="http://localhost", headers={"x-name": "first"}, content="hello")
+    event = LogRequest()(var("session", Session), var("user", user), var("parent", None), var("request", req))
+    req = Request(method="POST", url="http://localhost", headers={"x-name": "second"}, content="world")
+    event = LogRequest()(var("session", Session), var("user", user), event, var("request", req))
+    print(f"event {event}")
+    print(f"event.evaluate() {event.evaluate()}")

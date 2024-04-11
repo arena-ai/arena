@@ -1,6 +1,7 @@
 from typing import Generic, TypeVar, TypeVarTuple, Sequence
 from abc import ABC, abstractmethod
-from pydantic import BaseModel
+from dataclasses import dataclass
+from pydantic import BaseModel, ConfigDict
 
 As = TypeVarTuple('As')
 B = TypeVar('B')
@@ -21,6 +22,7 @@ class Op(BaseModel, ABC, Generic[*As, B]):
 
 
 class Computation(BaseModel, Generic[B]):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     """An Op applied to arguments"""
     op: Op
     args: Sequence['Computation']
