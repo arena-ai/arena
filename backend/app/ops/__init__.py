@@ -16,7 +16,7 @@ class Op(BaseModel, ABC, Generic[*As, B]):
         """Execute the op"""
         pass
 
-    def __call__(self, *args: 'Node[Any]') -> 'Node[B]':
+    def __call__(self, *args: 'Node') -> 'Node[B]':
         print(f"self = {self} ({type(self)})")
         print(f"args = {args} ({type(args)})")
         return Node(op=self, args=args, value=None)
