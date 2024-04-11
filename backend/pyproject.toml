@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "app"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
-authors = ["Admin <admin@example.com>"]
+authors = ["Admin <admin@sarus.tech>"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
 fastapi = "^0.109.1"
 python-multipart = "^0.0.7"
@@ -56,7 +56,7 @@ strict = true
 exclude = ["venv", "alembic"]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [

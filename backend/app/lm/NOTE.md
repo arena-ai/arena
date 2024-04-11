@@ -11,3 +11,7 @@ https://github.com/mistralai/client-python/tree/main/src/mistralai
 # Client instrumentation
 
 https://langfuse.com/docs/sdk/python/decorators
+
+# Experiment with mypy
+
+https://mypy-play.net/?mypy=latest&python=3.11

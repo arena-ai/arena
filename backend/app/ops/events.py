@@ -1,4 +1,4 @@
-from typing import Tuple, Mapping, TypeVar, Generic
+from typing import Mapping, TypeVar, Generic
 from copy import copy
 from pydantic import BaseModel
 from sqlmodel import Session
@@ -9,7 +9,7 @@ from app import crud
 
 E = TypeVar('E')
 
-class LogEvent(Op[Tuple[Session, User, list[Event], E], Tuple[Session, User, list[Event], E]], Generic[E]):
+class LogEvent(Op[tuple[Session, User, list[Event], E], tuple[Session, User, list[Event], E]], Generic[E]):
     name: str
 
     def event_create(self, user: User, previous_events: list[Event], e: E) -> EventCreate:
@@ -20,7 +20,7 @@ class LogEvent(Op[Tuple[Session, User, list[Event], E], Tuple[Session, User, lis
         event = crud.create_event(session=session, event_in=event_create, owner_id=user.id)
         return event
 
-    def call(self, input: Tuple[Session, User, list[Event], E]) -> Tuple[Session, User, list[Event], E]:
+    def call(self, input: tuple[Session, User, list[Event], E]) -> tuple[Session, User, list[Event], E]:
         session, user, previous_events, e = input
         event = self.log(session, user, previous_events, e)
         previous_events.append(copy(event))
