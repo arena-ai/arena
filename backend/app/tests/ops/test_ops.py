@@ -82,8 +82,8 @@ def test_randint() -> None:
 def test_log_requests(db: Session) -> None:
     user = crud.create_user(session=db, user_create=UserCreate(email=random_email(), password=random_lower_string()))
     req = Request(method="POST", url="http://localhost", headers={"x-name": "first"}, content="hello")
-    event = LogRequest()(var("session", Session), var("user", user), var("parent", None), var("request", req))
+    event = LogRequest()(var("session", db), var("user", user), var("parent", None), var("request", req))
     req = Request(method="POST", url="http://localhost", headers={"x-name": "second"}, content="world")
-    event = LogRequest()(var("session", Session), var("user", user), event, var("request", req))
+    event = LogRequest()(var("session", db), var("user", user), event, var("request", req))
     print(f"event {event}")
     print(f"event.evaluate() {event.evaluate()}")

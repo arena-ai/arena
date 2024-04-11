@@ -66,7 +66,6 @@ def get_event(*, session: Session, event_id: int) -> Event:
 
 def create_event(*, session: Session, event_in: EventCreate, owner_id: int) -> Event:
     db_event = Event.model_validate(event_in, update={"owner_id": owner_id})
-    print(f"DEBUG create_event {session}")
     session.add(db_event)
     session.commit()
     session.refresh(db_event)
