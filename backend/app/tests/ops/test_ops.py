@@ -1,9 +1,9 @@
 from typing import Callable
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app import crud
-from app.models import UserCreate, EventCreate
+from app.models import UserCreate, Event
 from app.ops import Op, Var, var, Const, cst, Rand, rnd, rndi
 from app.ops.events import LogRequest, Request
 from app.ops.session import session, user
@@ -86,4 +86,11 @@ def test_log_requests(db: Session) -> None:
     req = Request(method="POST", url="http://localhost", headers={"x-name": "second"}, content="world")
     event = LogRequest()(var("session", db), var("user", user), event, var("request", req))
     print(f"event {event}")
+    events = db.exec(select(Event)).all()
+    print(f"events {[e.model_dump_json() for e in events]}")
+    assert(len(events)==0)
     print(f"event.evaluate() {event.evaluate()}")
+    events = db.exec(select(Event)).all()
+    print(f"events {[e.model_dump_json() for e in events]}")
+    assert(len(events)==2)
+    

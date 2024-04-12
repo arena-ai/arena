@@ -6,7 +6,7 @@ from sqlmodel import func, select
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
 from app.lm.models import ChatCompletion, ChatCompletionCreate
-from app.lm.services import (
+from app.services.lm import (
     OpenAI, ChatCompletionOpenAI,
     Mistral, ChatCompletionMistral,
     Anthropic, ChatCompletionAnthropic
