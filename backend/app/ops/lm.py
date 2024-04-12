@@ -1,7 +1,5 @@
 from functools import cached_property
 
-from pydantic import computed_field
-
 from app.ops import Op
 from app.lm.models import ChatCompletion, ChatCompletionCreate
 from app.services import lm

@@ -1,6 +1,7 @@
-from typing import Mapping, Any
-
+from typing import Mapping, Sequence, Literal, Any
+from pydantic import BaseModel
 from app.lm import models
+from app.lm.models import Function, FunctionDefinition, ChatCompletionToolParam, Message, ResponseFormat
 
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
@@ -13,68 +14,41 @@ from openai.types.chat.chat_completion import ChatCompletion, Choice, ChoiceLogp
 from openai.types.chat.completion_create_params import CompletionCreateParams, CompletionCreateParamsStreaming, CompletionCreateParamsNonStreaming, ResponseFormat
 
 """
-ChatCompletionCreate -> openai CompletionCreateParams -> openai ChatCompletion -> ChatCompletion
+models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion
+Tools such as function calls are well supported yet
 """
 
-def _chat_completion_message_param(message: models.Message) -> ChatCompletionMessageParam:
-    match message.role:
-        case "system":
-            return ChatCompletionSystemMessageParam(role="system", content=message.content)
-        case "user":
-            return ChatCompletionUserMessageParam(role="user", content=message.content)
-        case "assistant":
-            return ChatCompletionAssistantMessageParam(role="assistant", content=message.content)
-        case _:
-            return ChatCompletionUserMessageParam(role="user", content=message.content)
+"""ChatCompletionCreate"""
+
+class ChatCompletionCreate(models.ChatCompletionCreate):
+    model: str | Literal[
+        "gpt-4-0125-preview",
+        "gpt-4-turbo-preview",
+        "gpt-4-1106-preview",
+        "gpt-4-vision-preview",
+        "gpt-4",
+        "gpt-4-0314",
+        "gpt-4-0613",
+        "gpt-4-32k",
+        "gpt-4-32k-0314",
+        "gpt-4-32k-0613",
+        "gpt-3.5-turbo",
+        "gpt-3.5-turbo-16k",
+        "gpt-3.5-turbo-0301",
+        "gpt-3.5-turbo-0613",
+        "gpt-3.5-turbo-1106",
+        "gpt-3.5-turbo-0125",
+        "gpt-3.5-turbo-16k-0613",
+    ]
 
 
-def _chat_completion_create(ccc: models.ChatCompletionCreate) -> CompletionCreateParams:
-    if ccc.stream:
-        return CompletionCreateParamsStreaming(
-            messages=[_chat_completion_message_param(msg) for msg in ccc.messages],
-            model=ccc.model,
-            frequency_penalty=ccc.frequency_penalty,
-            logit_bias=ccc.logit_bias,
-            logprobs=ccc.logprobs,
-            max_tokens=ccc.max_tokens,
-            n=ccc.n,
-            presence_penalty=ccc.presence_penalty,
-            response_format=ResponseFormat(type=ccc.response_format) if ccc.response_format else None,
-            seed=ccc.seed,
-            stop=ccc.stop,
-            temperature=ccc.temperature,
-            tool_choice=ccc.tool_choice,
-            tools=ccc.tools,
-            top_logprobs=ccc.top_logprobs,
-            top_p=ccc.top_p,
-            user=ccc.user,
-            stream=True
-            )
-    else:
-        return CompletionCreateParamsNonStreaming(
-            messages=[_chat_completion_message_param(msg) for msg in ccc.messages],
-            model=ccc.model,
-            frequency_penalty=ccc.frequency_penalty,
-            logit_bias=ccc.logit_bias,
-            logprobs=ccc.logprobs,
-            max_tokens=ccc.max_tokens,
-            n=ccc.n,
-            presence_penalty=ccc.presence_penalty,
-            response_format=ResponseFormat(type=ccc.response_format) if ccc.response_format else None,
-            seed=ccc.seed,
-            stop=ccc.stop,
-            temperature=ccc.temperature,
-            tool_choice=ccc.tool_choice,
-            tools=ccc.tools,
-            top_logprobs=ccc.top_logprobs,
-            top_p=ccc.top_p,
-            user=ccc.user,
-            stream=ccc.stream
-            )
+def _chat_completion_create(ccc: models.ChatCompletionCreate) -> ChatCompletionCreate:
+    return ChatCompletionCreate(ccc)
 
 
 def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:
     return _chat_completion_create(ccc)
+
 
 def _message(ccm: ChatCompletionMessage) -> models.Message:
     return models.Message(
