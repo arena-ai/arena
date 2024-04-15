@@ -1,18 +1,12 @@
 from typing import Mapping, Sequence, Literal, Any
 from pydantic import BaseModel
 from app.lm import models
-from app.lm.models import Function, FunctionDefinition, ChatCompletionToolParam, Message, ResponseFormat
+from app.lm.models import ChatCompletion
 
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
-from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
-from openai.types.chat.chat_completion_system_message_param import ChatCompletionSystemMessageParam
-from openai.types.chat.chat_completion_user_message_param import ChatCompletionUserMessageParam
-from openai.types.chat.chat_completion_assistant_message_param import ChatCompletionAssistantMessageParam
 from openai.types.chat.chat_completion_token_logprob import ChatCompletionTokenLogprob, TopLogprob
 from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion import ChatCompletion, Choice, ChoiceLogprobs
-from openai.types.chat.completion_create_params import CompletionCreateParams, CompletionCreateParamsStreaming, CompletionCreateParamsNonStreaming, ResponseFormat
-
 """
 models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion
 Tools such as function calls are well supported yet
@@ -41,13 +35,8 @@ class ChatCompletionCreate(models.ChatCompletionCreate):
         "gpt-3.5-turbo-16k-0613",
     ]
 
-
-def _chat_completion_create(ccc: models.ChatCompletionCreate) -> ChatCompletionCreate:
-    return ChatCompletionCreate(ccc)
-
-
 def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:
-    return _chat_completion_create(ccc)
+    return ChatCompletionCreate.model_validate(ccc.model_dump()).model_dump(exclude_unset=True, exclude_none=True)
 
 
 def _message(ccm: ChatCompletionMessage) -> models.Message:
@@ -65,8 +54,8 @@ def _top_logprob(tl: TopLogprob) -> models.TopLogprob:
     )
 
 
-def _chat_completion_token_logprob(cctl: ChatCompletionTokenLogprob) -> models.ChatCompletionTokenLogprob:
-    return models.ChatCompletionTokenLogprob(
+def _chat_completion_token_logprob(cctl: ChatCompletionTokenLogprob) -> models.TokenLogprob:
+    return models.TokenLogprob(
         token=cctl.token,
         logprob=cctl.logprob,
         top_logprobs=[_top_logprob(tl) for tl in cctl.top_logprobs]

@@ -82,14 +82,14 @@ class TopLogprob(BaseModel):
     logprob: float
 
 
-class ChatCompletionTokenLogprob(BaseModel):
+class TokenLogprob(BaseModel):
     token: str
     logprob: float
     top_logprobs: Sequence[TopLogprob]
 
 
 class ChoiceLogprobs(BaseModel):
-    content: Sequence[ChatCompletionTokenLogprob] | None = None
+    content: Sequence[TokenLogprob] | None = None
 
 
 class Choice(BaseModel):    
