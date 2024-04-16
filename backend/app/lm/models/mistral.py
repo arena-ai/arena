@@ -1,12 +1,34 @@
-from typing import Literal, Mapping, Any
+from typing import Literal, Mapping, Sequence, Any
+
+from pydantic import BaseModel
 
 from app.lm import models
 
 from mistralai.models.chat_completion import ChatMessage, ChatCompletionResponse, ChatCompletionResponseChoice, FinishReason, UsageInfo
 
 """
-ChatCompletionCreate -> mistral CompletionCreateParams -> mistral ChatCompletionResponse -> ChatCompletion
+models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion
 """
+
+class ChatCompletionCreate(BaseModel):
+    """
+    Maps to:
+    https://github.com/mistralai/client-python/blob/main/src/mistralai/client.py#L153
+    https://github.com/mistralai/client-python/blob/main/src/mistralai/models/chat_completion.py
+    https://docs.mistral.ai/api/#operation/createChatCompletion
+    """
+    messages: Sequence[models.Message]
+    model: str | Literal["mistral-embed", "mistral-large-2402", "mistral-large-latest", "mistral-medium", "mistral-medium-2312", "mistral-medium-latest", "mistral-small", "mistral-small-2312", "mistral-small-2402", "mistral-small-latest", "mistral-tiny", "mistral-tiny-2312", "open-mistral-7b", "open-mixtral-8x7b"]
+    max_tokens: int | None = None
+    response_format: models.ResponseFormat | None = None
+    safe_prompt: bool | None = None
+    random_seed: int | None = None
+    stream: bool | None = None
+    temperature: float | None = None
+    tool_choice: Literal["none", "auto", "any"] | None = None
+    tools: Sequence[models.ChatCompletionToolParam] | None = None
+    top_p: float | None = None
+    stream: bool | None = None
 
 
 def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:

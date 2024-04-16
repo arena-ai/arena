@@ -9,87 +9,25 @@ from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion import ChatCompletion, Choice, ChoiceLogprobs
 """
 models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion
-Tools such as function calls are well supported yet
+Tools such as function calls are not well supported yet
 """
 
 """ChatCompletionCreate"""
 
 class ChatCompletionCreate(models.ChatCompletionCreate):
-    model: str | Literal[
-        "gpt-4-0125-preview",
-        "gpt-4-turbo-preview",
-        "gpt-4-1106-preview",
-        "gpt-4-vision-preview",
-        "gpt-4",
-        "gpt-4-0314",
-        "gpt-4-0613",
-        "gpt-4-32k",
-        "gpt-4-32k-0314",
-        "gpt-4-32k-0613",
-        "gpt-3.5-turbo",
-        "gpt-3.5-turbo-16k",
-        "gpt-3.5-turbo-0301",
-        "gpt-3.5-turbo-0613",
-        "gpt-3.5-turbo-1106",
-        "gpt-3.5-turbo-0125",
-        "gpt-3.5-turbo-16k-0613",
-    ]
+    """
+    https://github.com/openai/openai-python/blob/main/src/openai/types/chat/completion_create_params.py#L24
+    https://platform.openai.com/docs/api-reference/chat
+    """
+    model: str | Literal["gpt-4-0125-preview", "gpt-4-turbo-preview", "gpt-4-1106-preview", "gpt-4-vision-preview", "gpt-4", "gpt-4-0314", "gpt-4-0613", "gpt-4-32k", "gpt-4-32k-0314", "gpt-4-32k-0613", "gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-1106", "gpt-3.5-turbo-0125", "gpt-3.5-turbo-16k-0613"]
 
-def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:
-    return ChatCompletionCreate.model_validate(ccc.model_dump()).model_dump(exclude_unset=True, exclude_none=True)
+    @classmethod
+    def from_chat_completion_create(cls, ccc: models.ChatCompletionCreate) -> "ChatCompletionCreate":
+        return ChatCompletionCreate.model_validate(ccc.model_dump())
 
-
-def _message(ccm: ChatCompletionMessage) -> models.Message:
-    return models.Message(
-        role=ccm.role,
-        content=ccm.content
-    )
-
-
-def _top_logprob(tl: TopLogprob) -> models.TopLogprob:
-    return models.TopLogprob(
-        token=tl.token,
-        bytes=tl.bytes,
-        logprob=tl.logprob
-    )
-
-
-def _chat_completion_token_logprob(cctl: ChatCompletionTokenLogprob) -> models.TokenLogprob:
-    return models.TokenLogprob(
-        token=cctl.token,
-        logprob=cctl.logprob,
-        top_logprobs=[_top_logprob(tl) for tl in cctl.top_logprobs]
-    )
-
-
-def _choice_logprobs(cl: ChoiceLogprobs) -> models.ChoiceLogprobs:
-    return models.ChoiceLogprobs(content=[_chat_completion_token_logprob(cctl) for cctl in cl.content] if cl else None)
-
-
-def _choice(c: Choice) -> models.Choice:
-    return models.Choice(
-        finish_reason=c.finish_reason,
-        index=c.index,
-        logprobs=_choice_logprobs(c.logprobs) if c.logprobs else None,
-        message=_message(c.message),
-    )
-
-
-def _completion_usage(cu: CompletionUsage) -> models.CompletionUsage:
-    return models.CompletionUsage(
-        completion_tokens=cu.completion_tokens,
-        prompt_tokens=cu.prompt_tokens,
-        total_tokens=cu.total_tokens
-    )
+    def to_dict(self) -> Mapping[str, Any]:
+        return self.model_dump(exclude_unset=True, exclude_none=True)
 
 
 def chat_completion(cc: ChatCompletion) -> models.ChatCompletion:
-    return models.ChatCompletion(
-        id=cc.id,
-        choices=[_choice(c) for c in cc.choices],
-        created=cc.created,
-        model=cc.model,
-        object=cc.object,
-        system_fingerprint=cc.system_fingerprint,
-        usage=_completion_usage(cc.usage),
-    )
+    return cc

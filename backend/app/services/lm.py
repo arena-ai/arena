@@ -1,16 +1,14 @@
 from typing import Mapping, Any
 from dataclasses import dataclass
+from functools import cached_property
 
 from fastapi import APIRouter
 from sqlmodel import func, select
+import httpx
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
 from app.lm.models import ChatCompletion, ChatCompletionCreate, openai, mistral, anthropic
-
-from openai import OpenAI as OpenAIClient
-from openai.types.chat.chat_completion import ChatCompletion as ChatCompletionOpenAI
-from openai.types.chat.completion_create_params import CompletionCreateParams as ChatCompletionCreateOpenAI
 
 from mistralai.client import MistralClient, MistralException
 from mistralai.models.chat_completion import ChatCompletionResponse as ChatCompletionMistral
@@ -22,14 +20,25 @@ from anthropic.types import MessageCreateParams as ChatCompletionCreateAnthropic
 @dataclass
 class OpenAI:
     api_key: str
+    timeout = httpx.Timeout(30., read=None)
+    url = "https://api.openai.com/v1"
     models: list[str] = ("gpt-4-0125-preview", "gpt-4-turbo-preview", "gpt-4-1106-preview", "gpt-4-vision-preview", "gpt-4", "gpt-4-0314", "gpt-4-0613", "gpt-4-32k", "gpt-4-32k-0314", "gpt-4-32k-0613", "gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-1106", "gpt-3.5-turbo-0125", "gpt-3.5-turbo-16k-0613")
+    
 
-    def native(self, ccc: Mapping) -> ChatCompletionOpenAI:
-        client = OpenAIClient(api_key=self.api_key)
-        return client.chat.completions.create(**ccc)
+    @cached_property
+    def headers(self) -> Mapping[str, str]:
+        return {
+            "Authorization": f"Bearer {self.api_key}"
+        }
 
-    def call(self, ccc: ChatCompletionCreate) -> ChatCompletion:
-        return openai.chat_completion(self.native(openai.chat_completion_create(ccc)))
+    async def chat_completion(self, ccc: openai.ChatCompletionCreate) -> openai.ChatCompletion:
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            response = await client.post(
+                url=f"{self.url}/chat/completions",
+                headers=self.headers,
+                json=ccc.model_dump(exclude_unset=True, exclude_none=True),
+            )
+            return response.raise_for_status().json()
 
 
 @dataclass

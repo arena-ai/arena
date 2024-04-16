@@ -7,28 +7,12 @@ import pytest
 from app.lm import models
 from app.lm.models import openai, mistral, anthropic
 
-from openai.types.chat.completion_create_params import CompletionCreateParams
-from openai.types.chat.chat_completion import ChatCompletion, ChoiceLogprobs, ChatCompletionTokenLogprob, ChatCompletionMessage, CompletionUsage, Choice
 from mistralai.client import ChatCompletionResponse
 from mistralai.models.chat_completion import ChatMessage, ChatCompletionResponse, ChatCompletionResponseChoice, FinishReason, UsageInfo, ToolCall, FunctionCall
 from anthropic.types import MessageCreateParams, Message, ContentBlock, Usage
 
 # Testing CreateChatCompletion -> CreateChatCompletionXXX
 
-@pytest.fixture
-def chat_completion_create_openai() -> models.ChatCompletionCreate:
-    return models.ChatCompletionCreate(**{
-        "model": "gpt-4",
-        "messages": [
-            {"role": "user", "content": "Write a short poem about the beauty of nature."}
-        ],
-        "max_tokens": 100,
-        "temperature": 0.9,
-        "top_p": 0.9,
-        "frequency_penalty": 0.5,
-        "presence_penalty": 0.5,
-        "n": 3
-    })
 
 @pytest.fixture
 def chat_completion_openai() -> ChatCompletion:
@@ -141,7 +125,7 @@ def chat_completion_anthropic() -> Message:
 # Test openai
 
 def test_chat_completion_create_openai(chat_completion_create_openai) -> None:
-    ccc: CompletionCreateParams = openai._chat_completion_create(chat_completion_create_openai)
+    ccc: CompletionCreateParams = openai.chat_completion_create(chat_completion_create_openai)
 
 def test_chat_completion_openai(chat_completion_openai) -> None:
     cc: models.ChatCompletion = openai.chat_completion(chat_completion_openai)

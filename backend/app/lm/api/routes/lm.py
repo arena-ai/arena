@@ -5,9 +5,9 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
-from app.lm.models import ChatCompletion, ChatCompletionCreate
+from app.lm.models import ChatCompletion, ChatCompletionCreate, openai
 from app.services.lm import (
-    OpenAI, ChatCompletionOpenAI,
+    OpenAI,
     Mistral, ChatCompletionMistral,
     Anthropic, ChatCompletionAnthropic
 )
@@ -16,15 +16,15 @@ from app.services.lm import (
 router = APIRouter()
 
 
-@router.post("/openai/chat/completions", response_model=ChatCompletionOpenAI)
-def openai_chat_completion(
+@router.post("/openai/chat/completions", response_model=openai.ChatCompletion)
+async def openai_chat_completion(
     session: SessionDep, current_user: CurrentUser, chat_completion_in: Mapping
-) -> ChatCompletionOpenAI:
+) -> openai.ChatCompletion:
     """
     OpenAI integration
     """
     openai_api_key = crud.get_setting(session=session, setting_name="OPENAI_API_KEY", owner_id=current_user.id)
-    return OpenAI(api_key=openai_api_key.content).native(ccc=chat_completion_in)
+    return await OpenAI(api_key=openai_api_key.content).chat_completion(ccc=chat_completion_in)
 
 
 @router.post("/mistral/v1/chat/completions", response_model=ChatCompletionMistral)
