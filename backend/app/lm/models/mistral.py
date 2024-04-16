@@ -30,13 +30,16 @@ class ChatCompletionCreate(BaseModel):
     top_p: float | None = None
     stream: bool | None = None
 
+    @classmethod
+    def from_chat_completion_create(cls, ccc: models.ChatCompletionCreate) -> "ChatCompletionCreate":
+        ccc = ccc.model_dump()
+        if "seed" in ccc:
+            ccc["random_seed"] = ccc["seed"]
+            del ccc["seed"]
+        return ChatCompletionCreate.model_validate(ccc)
 
-def chat_completion_create(ccc: models.ChatCompletionCreate) -> Mapping[str, Any]:
-    ccc = ccc.model_dump(mode="json", exclude_none=True)
-    if "seed" in ccc:
-        ccc["random_seed"] = ccc["seed"]
-        del ccc["seed"]
-    return ccc
+    def to_dict(self) -> Mapping[str, Any]:
+        return self.model_dump(exclude_unset=True, exclude_none=True)
 
 
 def _message(cm: ChatMessage) -> models.Message:
@@ -75,3 +78,11 @@ def chat_completion(ccr: ChatCompletionResponse) -> models.ChatCompletion:
         object=ccr.object,
         usage=_completion_usage(ccr.usage),
     )
+
+class ChatCompletion(models.ChatCompletion):
+    @classmethod
+    def from_chat_completion(cls, cc: models.ChatCompletion) -> "ChatCompletion":
+        return ChatCompletion.model_validate(cc.model_dump())
+
+    def to_dict(self) -> Mapping[str, Any]:
+        return self.model_dump(exclude_unset=True, exclude_none=True)

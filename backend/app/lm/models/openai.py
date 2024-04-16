@@ -3,10 +3,6 @@ from pydantic import BaseModel
 from app.lm import models
 from app.lm.models import ChatCompletion
 
-from openai.types.chat.chat_completion_message import ChatCompletionMessage
-from openai.types.chat.chat_completion_token_logprob import ChatCompletionTokenLogprob, TopLogprob
-from openai.types.completion_usage import CompletionUsage
-from openai.types.chat.chat_completion import ChatCompletion, Choice, ChoiceLogprobs
 """
 models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion
 Tools such as function calls are not well supported yet
@@ -28,6 +24,10 @@ class ChatCompletionCreate(models.ChatCompletionCreate):
     def to_dict(self) -> Mapping[str, Any]:
         return self.model_dump(exclude_unset=True, exclude_none=True)
 
+class ChatCompletion(models.ChatCompletion):
+    @classmethod
+    def from_chat_completion(cls, cc: models.ChatCompletion) -> "ChatCompletion":
+        return ChatCompletion.model_validate(cc.model_dump())
 
-def chat_completion(cc: ChatCompletion) -> models.ChatCompletion:
-    return cc
+    def to_dict(self) -> Mapping[str, Any]:
+        return self.model_dump(exclude_unset=True, exclude_none=True)

@@ -98,7 +98,7 @@ class Choice(BaseModel):
 
 
 class CompletionUsage(BaseModel):
-    completion_tokens: int
+    completion_tokens: int | None = None
     prompt_tokens: int
     total_tokens: int
 
