@@ -1,14 +1,10 @@
 from typing import Mapping, Sequence, Literal, Any
+
 from pydantic import BaseModel
+
 from app.lm import models
-from app.lm.models import ChatCompletion
+from app.lm.models import Function, FunctionDefinition, ChatCompletionToolParam, Message, ResponseFormat, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage
 
-"""
-models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion
-Tools such as function calls are not well supported yet
-"""
-
-"""ChatCompletionCreate"""
 
 class ChatCompletionCreate(models.ChatCompletionCreate):
     """
@@ -25,9 +21,13 @@ class ChatCompletionCreate(models.ChatCompletionCreate):
         return self.model_dump(exclude_unset=True, exclude_none=True)
 
 class ChatCompletion(models.ChatCompletion):
+    """
+    https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion.py#L40
+    """
     @classmethod
-    def from_chat_completion(cls, cc: models.ChatCompletion) -> "ChatCompletion":
-        return ChatCompletion.model_validate(cc.model_dump())
+    def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletion":
+        return ChatCompletion.model_validate(m)
 
-    def to_dict(self) -> Mapping[str, Any]:
-        return self.model_dump(exclude_unset=True, exclude_none=True)
+    def to_chat_completion(self) -> models.ChatCompletion:
+        return models.ChatCompletion(self.model_dump(exclude_unset=True, exclude_none=True))
+
