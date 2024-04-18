@@ -31,8 +31,9 @@ class ChatCompletionCreate(BaseModel):
     @classmethod
     def from_chat_completion_create(cls, ccc: models.ChatCompletionCreate) -> "ChatCompletionCreate":
         ccc = ccc.model_dump()
-        ccc["random_seed"] = ccc["seed"]
-        del ccc["seed"]
+        if "seed" in ccc:
+            ccc["random_seed"] = ccc["seed"]
+            del ccc["seed"]
         return ChatCompletionCreate.model_validate(ccc)
 
     def to_dict(self) -> Mapping[str, Any]:
@@ -48,4 +49,4 @@ class ChatCompletion(models.ChatCompletion):
         return ChatCompletion.model_validate(m)
 
     def to_chat_completion(self) -> models.ChatCompletion:
-        return models.ChatCompletion(self.model_dump(exclude_unset=True, exclude_none=True))
+        return models.ChatCompletion.model_validate(self.model_dump(exclude_unset=True, exclude_none=True))

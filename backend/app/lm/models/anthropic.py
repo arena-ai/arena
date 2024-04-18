@@ -3,7 +3,7 @@ from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel
 
 from app.lm import models
-from app.lm.models import Function, ChatCompletionToolParam, Message, ResponseFormat, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage
+from app.lm.models import Function, ChatCompletionToolParam, Message, ResponseFormat, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice
 """
 ChatCompletionCreate -> anthropic MessageCreateParams -> anthropic Message -> ChatCompletion
 """
@@ -41,10 +41,14 @@ class ChatCompletionCreate(BaseModel):
         messages: Sequence[MessageParam] = [msg.model_dump() for msg in ccc.messages if not isinstance(msg, str)]
         system: Sequence[str] = [msg for msg in ccc.messages if isinstance(msg, str)]
         ccc = ccc.model_dump()
-        ccc["max_tokens"] = ccc["max_tokens"] or 1
-        ccc["metadata"] = {"user_id": ccc["user"]}
-        ccc["stop_sequences"] = ccc["stop"]
-        del ccc["stop"]
+        if "max_tokens" in ccc:
+            ccc["max_tokens"] = ccc["max_tokens"] or 1
+        if "user" in ccc:
+            ccc["metadata"] = {"user_id": ccc["user"]}
+            del ccc["user"]
+        if "stop" in ccc:   
+            ccc["stop_sequences"] = ccc["stop"]
+            del ccc["stop"]
         ccc["system"] = None if len(system)==0 else system[0]
         return ChatCompletionCreate.model_validate(ccc)
 
@@ -55,6 +59,11 @@ class ChatCompletionCreate(BaseModel):
 class TextBlock(BaseModel):
     text: str = ""
     type: Literal["text"] = "text"
+
+class CompletionUsage(BaseModel):
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+
 
 class ChatCompletion(BaseModel):
     """
@@ -74,14 +83,23 @@ class ChatCompletion(BaseModel):
         return ChatCompletion.model_validate(m)
 
     def to_chat_completion(self) -> models.ChatCompletion:
+        finish_reasons = {
+            "end_turn": "tool_calls",
+            "max_tokens": "length",
+            "stop_sequence": "stop"
+        }
         return models.ChatCompletion(
             id=self.id,
-            choices=[models.Choice(
-                finish_reason=self.stop_reason,
+            choices=[Choice(
+                finish_reason=finish_reasons.get(self.stop_reason, None),
                 index=i,
                 logprobs=None,
-                message=models.Message(role="assistant", content=cb.text)
+                message=Message(role="assistant", content=cb.text)
             ) for i,cb in enumerate(self.content)],
             model=self.model,
-            usage=(self.usage),
+            usage=models.CompletionUsage(
+                prompt_tokens=self.usage.input_tokens,
+                completion_tokens=self.usage.output_tokens,
+                total_tokens=self.usage.input_tokens + self.usage.output_tokens,
+            ),
         )

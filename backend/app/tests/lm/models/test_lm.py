@@ -11,54 +11,22 @@ from anthropic.types import MessageCreateParams, Message, ContentBlock, Usage
 
 # Testing CreateChatCompletion -> CreateChatCompletionXXX
 
-
-@pytest.fixture
-def chat_completion_create_anthropic() -> models.ChatCompletionCreate:
-    return models.ChatCompletionCreate(**{
-        "max_tokens": 100,
-        "messages": [
-            {"role": "user", "content": "Hello, Claude"},
-            {"role": "assistant", "content": "Hi, I'm Claude. How can I help you?"},
-        ],
-        "model": "claude-2.0",
-        "metadata": {"user_id": "123e4567-e89b-12d3-a456-426614174000"},
-        "stop_sequences": ["Stop generating."],
-        "system": "You are a helpful assistant.",
-        "temperature": 0.8,
-        "top_k": 0,
-        "top_p": 1.0,
-        "stream": True,
-    })
-
-@pytest.fixture
-def chat_completion_anthropic() -> Message:
-    return Message(
-        id="0987654321",
-        content=[ContentBlock(type="text", text="The best answer is (B)")],
-        model="text-generation-model",
-        role="assistant",
-        stop_reason="stop_sequence",
-        stop_sequence="B)",
-        type="message",
-        usage=Usage(input_tokens=10, output_tokens=20)
-    )
-
 # Test openai
 
 def test_chat_completion_create_openai(chat_completion_create_openai) -> None:
     ccc: Mapping = openai.ChatCompletionCreate.from_chat_completion_create(chat_completion_create_openai).to_dict()
 
 def test_chat_completion_openai(chat_completion_openai) -> None:
-    cc: Mapping = openai.ChatCompletion.from_chat_completion(chat_completion_openai).to_dict()
+    cc: openai.ChatCompletion = openai.ChatCompletion.from_dict(chat_completion_openai.model_dump()).to_chat_completion()
 
 def test_chat_completion_create_mistral(chat_completion_create_mistral) -> None:
     m: Mapping = mistral.ChatCompletionCreate.from_chat_completion_create(chat_completion_create_mistral).to_dict()
 
 def test_chat_completion_mistral(chat_completion_mistral) -> None:
-    cc: Mapping = mistral.ChatCompletion.from_chat_completion(chat_completion_mistral).to_dict()
+    cc: mistral.ChatCompletion = mistral.ChatCompletion.from_dict(chat_completion_mistral.model_dump()).to_chat_completion()
 
 def test_chat_completion_create_anthropic(chat_completion_create_anthropic) -> None:
-    mcp: MessageCreateParams = anthropic._chat_completion_create(chat_completion_create_anthropic)
+    mcp: Mapping = anthropic.ChatCompletionCreate.from_chat_completion_create(chat_completion_create_anthropic).to_dict()
 
 def test_chat_completion_anthropic(chat_completion_anthropic) -> None:
-    cc: models.ChatCompletion = anthropic.chat_completion(chat_completion_anthropic)
+    cc: anthropic.ChatCompletion = anthropic.ChatCompletion.from_dict(chat_completion_anthropic).to_chat_completion()

@@ -164,3 +164,35 @@ def chat_completion_mistral() -> mistral.ChatCompletion:
         created=1661535393,
         usage=mistral.CompletionUsage(completion_tokens=11, prompt_tokens=3, total_tokens=14)
     )
+
+
+@pytest.fixture
+def chat_completion_create_anthropic() -> anthropic.ChatCompletionCreate:
+    return anthropic.ChatCompletionCreate(**{
+        "max_tokens": 100,
+        "messages": [
+            {"role": "user", "content": "Hello, Claude"},
+            {"role": "assistant", "content": "Hi, I'm Claude. How can I help you?"},
+        ],
+        "model": "claude-2.0",
+        "metadata": {"user_id": "123e4567-e89b-12d3-a456-426614174000"},
+        "stop_sequences": ["Stop generating."],
+        "system": "You are a helpful assistant.",
+        "temperature": 0.8,
+        "top_k": 0,
+        "top_p": 1.0,
+        "stream": True,
+    })
+
+@pytest.fixture
+def chat_completion_anthropic() -> anthropic.ChatCompletion:
+    return anthropic.ChatCompletion(
+        id="0987654321",
+        content=[anthropic.TextBlock(type="text", text="The best answer is (B)")],
+        model="text-generation-model",
+        role="assistant",
+        stop_reason="stop_sequence",
+        stop_sequence="B)",
+        type="message",
+        usage=anthropic.CompletionUsage(input_tokens=10, output_tokens=20)
+    )
