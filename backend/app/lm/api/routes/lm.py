@@ -5,7 +5,7 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
-from app.lm.models import ChatCompletion, ChatCompletionCreate, openai
+from app.lm.models import ChatCompletion, ChatCompletionCreate, openai, mistral, anthropic
 from app.services.lm import (
     OpenAI,
     Mistral,
@@ -27,22 +27,22 @@ async def openai_chat_completion(
     return await OpenAI(api_key=openai_api_key.content).chat_completion(ccc=chat_completion_in)
 
 
-@router.post("/mistral/v1/chat/completions", response_model=ChatCompletionMistral)
+@router.post("/mistral/v1/chat/completions", response_model=mistral.ChatCompletion)
 def mistral_chat_completion(
     session: SessionDep, current_user: CurrentUser, chat_completion_in: Mapping
-) -> ChatCompletionMistral:
+) -> mistral.ChatCompletion:
     """
     Mistral integration
     """
     mistral_api_key = crud.get_setting(session=session, setting_name="MISTRAL_API_KEY", owner_id=current_user.id)
-    return Mistral(api_key=mistral_api_key.content).native(ccc=chat_completion_in)
+    return Mistral(api_key=mistral_api_key.content).chat_completion(ccc=chat_completion_in)
 
 
 
-@router.post("/anthropic/v1/messages", response_model=ChatCompletionAnthropic)
+@router.post("/anthropic/v1/messages", response_model=anthropic.ChatCompletion)
 def anthropic_chat_completion(
     session: SessionDep, current_user: CurrentUser, chat_completion_in: Mapping
-) -> ChatCompletionAnthropic:
+) -> anthropic.ChatCompletion:
     """
     Anthropic integration
     """
