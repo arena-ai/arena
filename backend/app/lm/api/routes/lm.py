@@ -8,8 +8,8 @@ from app import crud
 from app.lm.models import ChatCompletion, ChatCompletionCreate, openai
 from app.services.lm import (
     OpenAI,
-    Mistral, ChatCompletionMistral,
-    Anthropic, ChatCompletionAnthropic
+    Mistral,
+    Anthropic,
 )
 
 

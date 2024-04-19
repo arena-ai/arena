@@ -10,12 +10,6 @@ from app.api.deps import CurrentUser, SessionDep
 from app import crud
 from app.lm.models import ChatCompletion, ChatCompletionCreate, openai, mistral, anthropic
 
-from mistralai.client import MistralClient, MistralException
-from mistralai.models.chat_completion import ChatCompletionResponse as ChatCompletionMistral
-
-from anthropic import Anthropic as AnthropicClient
-from anthropic.types import MessageCreateParams as ChatCompletionCreateAnthropic, Message as ChatCompletionAnthropic
-
 
 @dataclass
 class OpenAI:
@@ -24,7 +18,6 @@ class OpenAI:
     url = "https://api.openai.com/v1"
     models: list[str] = ("gpt-4-0125-preview", "gpt-4-turbo-preview", "gpt-4-1106-preview", "gpt-4-vision-preview", "gpt-4", "gpt-4-0314", "gpt-4-0613", "gpt-4-32k", "gpt-4-32k-0314", "gpt-4-32k-0613", "gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-0301", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-1106", "gpt-3.5-turbo-0125", "gpt-3.5-turbo-16k-0613")
     
-
     @cached_property
     def headers(self) -> Mapping[str, str]:
         return {
@@ -38,37 +31,54 @@ class OpenAI:
                 headers=self.headers,
                 json=ccc.model_dump(exclude_unset=True, exclude_none=True),
             )
-            return response.raise_for_status().json()
+            return openai.ChatCompletion.model_validate(response.raise_for_status().json())
+
 
 
 @dataclass
 class Mistral:
     api_key: str
+    timeout = httpx.Timeout(30., read=None)
+    url = "https://api.mistral.ai"
     models: list[str] = ("mistral-embed", "mistral-large-2402", "mistral-large-latest", "mistral-medium", "mistral-medium-2312", "mistral-medium-latest", "mistral-small", "mistral-small-2312", "mistral-small-2402", "mistral-small-latest", "mistral-tiny", "mistral-tiny-2312", "open-mistral-7b", "open-mixtral-8x7b")
-        
-    def native(self, ccc: Mapping) -> ChatCompletionMistral:
-        client = MistralClient(api_key=self.api_key)
-        request = client._make_chat_request(**ccc)
-        single_response = client._request("post", request, "v1/chat/completions")
-        for response in single_response:
-            return ChatCompletionMistral(**response)
-        raise MistralException("No response received")
 
-    def call(self, ccc: ChatCompletionCreate) -> ChatCompletion:
-        return mistral.chat_completion(self.native(mistral.chat_completion_create(ccc)))
+    @cached_property
+    def headers(self) -> Mapping[str, str]:
+        return {
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
+    async def chat_completion(self, ccc: mistral.ChatCompletionCreate) -> mistral.ChatCompletion:
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            response = await client.post(
+                url=f"{self.url}/v1/chat/completions",
+                headers=self.headers,
+                json=ccc.model_dump(exclude_unset=True, exclude_none=True),
+            )
+            return mistral.ChatCompletion.model_validate(response.raise_for_status().json())
 
 
 @dataclass
 class Anthropic:
     api_key: str
+    timeout = httpx.Timeout(30., read=None)
+    url = "https://api.anthropic.com"
     models: list[str] = ("claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-2.1", "claude-2.0", "claude-instant-1.2")
 
-    def native(self, ccc: Mapping) -> ChatCompletionAnthropic:
-        client = AnthropicClient(api_key=self.api_key)
-        return client.messages.create(**ccc)
+    @cached_property
+    def headers(self) -> Mapping[str, str]:
+        return {
+            "Authorization": f"Bearer {self.api_key}"
+        }
 
-    def call(self, ccc: ChatCompletionCreate) -> ChatCompletion:
-        return anthropic.chat_completion(self.native(anthropic.chat_completion_create(ccc)))
+    async def chat_completion(self, ccc: anthropic.ChatCompletionCreate) -> anthropic.ChatCompletion:
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            response = await client.post(
+                url=f"{self.url}/v1/messages",
+                headers=self.headers,
+                json=ccc.model_dump(exclude_unset=True, exclude_none=True),
+            )
+            return anthropic.ChatCompletion.model_validate(response.raise_for_status().json())
 
 
 @dataclass
