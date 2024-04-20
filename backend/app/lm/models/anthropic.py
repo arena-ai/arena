@@ -38,18 +38,24 @@ class ChatCompletionCreate(BaseModel):
 
     @classmethod
     def from_chat_completion_create(cls, ccc: models.ChatCompletionCreate) -> "ChatCompletionCreate":
-        messages: Sequence[MessageParam] = [msg.model_dump() for msg in ccc.messages if not isinstance(msg, str)]
-        system: Sequence[str] = [msg for msg in ccc.messages if isinstance(msg, str)]
+        messages: Sequence[Message] = [msg.model_dump() for msg in ccc.messages if not msg.role == "system"]
+        system: Sequence[str] = [msg.content for msg in ccc.messages if msg.role == "system"]
         ccc = ccc.model_dump()
         if "max_tokens" in ccc:
             ccc["max_tokens"] = ccc["max_tokens"] or 1
         if "user" in ccc:
             ccc["metadata"] = {"user_id": ccc["user"]}
             del ccc["user"]
+        else:
+            ccc["metadata"] = {"user_id": None}
         if "stop" in ccc:   
             ccc["stop_sequences"] = ccc["stop"]
             del ccc["stop"]
-        ccc["system"] = None if len(system)==0 else system[0]
+        if len(system)==0:
+            ccc["system"] = None
+        else:
+            ccc["system"] = system[0]
+        ccc["messages"] = messages
         return ChatCompletionCreate.model_validate(ccc)
 
     def to_dict(self) -> Mapping[str, Any]:
