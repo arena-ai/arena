@@ -47,6 +47,8 @@ async def anthropic_chat_completion(
     Anthropic integration
     """
     anthropic_api_key = crud.get_setting(session=session, setting_name="ANTHROPIC_API_KEY", owner_id=current_user.id)
+    print(f"\nDEBUG {chat_completion_in}")
+    print(f"\nDEBUG {anthropic.ChatCompletionCreate.model_validate(chat_completion_in)}")
     return await Anthropic(api_key=anthropic_api_key.content).chat_completion(ccc=anthropic.ChatCompletionCreate.model_validate(chat_completion_in))
 
 

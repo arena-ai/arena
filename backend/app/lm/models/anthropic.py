@@ -9,7 +9,7 @@ ChatCompletionCreate -> anthropic MessageCreateParams -> anthropic Message -> Ch
 """
 
 class Metadata(BaseModel):
-    user_id: str | None
+    user_id: str
 
 
 class FunctionDefinition(BaseModel):
@@ -43,11 +43,9 @@ class ChatCompletionCreate(BaseModel):
         ccc = ccc.model_dump()
         if "max_tokens" in ccc:
             ccc["max_tokens"] = ccc["max_tokens"] or 1
-        if "user" in ccc:
+        if "user" in ccc and ccc["user"] is not None:
             ccc["metadata"] = {"user_id": ccc["user"]}
             del ccc["user"]
-        else:
-            ccc["metadata"] = {"user_id": None}
         if "stop" in ccc:   
             ccc["stop_sequences"] = ccc["stop"]
             del ccc["stop"]
