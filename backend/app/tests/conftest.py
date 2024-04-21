@@ -116,15 +116,6 @@ def chat_completion_create_mistral() -> mistral.ChatCompletionCreate:
             mistral.Message(
                 content="I need the current weather in San Francisco",
                 role="user",
-                tool_calls=[
-                    mistral.ChatCompletionToolParam(
-                        function=mistral.Function(
-                            arguments="{'location': 'San Francisco'}",
-                            name="get_weather"
-                        ),
-                        type="function"
-                    )
-                ]
             )
         ],
         model="mistral-medium-2312",
@@ -132,9 +123,7 @@ def chat_completion_create_mistral() -> mistral.ChatCompletionCreate:
         response_format=mistral.ResponseFormat(type="text"),
         safe_prompt=True,
         random_seed=0,
-        temperature=0.5,
-        tool_choice="auto",
-        top_p=0.9,
+        temperature=1.0,
         stream=False
     )
 
@@ -181,7 +170,7 @@ def chat_completion_create_anthropic() -> anthropic.ChatCompletionCreate:
         "temperature": 0.8,
         "top_k": 0,
         "top_p": 1.0,
-        "stream": True,
+        "stream": False,
     })
 
 @pytest.fixture
