@@ -78,7 +78,7 @@ class ChatCompletion(BaseModel):
     model: str
     role: Literal["assistant"] = "assistant"
     stop_reason: Literal["end_turn", "max_tokens", "stop_sequence"] | None = None
-    stop_sequence: str = None
+    stop_sequence: str | None = None
     type: Literal["message"] = "message"
     usage: CompletionUsage | None = None
 

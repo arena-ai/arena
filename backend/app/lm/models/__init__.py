@@ -72,6 +72,10 @@ class ChatCompletionCreate(BaseModel):
     user: str | None = None
     stream: bool | None = None
 
+    def to_dict(self) -> Mapping[str, Any]:
+        return self.model_dump(exclude_unset=True, exclude_none=True)
+
+
 """ChatCompletion"""
 
 class TopLogprob(BaseModel):
@@ -117,3 +121,7 @@ class ChatCompletion(BaseModel):
     object: Literal["chat.completion"] | None = None
     system_fingerprint: str | None = None
     usage: CompletionUsage | None = None
+
+    @classmethod
+    def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletion":
+        return ChatCompletion.model_validate(m)

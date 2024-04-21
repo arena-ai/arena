@@ -158,14 +158,11 @@ def test_anthropic(
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ARENA_ANTHROPIC_API_KEY")},
     )
     ccc = ChatCompletionCreate.model_validate(chat_input("claude-2.1"))
-    print(f"\nTEST {ccc}")
     ccc = anthropic.ChatCompletionCreate.from_chat_completion_create(ccc)
-    ccc = ccc.to_dict()
-    print(f"\nTEST {ccc}")
     response = client.post(
         f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
         headers = superuser_token_headers,
-        json = ccc,
+        json = ccc.to_dict(),
     )
     assert response.status_code == 200
     content = response.json()
@@ -191,6 +188,6 @@ def test_arena(
         response = client.post(
             f"{settings.API_V1_STR}/lm/chat/completions",
             headers = superuser_token_headers,
-            json = ccc.model_dump(mode="json")
+            json = ccc.to_dict()
         )
         assert response.status_code == 200
