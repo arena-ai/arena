@@ -39,7 +39,6 @@ async def mistral_chat_completion(
     return await Mistral(api_key=mistral_api_key.content).mistral_chat_completion(ccc=mistral.ChatCompletionCreate.model_validate(chat_completion_in))
 
 
-
 @router.post("/anthropic/v1/messages", response_model=anthropic.ChatCompletion)
 async def anthropic_chat_completion(
     session: SessionDep, current_user: CurrentUser, chat_completion_in: Mapping
