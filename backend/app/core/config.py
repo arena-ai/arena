@@ -82,6 +82,22 @@ class Settings(BaseSettings):
             path="0",
         )
 
+    # Presidio analyzer https://microsoft.github.io/presidio/analyzer/
+    PRESIDIO_ANALYZER_SERVER: str = "localhost"
+    PRESIDIO_ANALYZER_PORT: int = 5001
+    # Presidio anonymizer https://microsoft.github.io/presidio/anonymizer/
+    PRESIDIO_ANONYMIZER_SERVER: str = "localhost"
+    PRESIDIO_ANONYMIZER_PORT: int = 5002
+    PRESIDIO_ANONYMIZERS: dict[str, Any] = {
+        "DEFAULT": {"type": "replace", "new_value": "ANONYMIZED"},
+        "PHONE_NUMBER": {
+            "type": "mask",
+            "masking_char": "*",
+            "chars_to_mask": 4,
+            "from_end": True,
+        },
+    }
+
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
     SMTP_PORT: int = 587

@@ -11,6 +11,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app import crud
 from app.lm.models import ChatCompletion, ChatCompletionCreate, openai, mistral, anthropic
 
+
 @dataclass
 class Service(ABC):
     api_key: str
