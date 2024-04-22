@@ -16,7 +16,7 @@ class Const(Op[tuple[()], B], Generic[B]):
     def __init__(self, value: B):
         super().__init__(name=f"const_{value}", value=value)
 
-    def call(self) -> B:
+    async def call(self) -> B:
         return self.value
 
 def cst(value: B) -> Computation[B]:
@@ -27,7 +27,7 @@ class Var(Op[tuple[B], B], Generic[B]):
     """A variable op"""
     name: str
 
-    def call(self, value: B) -> B:
+    async def call(self, value: B) -> B:
         return value
 
 def var(name: str, value: B) -> Computation[B]:
@@ -39,7 +39,7 @@ class Fun(Op[tuple[A], B], Generic[A, B]):
     name: str
     fun: Callable[[A], B]
 
-    def call(self, a: A) -> B:
+    async def call(self, a: A) -> B:
         return self.fun(a)
 
 def fun(f: Callable[[A], B], a: Computation[A]) -> Computation[B]:
@@ -48,7 +48,7 @@ def fun(f: Callable[[A], B], a: Computation[A]) -> Computation[B]:
 class Rand(Op[tuple[()], float]):
     name: str = "rand"
 
-    def call(self) -> float:
+    async def call(self) -> float:
         return random()
 
 def rnd() -> Computation[float]:
@@ -58,7 +58,7 @@ def rnd() -> Computation[float]:
 class RandInt(Op[tuple[int, int], int]):
     name: str = "randint"
 
-    def call(self, a: int, b: int) -> int:
+    async def call(self, a: int, b: int) -> int:
         return randint(a, b)
 
 def rndi(a: int, b: int) -> Computation[int]:
