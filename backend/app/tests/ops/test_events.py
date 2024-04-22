@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 
 from app import crud
 from app.models import UserCreate, Event
+from app.ops.utils import var
 from app.ops.events import LogRequest, Request
 from app.ops.session import session, user
 from app.tests.utils.utils import random_email, random_lower_string
