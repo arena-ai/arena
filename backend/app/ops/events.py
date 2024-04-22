@@ -16,7 +16,6 @@ class LogEvent(Op[tuple[Session, User, Event | None, A], Event], Generic[A]):
         return EventCreate(name=self.name, content=a.model_dump_json(), parent_id=None if parent is None else parent.id)
 
     def call(self, session: Session, user: User, parent: Event | None, a: A) -> Event:
-        print(f"DEBUG call {session}")
         event_create = self.event_create(parent, a)
         event = crud.create_event(session=session, event_in=event_create, owner_id=user.id)
         return event
