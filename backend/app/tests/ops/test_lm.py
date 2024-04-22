@@ -23,5 +23,5 @@ def test_arena(db: Session) -> None:
             Message(role="user", content="What is the capital of France?")
         ]
     )))
-    print(run(comp.evaluate).content)
+    print(run(comp.evaluate).choices[0].message.content)
     
