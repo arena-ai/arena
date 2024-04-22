@@ -6,13 +6,18 @@ from app.services import lm
 
 
 class Arena(Op[ChatCompletionCreate, ChatCompletion]):
+    name: str = "arena"
     openai_api_key: str
     mistral_api_key: str
     anthropic_api_key: str
 
-    def __init__(self, openai_api_key: str, mistral_api_key: str, anthropic_api_key: str):
-        super().__init__(name="lm_arena", openai_api_key=openai_api_key, mistral_api_key=mistral_api_key, anthropic_api_key=anthropic_api_key)
-        self.arena = lm.Arena(openai_api_key=openai_api_key, mistral_api_key=mistral_api_key, anthropic_api_key=anthropic_api_key)
+    @cached_property
+    def service(self) -> lm.Arena:
+        return lm.Arena(
+            openai_api_key=self.openai_api_key,
+            mistral_api_key=self.mistral_api_key,
+            anthropic_api_key=self.anthropic_api_key,
+        )
 
-    def call(self, input: ChatCompletionCreate) -> ChatCompletion:
-        return self.arena.call(input)
+    async def call(self, input: ChatCompletionCreate) -> ChatCompletion:
+        return await self.service.chat_completion(input)
