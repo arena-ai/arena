@@ -100,7 +100,7 @@ services:
 
   worker:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
-    command: 'celery -A app.worker worker -l INFO -I app.worker.evaluation'
+    command: 'celery -A app.worker worker -l INFO'
     restart: always
     depends_on:
       - db
