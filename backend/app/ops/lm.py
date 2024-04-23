@@ -17,5 +17,8 @@ class Chat(Op[ChatCompletionCreate, ChatCompletion]):
     async def call(self, input: ChatCompletionCreate) -> ChatCompletion:
         return await self.service.chat_completion(input)
 
-class Score(Op[ChatCompletion, str]):
+
+class Judge(Op[ChatCompletion, str]):
+    """Implements a simple LLM-as-a-judge as in https://arxiv.org/pdf/2306.05685.pdf
+    """
     name: str = "score"
