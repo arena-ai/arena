@@ -5,7 +5,7 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
-from app.lm.models import ChatCompletion, ChatCompletionCreate, openai, mistral, anthropic
+from app.lm.models import LanguageModelsApiKeys, ChatCompletion, ChatCompletionCreate, openai, mistral, anthropic
 from app.services.lm import (
     OpenAI,
     Mistral,
@@ -60,8 +60,9 @@ async def chat_completion(
     openai_api_key = crud.get_setting(session=session, setting_name="OPENAI_API_KEY", owner_id=current_user.id)
     mistral_api_key = crud.get_setting(session=session, setting_name="MISTRAL_API_KEY", owner_id=current_user.id)
     anthropic_api_key = crud.get_setting(session=session, setting_name="ANTHROPIC_API_KEY", owner_id=current_user.id)
-    return await LanguageModels(
-        openai_api_key=openai_api_key.content,
-        mistral_api_key=mistral_api_key.content,
-        anthropic_api_key=anthropic_api_key.content,
-    ).chat_completion(ccc=chat_completion_in)
+    api_keys = LanguageModelsApiKeys(
+        openai_api_key = None if openai_api_key is None else openai_api_key.content,
+        mistral_api_key = None if mistral_api_key is None else mistral_api_key.content,
+        anthropic_api_key = None if anthropic_api_key is None else anthropic_api_key.content,
+    )
+    return await LanguageModels(api_keys=api_keys).chat_completion(ccc=chat_completion_in)

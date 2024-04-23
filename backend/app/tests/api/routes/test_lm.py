@@ -170,7 +170,7 @@ def test_anthropic(
     content = response.json()
 
 
-def test_arena(
+def test_language_models(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     # Setup all tokens
