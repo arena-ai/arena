@@ -10,7 +10,7 @@ from app.services.lm import (
     OpenAI,
     Mistral,
     Anthropic,
-    Arena,
+    LanguageModels,
 )
 
 
@@ -60,7 +60,7 @@ async def chat_completion(
     openai_api_key = crud.get_setting(session=session, setting_name="OPENAI_API_KEY", owner_id=current_user.id)
     mistral_api_key = crud.get_setting(session=session, setting_name="MISTRAL_API_KEY", owner_id=current_user.id)
     anthropic_api_key = crud.get_setting(session=session, setting_name="ANTHROPIC_API_KEY", owner_id=current_user.id)
-    return await Arena(
+    return await LanguageModels(
         openai_api_key=openai_api_key.content,
         mistral_api_key=mistral_api_key.content,
         anthropic_api_key=anthropic_api_key.content,

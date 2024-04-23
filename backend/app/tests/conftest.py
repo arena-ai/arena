@@ -1,3 +1,4 @@
+import os
 from collections.abc import Generator
 
 import pytest
@@ -10,7 +11,7 @@ from app.main import app
 from app.models import User, Setting, Event, EventIdentifier, Attribute, EventAttribute
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
-from app.lm.models import openai, mistral, anthropic, Choice, ChoiceLogprobs, Message, TokenLogprob, CompletionUsage, ChatCompletionToolParam, Function
+from app.lm.models import LanguageModelsApiKeys, ChatCompletionCreate, ChatCompletion, openai, mistral, anthropic
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -48,6 +49,14 @@ def superuser_token_headers(client: TestClient) -> dict[str, str]:
 def normal_user_token_headers(client: TestClient, db: Session) -> dict[str, str]:
     return authentication_token_from_email(
         client=client, email=settings.EMAIL_TEST_USER, db=db
+    )
+
+@pytest.fixture
+def language_models_api_keys():
+    return LanguageModelsApiKeys(
+        openai_api_key=os.getenv("ARENA_OPENAI_API_KEY"),
+        mistral_api_key=os.getenv("ARENA_MISTRAL_API_KEY"),
+        anthropic_api_key=os.getenv("ARENA_ANTHROPIC_API_KEY"),
     )
 
 @pytest.fixture

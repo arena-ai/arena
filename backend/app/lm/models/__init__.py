@@ -1,6 +1,12 @@
 from typing import Literal, Mapping, Sequence, Any
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel
 
+"""All LanguageModels"""
+
+class LanguageModelsApiKeys(BaseModel):
+    openai_api_key: str
+    mistral_api_key: str
+    anthropic_api_key: str
 
 """ChatCompletionCreate"""
 

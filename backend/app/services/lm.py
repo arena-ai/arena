@@ -9,7 +9,7 @@ import httpx
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
-from app.lm.models import ChatCompletion, ChatCompletionCreate, openai, mistral, anthropic
+from app.lm.models import LanguageModelsApiKeys, ChatCompletion, ChatCompletionCreate, openai, mistral, anthropic
 
 
 @dataclass
@@ -97,23 +97,21 @@ class Anthropic(Service):
 
 
 @dataclass
-class Arena:
-    openai_api_key: str
-    mistral_api_key: str
-    anthropic_api_key: str
+class LanguageModels:
+    api_keys: LanguageModelsApiKeys
     timeout = httpx.Timeout(30., read=None)
 
     @cached_property
     def openai(self) -> OpenAI:
-        return OpenAI(api_key=self.openai_api_key, timeout=self.timeout)
+        return OpenAI(api_key=self.api_keys.openai_api_key, timeout=self.timeout)
 
     @cached_property
     def mistral(self) -> Mistral:
-        return Mistral(api_key=self.mistral_api_key, timeout=self.timeout)
+        return Mistral(api_key=self.api_keys.mistral_api_key, timeout=self.timeout)
     
     @cached_property
     def anthropic(self) -> Anthropic:
-        return Anthropic(api_key=self.anthropic_api_key, timeout=self.timeout)
+        return Anthropic(api_key=self.api_keys.anthropic_api_key, timeout=self.timeout)
     
     @cached_property
     def services(self) -> Sequence[Service]:
