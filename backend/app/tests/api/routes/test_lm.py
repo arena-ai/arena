@@ -1,7 +1,8 @@
 import os
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, select
 
+from app.models import Event
 from app.core.config import settings
 from app.lm.models import anthropic, ChatCompletionCreate
 
@@ -193,3 +194,6 @@ def test_language_models(
             json = ccc.to_dict()
         )
         assert response.status_code == 200
+    events = db.exec(select(Event)).all()
+    for event in events:
+        print(event)

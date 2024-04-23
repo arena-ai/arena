@@ -53,7 +53,7 @@ async def anthropic_chat_completion(
 
 async def chat_completion_request_event(session: Session, current_user: User, chat_completion_create: ChatCompletionCreate) -> Event:
     # Create a request event
-    event_create = EventCreate(name="chat_completion_request", content=chat_completion_create, parent_id=None)
+    event_create = EventCreate(name="chat_completion_request", content=chat_completion_create.model_dump_json(), parent_id=None)
     event = crud.create_event(session=session, event_in=event_create, owner_id=current_user.id)
     return event
 
@@ -62,7 +62,7 @@ async def chat_completion_response_event(session: Session, current_user: User, r
     # Add the native identifier to the parent event
     crud.create_event_identifier(session=session, event_identifier=chat_completion.id, event_id=request_event_id)
     # Create a response event
-    event_create = EventCreate(name="chat_completion_response", content=chat_completion, parent_id=request_event_id)
+    event_create = EventCreate(name="chat_completion_response", content=chat_completion.model_dump_json(), parent_id=request_event_id)
     event = crud.create_event(session=session, event_in=event_create, owner_id=current_user.id)
     return event
 
