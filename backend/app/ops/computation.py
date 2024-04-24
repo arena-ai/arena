@@ -23,7 +23,7 @@ class Op(BaseModel, ABC, Generic[*As, B]):
         return Computation(op=self, args=args)
 
 
-class Getattr(Op[B], Generic[B]):
+class Getattr(Op[tuple[()], B], Generic[B]):
     """A getattr op"""
     name: str = "getattr"
     attr: str
@@ -32,7 +32,7 @@ class Getattr(Op[B], Generic[B]):
         return self.__getattr__(self.attr)
 
 
-class Getitem(Op[B], Generic[B]):
+class Getitem(Op[tuple[()], B], Generic[B]):
     """A getitem op"""
     name: str = "getitem"
     index: int
@@ -41,7 +41,7 @@ class Getitem(Op[B], Generic[B]):
         return self.__getitem__(self.index)
 
 
-class Call(Op[B], Generic[B]):
+class Call(Op[tuple[()], B], Generic[B]):
     """A call op"""
     name: str = "call"
     args: tuple
