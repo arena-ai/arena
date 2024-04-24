@@ -31,6 +31,7 @@ def test_judge(language_models_api_keys) -> None:
     comp = tup(resp.choices[0].message.content, judge(req, resp))
     print(run(comp.evaluate))
 
+
 def test_other_judge(language_models_api_keys) -> None:
     chat = Chat(api_keys=language_models_api_keys)
     judge = Judge(api_keys=language_models_api_keys)
