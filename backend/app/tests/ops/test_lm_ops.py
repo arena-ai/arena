@@ -27,7 +27,8 @@ def test_judge(language_models_api_keys) -> None:
             Message(role="user", content="Can you write a short poem about prime numbers?")
         ]
     ))
-    comp = judge(req, chat(req))
+    resp = chat(req)
+    comp = tup(resp.choices[0].message.content, judge(req, resp))
     print(run(comp.evaluate))
 
 def test_other_judge(language_models_api_keys) -> None:
@@ -41,5 +42,5 @@ def test_other_judge(language_models_api_keys) -> None:
         ]
     ))
     resp = chat(req)
-    comp = tup(resp, judge(req, resp))
+    comp = tup(resp.choices[0].message.content, judge(req, resp))
     print(run(comp.evaluate))
