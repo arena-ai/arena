@@ -19,7 +19,7 @@ class Op(BaseModel, ABC, Generic[*As, B]):
         """Execute the op"""
         pass
 
-    def __call__(self, *args: 'Computation' | Any) -> 'Computation[B]':
+    def __call__(self, *args: Any) -> 'Computation[B]':
         return Computation(op=self, args=[Computation.from_any(arg) for arg in args])
 
 
@@ -109,7 +109,7 @@ class Computation(BaseModel, Generic[B]):
         return Call(args=args)(self)
 
     @classmethod
-    def from_any(cls, arg: 'Computation' | Any) -> 'Computation':
+    def from_any(cls, arg: Any) -> 'Computation':
         if isinstance(arg, Computation):
             return arg
         else:
