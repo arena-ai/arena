@@ -1,24 +1,13 @@
 from typing import TypeVar, Generic, Callable, TypeVarTuple
 from random import random, randint
 
-from app.ops.computation import Op, Computation
+from app.ops.computation import Op, Computation, Const
 # Utility classes
 
 A = TypeVar('A')
 B = TypeVar('B')
 As = TypeVarTuple('As')
 
-
-class Const(Op[tuple[()], B], Generic[B]):
-    """A constant op"""
-    name: str
-    value: B
-
-    def __init__(self, value: B):
-        super().__init__(name=f"const_{value}", value=value)
-
-    async def call(self) -> B:
-        return self.value
 
 def cst(value: B) -> Computation[B]:
     return Const(value)()

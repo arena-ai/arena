@@ -13,6 +13,8 @@ from app.services.lm import (
     Anthropic,
     LanguageModels,
 )
+from app.ops.events import BuildRequest, LogRequest, BuildResponse, LogResponse
+from app.ops.lm import Chat, Judge
 
 
 router = APIRouter()

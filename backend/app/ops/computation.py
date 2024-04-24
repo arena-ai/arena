@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, TypeVarTuple, Sequence
+from typing import Any, Generic, TypeVar, TypeVarTuple, Sequence
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from asyncio import TaskGroup, Task
@@ -19,8 +19,20 @@ class Op(BaseModel, ABC, Generic[*As, B]):
         """Execute the op"""
         pass
 
-    def __call__(self, *args: 'Computation') -> 'Computation[B]':
-        return Computation(op=self, args=args)
+    def __call__(self, *args: 'Computation' | Any) -> 'Computation[B]':
+        return Computation(op=self, args=[Computation.from_any(arg) for arg in args])
+
+
+class Const(Op[tuple[()], B], Generic[B]):
+    """A constant op"""
+    name: str
+    value: B
+
+    def __init__(self, value: B):
+        super().__init__(name=f"const_{value}", value=value)
+
+    async def call(self) -> B:
+        return self.value
 
 
 class Getattr(Op[A, B], Generic[A, B]):
@@ -96,3 +108,9 @@ class Computation(BaseModel, Generic[B]):
     def __call__(self, *args) -> 'Computation':
         return Call(args=args)(self)
 
+    @classmethod
+    def from_any(cls, arg: 'Computation' | Any) -> 'Computation':
+        if isinstance(arg, Computation):
+            return arg
+        else:
+            return Const(value=arg)()
