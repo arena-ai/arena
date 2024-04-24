@@ -107,10 +107,10 @@ class Computation(BaseModel, Generic[B]):
 
     def __call__(self, *args) -> 'Computation':
         return Call(args=args)(self)
-
+    
     @classmethod
     def from_any(cls, arg: Any) -> 'Computation':
         if isinstance(arg, Computation):
             return arg
         else:
-            return Const(value=arg)()
+            return Const(arg)()
