@@ -23,31 +23,31 @@ class Op(BaseModel, ABC, Generic[*As, B]):
         return Computation(op=self, args=args)
 
 
-class Getattr(Op[tuple[()], B], Generic[B]):
+class Getattr(Op[A, B], Generic[A, B]):
     """A getattr op"""
     name: str = "getattr"
     attr: str
 
-    async def call(self) -> B:
-        return self.__getattr__(self.attr)
+    async def call(self, a: A) -> B:
+        return a.__getattribute__(self.attr)
 
 
-class Getitem(Op[tuple[()], B], Generic[B]):
+class Getitem(Op[*As, B], Generic[*As, B]):
     """A getitem op"""
     name: str = "getitem"
     index: int
 
-    async def call(self) -> B:
-        return self.__getitem__(self.index)
+    async def call(self, a: A) -> B:
+        return a.__getitem__(self.index)
 
 
-class Call(Op[tuple[()], B], Generic[B]):
+class Call(Op[*As, B], Generic[*As, B]):
     """A call op"""
     name: str = "call"
     args: tuple
 
-    async def call(self) -> B:
-        return self.__call__(*self.args)
+    async def call(self, a: A) -> B:
+        return a.__call__(*self.args)
 
 
 class Computation(BaseModel, Generic[B]):
@@ -91,7 +91,7 @@ class Computation(BaseModel, Generic[B]):
         return Getattr(attr=name)(self)
     
     def __getitem__(self, name: str) -> 'Computation':
-        return Getattr(index=name)(self)
+        return Getitem(index=name)(self)
 
     def __call__(self, *args) -> 'Computation':
         return Call(args=args)(self)

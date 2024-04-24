@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from anyio import run
 
 from app.ops import Op, Const, cst, rnd, rndi
@@ -62,3 +64,29 @@ def test_randint() -> None:
     print(f"f = {f}")
     print(f"f = {run(f.evaluate)}")
     print(f"f = {run(f.evaluate)}")
+
+
+def test_access() -> None:
+    @dataclass
+    class A:
+        rep: int
+        txt: str
+    
+    @dataclass
+    class B:
+        a: list[A]
+        b: str
+        c: int
+    
+    class AToB(Op[A, B]):
+        name: str = "atob"
+
+        async def call(self, a: A) -> B:
+            return B(a=[a for _ in range(a.rep)], b=a.txt, c=a.rep)
+
+    a = cst(A(5, "hello"))
+    f = AToB()
+    b = f(a)
+    print(b.c)
+    print(run((b.c).evaluate))
+    print(run((b.a[2].txt.upper()).evaluate))
