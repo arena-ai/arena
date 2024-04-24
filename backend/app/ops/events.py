@@ -32,6 +32,13 @@ class LogRequest(LogEvent[Request]):
     name: str = "log_request"
 
 
+class BuildRequest(Op[tuple[str, str, Mapping[str, str], str], Request]):
+    name: str = "build_request"
+
+    async def call(self, method: str, url: str, headers: Mapping[str, str], content: str) -> Request:
+        return Request(method=method, url=url, headers=headers, content=content)
+
+
 class Response(BaseModel):
     status_code: int
     headers: Mapping[str, str]
@@ -40,3 +47,10 @@ class Response(BaseModel):
 
 class LogResponse(LogEvent[Response]):
     name: str = "log_response"
+
+
+class BuildResponse(Op[tuple[int, Mapping[str, str], str], Response]):
+    name: str = "build_response"
+
+    async def call(self, status_code: int, headers: Mapping[str, str], content: str) -> Request:
+        return Request(status_code=status_code, headers=headers, content=content)
