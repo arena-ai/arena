@@ -1,12 +1,13 @@
-from typing import Generic, TypeVar, TypeVarTuple, Sequence, ClassVar
+from typing import Generic, TypeVar, TypeVarTuple, Sequence
 from abc import ABC, abstractmethod
-from functools import cached_property
 from dataclasses import dataclass
 from asyncio import TaskGroup, Task
 from anyio import run
 from pydantic import BaseModel, ConfigDict, Field
 
+
 As = TypeVarTuple('As')
+A = TypeVar('A')
 B = TypeVar('B')
 
 class Op(BaseModel, ABC, Generic[*As, B]):
@@ -20,6 +21,33 @@ class Op(BaseModel, ABC, Generic[*As, B]):
 
     def __call__(self, *args: 'Computation') -> 'Computation[B]':
         return Computation(op=self, args=args)
+
+
+class Getattr(Op[B], Generic[B]):
+    """A getattr op"""
+    name: str = "getattr"
+    attr: str
+
+    async def call(self) -> B:
+        return self.__getattr__(self.attr)
+
+
+class Getitem(Op[B], Generic[B]):
+    """A getitem op"""
+    name: str = "getitem"
+    index: int
+
+    async def call(self) -> B:
+        return self.__getitem__(self.index)
+
+
+class Call(Op[B], Generic[B]):
+    """A call op"""
+    name: str = "call"
+    args: tuple
+
+    async def call(self) -> B:
+        return self.__call__(*self.args)
 
 
 class Computation(BaseModel, Generic[B]):
@@ -58,4 +86,13 @@ class Computation(BaseModel, Generic[B]):
             value = await self.task
         self._clear()
         return value
+    
+    def __getattr__(self, name: str) -> 'Computation':
+        return Getattr(attr=name)(self)
+    
+    def __getitem__(self, name: str) -> 'Computation':
+        return Getattr(index=name)(self)
+
+    def __call__(self, *args) -> 'Computation':
+        return Call(args=args)(self)
 

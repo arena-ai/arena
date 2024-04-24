@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Callable
+from typing import TypeVar, Generic, Callable, TypeVarTuple
 from random import random, randint
 
 from app.ops.computation import Op, Computation
@@ -6,6 +6,7 @@ from app.ops.computation import Op, Computation
 
 A = TypeVar('A')
 B = TypeVar('B')
+As = TypeVarTuple('As')
 
 
 class Const(Op[tuple[()], B], Generic[B]):
@@ -34,6 +35,17 @@ def var(name: str, value: B) -> Computation[B]:
     return Var(name=name)(cst(value))
 
 
+class Tup(Op[*As, tuple[*As]], Generic[*As]):
+    """A variable op"""
+    name: str = "tup"
+
+    async def call(self, *tup: *As) -> tuple[*As]:
+        return tup
+
+def tup(*tup: Computation) -> Computation[tuple[*As]]:
+    return Tup()(*tup)
+
+
 class Fun(Op[tuple[A], B], Generic[A, B]):
     """A variable op"""
     name: str
@@ -44,6 +56,7 @@ class Fun(Op[tuple[A], B], Generic[A, B]):
 
 def fun(f: Callable[[A], B], a: Computation[A]) -> Computation[B]:
     return Fun(f)(a)
+
 
 class Rand(Op[tuple[()], float]):
     name: str = "rand"
