@@ -35,7 +35,7 @@ class ChatCompletionCreate(models.ChatCompletionCreate):
 
     @classmethod
     def from_chat_completion_create(cls, ccc: models.ChatCompletionCreate) -> "ChatCompletionCreate":
-        return ChatCompletionCreate.model_validate(ccc.model_dump())
+        return ChatCompletionCreate.model_validate(ccc.model_dump(exclude=["arena_parameters"]))
 
     def to_dict(self) -> Mapping[str, Any]:
         return self.model_dump(exclude_unset=True, exclude_none=True)

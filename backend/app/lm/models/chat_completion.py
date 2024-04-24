@@ -50,6 +50,11 @@ class ResponseFormat(BaseModel):
     type: Literal["text", "json_object"] | None = None
 
 
+class ArenaParameters(BaseModel):
+    pii_filter: bool = False
+    judge_evaluation: bool = True
+
+
 class ChatCompletionCreate(BaseModel):
     """
     Maps to:
@@ -77,6 +82,7 @@ class ChatCompletionCreate(BaseModel):
     top_p: float | None = None
     user: str | None = None
     stream: bool | None = None
+    arena_parameters: ArenaParameters | None = None
 
     def to_dict(self) -> Mapping[str, Any]:
         return self.model_dump(exclude_unset=True, exclude_none=True)
@@ -127,6 +133,7 @@ class ChatCompletion(BaseModel):
     object: Literal["chat.completion"] | None = None
     system_fingerprint: str | None = None
     usage: CompletionUsage | None = None
+    arena_parameters: ArenaParameters | None = None
 
     @classmethod
     def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletion":
