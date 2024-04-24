@@ -60,6 +60,28 @@ def language_models_api_keys():
     )
 
 @pytest.fixture
+def chat_input_gen():
+    def chat_input(model: str):
+        """A Standard chat input"""
+        return {
+            "model": model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant."
+                },
+                {
+                    "role": "user",
+                    "content": "Who is Victor Hugo? Where does he live?"
+                }
+            ],
+            "temperature": 1.0,
+            "max_tokens": 1000
+        }
+    return chat_input
+
+
+@pytest.fixture
 def chat_completion_create_openai() -> openai.ChatCompletionCreate:
     return openai.ChatCompletionCreate(**{
         "model": "gpt-4",

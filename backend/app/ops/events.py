@@ -29,7 +29,7 @@ class Request(BaseModel):
 
 
 class LogRequest(LogEvent[Request]):
-    name: str = "log_request"
+    name: str = "request"
 
 
 class BuildRequest(Op[tuple[str, str, Mapping[str, str], str], Request]):
@@ -46,7 +46,7 @@ class Response(BaseModel):
 
 
 class LogResponse(LogEvent[Response]):
-    name: str = "log_response"
+    name: str = "response"
 
 
 class BuildResponse(Op[tuple[int, Mapping[str, str], str], Response]):

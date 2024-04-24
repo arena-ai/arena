@@ -16,7 +16,7 @@ router = APIRouter()
 async def evaluation_event(session: Session, current_user: User, evaluation: Evaluation) -> Event:
     # Create an evaluation event
     event_identifier = crud.get_event_identifier(session=session, event_identifier=evaluation.identifier)
-    event_create = EventCreate(name="evaluation", content=json.dumps(evaluation), parent_id=event_identifier.event_id)
+    event_create = EventCreate(name="evaluation", content=json.dumps(evaluation.score), parent_id=event_identifier.event_id)
     event = crud.create_event(session=session, event_in=event_create, owner_id=current_user.id)
     return event
 
