@@ -84,9 +84,8 @@ def test_access() -> None:
         async def call(self, a: A) -> B:
             return B(a=[a for _ in range(a.rep)], b=a.txt, c=a.rep)
 
-    a = cst(A(5, "hello"))
     f = AToB()
-    b = f(a)
+    b = f(A(5, "hello"))
     print(b.c)
     print(run((b.c).evaluate))
     print(run((b.a[2].txt.upper()).evaluate))
