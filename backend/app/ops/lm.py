@@ -6,7 +6,6 @@ from app.lm.models import LanguageModelsApiKeys, ChatCompletion, ChatCompletionC
 from app.services import lm
 
 
-
 class Chat(Op[ChatCompletionCreate, ChatCompletion]):
     name: str = "chat"
     api_keys: LanguageModelsApiKeys
@@ -17,8 +16,6 @@ class Chat(Op[ChatCompletionCreate, ChatCompletion]):
 
     async def call(self, input: ChatCompletionCreate) -> ChatCompletion:
         return await self.service.chat_completion(input)
-
-
 
 
 class Judge(Op[tuple[ChatCompletionCreate, ChatCompletion], float]):

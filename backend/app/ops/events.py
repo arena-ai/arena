@@ -30,3 +30,13 @@ class Request(BaseModel):
 
 class LogRequest(LogEvent[Request]):
     name: str = "log_request"
+
+
+class Response(BaseModel):
+    status_code: int
+    headers: Mapping[str, str]
+    content: str
+
+
+class LogResponse(LogEvent[Response]):
+    name: str = "log_response"
