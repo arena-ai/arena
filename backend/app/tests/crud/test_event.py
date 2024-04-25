@@ -1,7 +1,7 @@
 from sqlmodel import Session
 
 from app import crud
-from app.models import UserCreate, Event, EventCreate, Attribute, EventAttribute, EventAttributeCreate
+from app.models import UserCreate, EventCreate
 from app.tests.utils.utils import random_email, random_lower_string
 
 def test_create_event(db: Session) -> None:

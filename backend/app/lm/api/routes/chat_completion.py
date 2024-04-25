@@ -13,6 +13,7 @@ from app.services.lm import (
     Anthropic,
     LanguageModels,
 )
+from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys
 from app.ops.events import BuildRequest, LogRequest, BuildResponse, LogResponse
 from app.ops.lm import Chat, Judge
 
@@ -27,7 +28,6 @@ async def openai_chat_completion(
     """
     OpenAI integration
     """
-    openai_api_key = crud.get_setting(session=session, setting_name="OPENAI_API_KEY", owner_id=current_user.id)
     return await OpenAI(api_key=openai_api_key.content).openai_chat_completion(ccc=openai.ChatCompletionCreate.model_validate(chat_completion_in))
 
 

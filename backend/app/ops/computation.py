@@ -20,6 +20,7 @@ class Op(BaseModel, ABC, Generic[*As, B]):
         pass
 
     def __call__(self, *args: Any) -> 'Computation[B]':
+        """Compose Ops into Computations"""
         return Computation(op=self, args=[Computation.from_any(arg) for arg in args])
 
 
