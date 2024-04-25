@@ -9,7 +9,7 @@ import httpx
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
-from app.lm.models import LanguageModelsApiKeys, ChatCompletion, ChatCompletionCreate, openai, mistral, anthropic
+from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
 
 
 @dataclass
@@ -17,7 +17,7 @@ class Service(ABC):
     api_key: str
 
     @abstractmethod
-    async def chat_completion(self, ccc: ChatCompletionCreate) -> ChatCompletion:
+    async def chat_completion(self, ccc: ChatCompletionRequest) -> ChatCompletionResponse:
         pass
 
 
@@ -53,17 +53,17 @@ class OpenAI(Service):
             "Authorization": f"Bearer {self.api_key}"
         }
 
-    async def openai_chat_completion(self, ccc: openai.ChatCompletionCreate) -> openai.ChatCompletion:
+    async def openai_chat_completion(self, ccc: openai.ChatCompletionRequest) -> openai.ChatCompletionResponse:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.post(
                 url=f"{self.url}/chat/completions",
                 headers=self.headers,
                 json=ccc.model_dump(exclude_unset=True, exclude_none=True),
             )
-            return openai.ChatCompletion.model_validate(response.raise_for_status().json())
+            return openai.ChatCompletionResponse.model_validate(response.raise_for_status().json())
 
-    async def chat_completion(self, ccc: ChatCompletionCreate) -> ChatCompletion:
-        return (await self.openai_chat_completion(openai.ChatCompletionCreate.from_chat_completion_create(ccc))).to_chat_completion()
+    async def chat_completion(self, ccc: ChatCompletionRequest) -> ChatCompletionResponse:
+        return (await self.openai_chat_completion(openai.ChatCompletionRequest.from_chat_completion_create(ccc))).to_chat_completion()
 
 
 @dataclass
@@ -78,17 +78,17 @@ class Mistral(Service):
             "Authorization": f"Bearer {self.api_key}"
         }
 
-    async def mistral_chat_completion(self, ccc: mistral.ChatCompletionCreate) -> mistral.ChatCompletion:
+    async def mistral_chat_completion(self, ccc: mistral.ChatCompletionRequest) -> mistral.ChatCompletionResponse:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.post(
                 url=f"{self.url}/v1/chat/completions",
                 headers=self.headers,
                 json=ccc.model_dump(exclude_unset=True, exclude_none=True),
             )
-            return mistral.ChatCompletion.model_validate(response.raise_for_status().json())
+            return mistral.ChatCompletionResponse.model_validate(response.raise_for_status().json())
 
-    async def chat_completion(self, ccc: ChatCompletionCreate) -> ChatCompletion:
-        return (await self.mistral_chat_completion(mistral.ChatCompletionCreate.from_chat_completion_create(ccc))).to_chat_completion()
+    async def chat_completion(self, ccc: ChatCompletionRequest) -> ChatCompletionResponse:
+        return (await self.mistral_chat_completion(mistral.ChatCompletionRequest.from_chat_completion_create(ccc))).to_chat_completion()
 
 @dataclass
 class Anthropic(Service):
@@ -103,17 +103,17 @@ class Anthropic(Service):
             "anthropic-version": "2023-06-01",
         }
 
-    async def anthropic_chat_completion(self, ccc: anthropic.ChatCompletionCreate) -> anthropic.ChatCompletion:
+    async def anthropic_chat_completion(self, ccc: anthropic.ChatCompletionRequest) -> anthropic.ChatCompletionResponse:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.post(
                 url=f"{self.url}/v1/messages",
                 headers=self.headers,
                 json=ccc.model_dump(exclude_unset=True, exclude_none=True),
             )
-            return anthropic.ChatCompletion.model_validate(response.raise_for_status().json())
+            return anthropic.ChatCompletionResponse.model_validate(response.raise_for_status().json())
 
-    async def chat_completion(self, ccc: ChatCompletionCreate) -> ChatCompletion:
-        return (await self.anthropic_chat_completion(anthropic.ChatCompletionCreate.from_chat_completion_create(ccc))).to_chat_completion()
+    async def chat_completion(self, ccc: ChatCompletionRequest) -> ChatCompletionResponse:
+        return (await self.anthropic_chat_completion(anthropic.ChatCompletionRequest.from_chat_completion_create(ccc))).to_chat_completion()
 
 
 @dataclass
@@ -137,7 +137,7 @@ class LanguageModels:
     def services(self) -> Sequence[Service]:
         return [self.openai, self.mistral, self.anthropic]
 
-    async def chat_completion(self, ccc: ChatCompletionCreate) -> ChatCompletion:
+    async def chat_completion(self, ccc: ChatCompletionRequest) -> ChatCompletionResponse:
         for service in self.services:
             if ccc.model in service.models:
                 return await service.chat_completion(ccc=ccc)

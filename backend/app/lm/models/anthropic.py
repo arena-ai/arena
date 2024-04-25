@@ -18,7 +18,7 @@ class FunctionDefinition(BaseModel):
     input_schema: Mapping[str, Any]
 
 
-class ChatCompletionCreate(BaseModel):
+class ChatCompletionRequest(BaseModel):
     """
     Maps to:
     https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message_create_params.py#L13
@@ -37,7 +37,7 @@ class ChatCompletionCreate(BaseModel):
     stream: bool | None = None
 
     @classmethod
-    def from_chat_completion_create(cls, ccc: models.ChatCompletionCreate) -> "ChatCompletionCreate":
+    def from_chat_completion_create(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
         messages: Sequence[Message] = [msg.model_dump() for msg in ccc.messages if not msg.role == "system"]
         system: Sequence[str] = [msg.content for msg in ccc.messages if msg.role == "system"]
         ccc = ccc.model_dump()
@@ -56,7 +56,7 @@ class ChatCompletionCreate(BaseModel):
         if "arena_parameters" in ccc:
             del ccc["arena_parameters"]
         ccc["messages"] = messages
-        return ChatCompletionCreate.model_validate(ccc)
+        return ChatCompletionRequest.model_validate(ccc)
 
     def to_dict(self) -> Mapping[str, Any]:
         return self.model_dump(exclude_unset=True, exclude_none=True)
@@ -71,7 +71,7 @@ class CompletionUsage(BaseModel):
     output_tokens: int | None = None
 
 
-class ChatCompletion(BaseModel):
+class ChatCompletionResponse(BaseModel):
     """
     https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message.py#L14
     """
@@ -85,16 +85,16 @@ class ChatCompletion(BaseModel):
     usage: CompletionUsage | None = None
 
     @classmethod
-    def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletion":
-        return ChatCompletion.model_validate(m)
+    def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletionResponse":
+        return ChatCompletionResponse.model_validate(m)
 
-    def to_chat_completion(self) -> models.ChatCompletion:
+    def to_chat_completion(self) -> models.ChatCompletionResponse:
         finish_reasons = {
             "end_turn": "tool_calls",
             "max_tokens": "length",
             "stop_sequence": "stop"
         }
-        return models.ChatCompletion(
+        return models.ChatCompletionResponse(
             id=self.id,
             choices=[Choice(
                 finish_reason=finish_reasons.get(self.stop_reason, None),

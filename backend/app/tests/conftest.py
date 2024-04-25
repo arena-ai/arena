@@ -11,7 +11,7 @@ from app.main import app
 from app.models import User, Setting, Event, EventIdentifier, Attribute, EventAttribute
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
-from app.lm.models import LanguageModelsApiKeys, ChatCompletionCreate, ChatCompletion, openai, mistral, anthropic
+from app.lm.models import LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletionResponse, openai, mistral, anthropic
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -82,8 +82,8 @@ def chat_input_gen():
 
 
 @pytest.fixture
-def chat_completion_create_openai() -> openai.ChatCompletionCreate:
-    return openai.ChatCompletionCreate(**{
+def chat_completion_create_openai() -> openai.ChatCompletionRequest:
+    return openai.ChatCompletionRequest(**{
         "model": "gpt-4",
         "messages": [
             {"role": "user", "content": "Write a short poem about the beauty of nature."}
@@ -97,8 +97,8 @@ def chat_completion_create_openai() -> openai.ChatCompletionCreate:
     })
 
 @pytest.fixture
-def chat_completion_openai() -> openai.ChatCompletion:
-    return openai.ChatCompletion(
+def chat_completion_openai() -> openai.ChatCompletionResponse:
+    return openai.ChatCompletionResponse(
         id="cmpl-123",
         choices=[
             openai.Choice(
@@ -137,8 +137,8 @@ def chat_completion_openai() -> openai.ChatCompletion:
     )
 
 @pytest.fixture
-def chat_completion_create_mistral() -> mistral.ChatCompletionCreate:
-    return mistral.ChatCompletionCreate(
+def chat_completion_create_mistral() -> mistral.ChatCompletionRequest:
+    return mistral.ChatCompletionRequest(
         messages=[
             mistral.Message(
                 content="Hello, how can I assist you today?",
@@ -160,8 +160,8 @@ def chat_completion_create_mistral() -> mistral.ChatCompletionCreate:
 
 
 @pytest.fixture
-def chat_completion_mistral() -> mistral.ChatCompletion:
-    return mistral.ChatCompletion(
+def chat_completion_mistral() -> mistral.ChatCompletionResponse:
+    return mistral.ChatCompletionResponse(
         id="cmpl-3o4Mn05jW6S9Zu2DLt2g3t0aFgU",
         choices=[
             mistral.Choice(
@@ -187,8 +187,8 @@ def chat_completion_mistral() -> mistral.ChatCompletion:
 
 
 @pytest.fixture
-def chat_completion_create_anthropic() -> anthropic.ChatCompletionCreate:
-    return anthropic.ChatCompletionCreate(**{
+def chat_completion_create_anthropic() -> anthropic.ChatCompletionRequest:
+    return anthropic.ChatCompletionRequest(**{
         "max_tokens": 100,
         "messages": [
             {"role": "user", "content": "Hello, Claude"},
@@ -205,8 +205,8 @@ def chat_completion_create_anthropic() -> anthropic.ChatCompletionCreate:
     })
 
 @pytest.fixture
-def chat_completion_anthropic() -> anthropic.ChatCompletion:
-    return anthropic.ChatCompletion(
+def chat_completion_anthropic() -> anthropic.ChatCompletionResponse:
+    return anthropic.ChatCompletionResponse(
         id="0987654321",
         content=[anthropic.TextBlock(type="text", text="The best answer is (B)")],
         model="text-generation-model",

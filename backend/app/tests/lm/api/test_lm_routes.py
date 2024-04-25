@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 
 from app.models import Event
 from app.core.config import settings
-from app.lm.models import anthropic, ChatCompletionCreate
+from app.lm.models import anthropic, ChatCompletionRequest
 
 from openai import OpenAI
 from mistralai.client import MistralClient
@@ -108,8 +108,8 @@ def test_mistral(
 def test_anthropic_client(chat_input_gen) -> None:
     """Test the native anthropic client"""
     anthropic_client = Anthropic(api_key=os.getenv("ARENA_ANTHROPIC_API_KEY"))
-    ccc = ChatCompletionCreate.model_validate(chat_input_gen("claude-2.1"))
-    ccc = anthropic.ChatCompletionCreate.from_chat_completion_create(ccc)
+    ccc = ChatCompletionRequest.model_validate(chat_input_gen("claude-2.1"))
+    ccc = anthropic.ChatCompletionRequest.from_chat_completion_create(ccc)
     ccc = ccc.to_dict()
     response =  anthropic_client.messages.create(**ccc)
     assert len(response.content) == 1
@@ -126,8 +126,8 @@ def test_anthropic_client_arena_endpoint(
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ARENA_ANTHROPIC_API_KEY")},
     )
     anthropic_client = Anthropic(auth_token=superuser_token_headers["Authorization"][7:], base_url=f"http://localhost/api/v1/lm/anthropic")
-    ccc = ChatCompletionCreate.model_validate(chat_input_gen("claude-2.1"))
-    ccc = anthropic.ChatCompletionCreate.from_chat_completion_create(ccc)
+    ccc = ChatCompletionRequest.model_validate(chat_input_gen("claude-2.1"))
+    ccc = anthropic.ChatCompletionRequest.from_chat_completion_create(ccc)
     ccc = ccc.to_dict()
     response =  anthropic_client.messages.create(**ccc)
     assert len(response.content) == 1
@@ -142,8 +142,8 @@ def test_anthropic(
         headers=superuser_token_headers,
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ARENA_ANTHROPIC_API_KEY")},
     )
-    ccc = ChatCompletionCreate.model_validate(chat_input_gen("claude-2.1"))
-    ccc = anthropic.ChatCompletionCreate.from_chat_completion_create(ccc)
+    ccc = ChatCompletionRequest.model_validate(chat_input_gen("claude-2.1"))
+    ccc = anthropic.ChatCompletionRequest.from_chat_completion_create(ccc)
     response = client.post(
         f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
         headers = superuser_token_headers,
@@ -165,9 +165,9 @@ def test_language_models(
             json={"name": f"{api}_API_KEY", "content": os.getenv(f"ARENA_{api}_API_KEY")},
         )
     for ccc in [
-        (ChatCompletionCreate(**chat_input_gen("gpt-3.5-turbo"))),
-        (ChatCompletionCreate(**chat_input_gen("mistral-small"))),
-        (ChatCompletionCreate(**chat_input_gen("claude-2.1"))),
+        (ChatCompletionRequest(**chat_input_gen("gpt-3.5-turbo"))),
+        (ChatCompletionRequest(**chat_input_gen("mistral-small"))),
+        (ChatCompletionRequest(**chat_input_gen("claude-2.1"))),
         ]:
         # Call Arena
         response = client.post(

@@ -1,43 +1,43 @@
 import re
 
 from app.ops import Op
-from app.lm.models import LanguageModelsApiKeys, ChatCompletion, ChatCompletionCreate, Message, openai, mistral, anthropic
+from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, openai, mistral, anthropic
 from app.services import lm
 
 
-class OpenAI(Op[tuple[str, openai.ChatCompletionCreate], openai.ChatCompletion]):
+class OpenAI(Op[tuple[str, openai.ChatCompletionRequest], openai.ChatCompletionResponse]):
     name: str = "openai"
 
-    async def call(self, api_key: str, input: openai.ChatCompletionCreate) -> openai.ChatCompletion:
+    async def call(self, api_key: str, input: openai.ChatCompletionRequest) -> openai.ChatCompletionResponse:
         service = lm.OpenAI(api_key=api_key)
         return await service.openai_chat_completion(input)
 
 
-class Mistral(Op[tuple[str, mistral.ChatCompletionCreate], mistral.ChatCompletion]):
+class Mistral(Op[tuple[str, mistral.ChatCompletionRequest], mistral.ChatCompletionResponse]):
     name: str = "mistral"
 
-    async def call(self, api_key: str, input: mistral.ChatCompletionCreate) -> mistral.ChatCompletion:
+    async def call(self, api_key: str, input: mistral.ChatCompletionRequest) -> mistral.ChatCompletionResponse:
         service = lm.Mistral(api_key=api_key)
         return await service.mistral_chat_completion(input)
 
 
-class Anthropic(Op[tuple[str, anthropic.ChatCompletionCreate], anthropic.ChatCompletion]):
+class Anthropic(Op[tuple[str, anthropic.ChatCompletionRequest], anthropic.ChatCompletionResponse]):
     name: str = "anthropic"
 
-    async def call(self, api_key: str, input: anthropic.ChatCompletionCreate) -> anthropic.ChatCompletion:
+    async def call(self, api_key: str, input: anthropic.ChatCompletionRequest) -> anthropic.ChatCompletionResponse:
         service = lm.Anthropic(api_key=api_key)
         return await service.anthropic_chat_completion(input)
 
 
-class Chat(Op[tuple[LanguageModelsApiKeys, ChatCompletionCreate], ChatCompletion]):
+class Chat(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest], ChatCompletionResponse]):
     name: str = "chat"
 
-    async def call(self, api_keys: LanguageModelsApiKeys, input: ChatCompletionCreate) -> ChatCompletion:
+    async def call(self, api_keys: LanguageModelsApiKeys, input: ChatCompletionRequest) -> ChatCompletionResponse:
         service = lm.LanguageModels(api_keys=api_keys)
         return await service.chat_completion(input)
 
 
-class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionCreate, ChatCompletion], float]):
+class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletionResponse], float]):
     """Implements a simple LLM-as-a-judge as in https://arxiv.org/pdf/2306.05685.pdf
     """
     name: str = "judge"
@@ -52,12 +52,12 @@ class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionCreate, ChatCompletion
         else:
             return 0.0
     
-    async def call(self, api_keys: LanguageModelsApiKeys, request: ChatCompletionCreate, response: ChatCompletion) -> float:
+    async def call(self, api_keys: LanguageModelsApiKeys, request: ChatCompletionRequest, response: ChatCompletionResponse) -> float:
         service = lm.LanguageModels(api_keys=api_keys)
         reference_request = request.model_copy()
         reference_request.model = self.reference_model
         reference_response = await service.chat_completion(reference_request)
-        judge_request = ChatCompletionCreate(
+        judge_request = ChatCompletionRequest(
             model=self.judge_model,
             messages=[
                 Message(role="system", content=f"""You will be given [User request] [Assistant response] pairs.

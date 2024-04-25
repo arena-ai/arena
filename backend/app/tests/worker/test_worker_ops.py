@@ -1,11 +1,11 @@
 from app.worker import evaluate
 
 from app.ops.lm import Chat
-from app.lm.models import ChatCompletionCreate, Message
+from app.lm.models import ChatCompletionRequest, Message
 
 def test_evaluate(language_models_api_keys):
     lm = Chat()
-    comp = lm(language_models_api_keys, ChatCompletionCreate(
+    comp = lm(language_models_api_keys, ChatCompletionRequest(
         model="gpt-3.5-turbo",
         messages=[
             Message(role="system", content="You are a helpful assistant."),

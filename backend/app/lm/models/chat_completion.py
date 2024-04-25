@@ -55,7 +55,7 @@ class ArenaParameters(BaseModel):
     judge_evaluation: bool = True
 
 
-class ChatCompletionCreate(BaseModel):
+class ChatCompletionRequest(BaseModel):
     """
     Maps to:
     https://github.com/openai/openai-python/blob/main/src/openai/types/chat/completion_create_params.py#L24
@@ -119,7 +119,7 @@ class CompletionUsage(BaseModel):
     total_tokens: int
 
 
-class ChatCompletion(BaseModel):
+class ChatCompletionResponse(BaseModel):
     """
     Maps to:
     https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion.py#L40
@@ -136,5 +136,5 @@ class ChatCompletion(BaseModel):
     arena_parameters: ArenaParameters | None = None
 
     @classmethod
-    def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletion":
-        return ChatCompletion.model_validate(m)
+    def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletionResponse":
+        return ChatCompletionResponse.model_validate(m)

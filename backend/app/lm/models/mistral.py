@@ -9,7 +9,7 @@ from app.lm.models import Function, FunctionDefinition, ChatCompletionToolParam,
 models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion
 """
 
-class ChatCompletionCreate(BaseModel):
+class ChatCompletionRequest(BaseModel):
     """
     Maps to:
     https://github.com/mistralai/client-python/blob/main/src/mistralai/client.py#L153
@@ -29,26 +29,26 @@ class ChatCompletionCreate(BaseModel):
     stream: bool | None = None
 
     @classmethod
-    def from_chat_completion_create(cls, ccc: models.ChatCompletionCreate) -> "ChatCompletionCreate":
+    def from_chat_completion_create(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
         ccc = ccc.model_dump()
         if "seed" in ccc:
             ccc["random_seed"] = ccc["seed"]
             del ccc["seed"]
         if "arena_parameters" in ccc:
             del ccc["arena_parameters"]
-        return ChatCompletionCreate.model_validate(ccc)
+        return ChatCompletionRequest.model_validate(ccc)
 
     def to_dict(self) -> Mapping[str, Any]:
         return self.model_dump(exclude_unset=True, exclude_none=True)
 
 
-class ChatCompletion(models.ChatCompletion):
+class ChatCompletionResponse(models.ChatCompletionResponse):
     """
     https://github.com/mistralai/client-python/blob/main/src/mistralai/models/chat_completion.py#L86
     """
     @classmethod
-    def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletion":
-        return ChatCompletion.model_validate(m)
+    def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletionResponse":
+        return ChatCompletionResponse.model_validate(m)
 
-    def to_chat_completion(self) -> models.ChatCompletion:
-        return models.ChatCompletion.model_validate(self.model_dump(exclude_unset=True, exclude_none=True))
+    def to_chat_completion(self) -> models.ChatCompletionResponse:
+        return models.ChatCompletionResponse.model_validate(self.model_dump(exclude_unset=True, exclude_none=True))

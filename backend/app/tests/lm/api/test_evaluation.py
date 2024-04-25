@@ -5,7 +5,7 @@ from random import random
 
 from app.models import Event
 from app.core.config import settings
-from app.lm.models import ChatCompletionCreate, Evaluation
+from app.lm.models import ChatCompletionRequest, Evaluation
 
 
 def test_evaluation(
@@ -20,9 +20,9 @@ def test_evaluation(
             json={"name": f"{api}_API_KEY", "content": os.getenv(f"ARENA_{api}_API_KEY")},
         )
     for ccc in [
-        (ChatCompletionCreate(**chat_input_gen("gpt-3.5-turbo"))),
-        (ChatCompletionCreate(**chat_input_gen("mistral-small"))),
-        (ChatCompletionCreate(**chat_input_gen("claude-2.1"))),
+        (ChatCompletionRequest(**chat_input_gen("gpt-3.5-turbo"))),
+        (ChatCompletionRequest(**chat_input_gen("mistral-small"))),
+        (ChatCompletionRequest(**chat_input_gen("claude-2.1"))),
         ]:
         # Call Arena
         response = client.post(
@@ -54,9 +54,9 @@ def test_evaluation_get(
             json={"name": f"{api}_API_KEY", "content": os.getenv(f"ARENA_{api}_API_KEY")},
         )
     for ccc in [
-        (ChatCompletionCreate(**chat_input_gen("gpt-3.5-turbo"))),
-        (ChatCompletionCreate(**chat_input_gen("mistral-small"))),
-        (ChatCompletionCreate(**chat_input_gen("claude-2.1"))),
+        (ChatCompletionRequest(**chat_input_gen("gpt-3.5-turbo"))),
+        (ChatCompletionRequest(**chat_input_gen("mistral-small"))),
+        (ChatCompletionRequest(**chat_input_gen("claude-2.1"))),
         ]:
         # Call Arena
         response = client.post(
