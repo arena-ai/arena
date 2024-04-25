@@ -10,7 +10,7 @@ class OpenAI(Op[tuple[str, openai.ChatCompletionCreate], openai.ChatCompletion])
 
     async def call(self, api_key: str, input: openai.ChatCompletionCreate) -> openai.ChatCompletion:
         service = lm.OpenAI(api_key=api_key)
-        return await service.chat_completion(input)
+        return await service.openai_chat_completion(input)
 
 
 class Mistral(Op[tuple[str, mistral.ChatCompletionCreate], mistral.ChatCompletion]):
@@ -18,7 +18,7 @@ class Mistral(Op[tuple[str, mistral.ChatCompletionCreate], mistral.ChatCompletio
 
     async def call(self, api_key: str, input: mistral.ChatCompletionCreate) -> mistral.ChatCompletion:
         service = lm.Mistral(api_key=api_key)
-        return await service.chat_completion(input)
+        return await service.mistral_chat_completion(input)
 
 
 class Anthropic(Op[tuple[str, anthropic.ChatCompletionCreate], anthropic.ChatCompletion]):
@@ -26,7 +26,7 @@ class Anthropic(Op[tuple[str, anthropic.ChatCompletionCreate], anthropic.ChatCom
 
     async def call(self, api_key: str, input: anthropic.ChatCompletionCreate) -> anthropic.ChatCompletion:
         service = lm.Anthropic(api_key=api_key)
-        return await service.chat_completion(input)
+        return await service.anthropic_chat_completion(input)
 
 
 class Chat(Op[tuple[LanguageModelsApiKeys, ChatCompletionCreate], ChatCompletion]):

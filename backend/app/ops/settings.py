@@ -9,19 +9,19 @@ class Setting(Op[tuple[Session, User], str]):
     name: str
 
     async def call(self, session: Session, user: User) -> str:
-        return crud.get_setting(session=session, setting_name=self.name, owner_id=user.id)
+        return crud.get_setting(session=session, setting_name=self.name, owner_id=user.id).content
 
 
 def openai_api_key(session: Session, user: User) -> Computation[str]:
-    Setting("OPENAI_API_KEY")(session, user)
+    return Setting(name="OPENAI_API_KEY")(session, user)
 
 
 def mistral_api_key(session: Session, user: User) -> Computation[str]:
-    Setting("MISTRAL_API_KEY")(session, user)
+    return Setting(name="MISTRAL_API_KEY")(session, user)
 
 
 def anthropic_api_key(session: Session, user: User) -> Computation[str]:
-    Setting("ANTHROPIC_API_KEY")(session, user)
+    return Setting(name="ANTHROPIC_API_KEY")(session, user)
 
 
 class LanguageModelsApiKeys(Op[tuple[str, str, str], str]):
