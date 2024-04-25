@@ -191,17 +191,12 @@ def chat_completion_create_anthropic() -> anthropic.ChatCompletionRequest:
     return anthropic.ChatCompletionRequest(**{
         "max_tokens": 100,
         "messages": [
-            {"role": "user", "content": "Hello, Claude"},
-            {"role": "assistant", "content": "Hi, I'm Claude. How can I help you?"},
+            {"role": "user", "content": "Hello, Claude, how can you help?"},
         ],
         "model": "claude-2.0",
         "metadata": {"user_id": "123e4567-e89b-12d3-a456-426614174000"},
-        "stop_sequences": ["Stop generating."],
         "system": "You are a helpful assistant.",
         "temperature": 0.8,
-        "top_k": 0,
-        "top_p": 1.0,
-        "stream": False,
     })
 
 @pytest.fixture

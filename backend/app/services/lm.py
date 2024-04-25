@@ -52,7 +52,7 @@ class OpenAI(Service[openai.ChatCompletionRequest, openai.ChatCompletionResponse
             content=req,
         )
     
-    def from_any(self, a:Any) -> openai.ChatCompletionResponse:
+    def from_any(self, a: Any) -> openai.ChatCompletionResponse:
         return openai.ChatCompletionResponse.model_validate(a)
 
     async def openai_chat_completion(self, ccc: openai.ChatCompletionRequest) -> Response[openai.ChatCompletionResponse]:
@@ -87,7 +87,7 @@ class Mistral(Service[mistral.ChatCompletionRequest, mistral.ChatCompletionRespo
             content=req,
         )
     
-    def from_any(self, a:Any) -> mistral.ChatCompletionResponse:
+    def from_any(self, a: Any) -> mistral.ChatCompletionResponse:
         return mistral.ChatCompletionResponse.model_validate(a)
     
     async def mistral_chat_completion(self, ccc: mistral.ChatCompletionRequest) -> Response[mistral.ChatCompletionResponse]:
@@ -123,7 +123,7 @@ class Anthropic(Service[anthropic.ChatCompletionRequest, anthropic.ChatCompletio
             content=req,
         )
     
-    def from_any(self, a:Any) -> anthropic.ChatCompletionResponse:
+    def from_any(self, a: Any) -> anthropic.ChatCompletionResponse:
         return anthropic.ChatCompletionResponse.model_validate(a)
     
     async def anthropic_chat_completion(self, ccc: anthropic.ChatCompletionRequest) -> Response[anthropic.ChatCompletionRequest]:
