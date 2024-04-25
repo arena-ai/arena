@@ -109,7 +109,7 @@ def test_anthropic_client(chat_input_gen) -> None:
     """Test the native anthropic client"""
     anthropic_client = Anthropic(api_key=os.getenv("ARENA_ANTHROPIC_API_KEY"))
     ccc = ChatCompletionRequest.model_validate(chat_input_gen("claude-2.1"))
-    ccc = anthropic.ChatCompletionRequest.from_chat_completion_create(ccc)
+    ccc = anthropic.ChatCompletionRequest.from_chat_completion_request(ccc)
     ccc = ccc.to_dict()
     response =  anthropic_client.messages.create(**ccc)
     assert len(response.content) == 1
@@ -127,7 +127,7 @@ def test_anthropic_client_arena_endpoint(
     )
     anthropic_client = Anthropic(auth_token=superuser_token_headers["Authorization"][7:], base_url=f"http://localhost/api/v1/lm/anthropic")
     ccc = ChatCompletionRequest.model_validate(chat_input_gen("claude-2.1"))
-    ccc = anthropic.ChatCompletionRequest.from_chat_completion_create(ccc)
+    ccc = anthropic.ChatCompletionRequest.from_chat_completion_request(ccc)
     ccc = ccc.to_dict()
     response =  anthropic_client.messages.create(**ccc)
     assert len(response.content) == 1
@@ -143,7 +143,7 @@ def test_anthropic(
         json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ARENA_ANTHROPIC_API_KEY")},
     )
     ccc = ChatCompletionRequest.model_validate(chat_input_gen("claude-2.1"))
-    ccc = anthropic.ChatCompletionRequest.from_chat_completion_create(ccc)
+    ccc = anthropic.ChatCompletionRequest.from_chat_completion_request(ccc)
     response = client.post(
         f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
         headers = superuser_token_headers,

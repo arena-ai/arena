@@ -29,7 +29,7 @@ class ChatCompletionRequest(BaseModel):
     stream: bool | None = None
 
     @classmethod
-    def from_chat_completion_create(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
+    def from_chat_completion_request(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
         ccc = ccc.model_dump()
         if "seed" in ccc:
             ccc["random_seed"] = ccc["seed"]
@@ -50,5 +50,5 @@ class ChatCompletionResponse(models.ChatCompletionResponse):
     def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletionResponse":
         return ChatCompletionResponse.model_validate(m)
 
-    def to_chat_completion(self) -> models.ChatCompletionResponse:
+    def to_chat_completion_response(self) -> models.ChatCompletionResponse:
         return models.ChatCompletionResponse.model_validate(self.model_dump(exclude_unset=True, exclude_none=True))

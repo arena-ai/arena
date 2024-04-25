@@ -28,4 +28,4 @@ class Analyzer:
             return openai.ChatCompletionResponse.model_validate(response.raise_for_status().json())
 
     async def chat_completion(self, ccc: ChatCompletionRequest) -> ChatCompletionResponse:
-        return (await self.openai_chat_completion(openai.ChatCompletionRequest.from_chat_completion_create(ccc))).to_chat_completion()
+        return (await self.openai_chat_completion(openai.ChatCompletionRequest.from_chat_completion_request(ccc))).to_chat_completion_response()

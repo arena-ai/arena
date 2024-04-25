@@ -37,7 +37,7 @@ class ChatCompletionRequest(BaseModel):
     stream: bool | None = None
 
     @classmethod
-    def from_chat_completion_create(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
+    def from_chat_completion_request(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
         messages: Sequence[Message] = [msg.model_dump() for msg in ccc.messages if not msg.role == "system"]
         system: Sequence[str] = [msg.content for msg in ccc.messages if msg.role == "system"]
         ccc = ccc.model_dump()
@@ -88,7 +88,7 @@ class ChatCompletionResponse(BaseModel):
     def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletionResponse":
         return ChatCompletionResponse.model_validate(m)
 
-    def to_chat_completion(self) -> models.ChatCompletionResponse:
+    def to_chat_completion_response(self) -> models.ChatCompletionResponse:
         finish_reasons = {
             "end_turn": "tool_calls",
             "max_tokens": "length",

@@ -63,7 +63,7 @@ class OpenAI(Service):
             return openai.ChatCompletionResponse.model_validate(response.raise_for_status().json())
 
     async def chat_completion(self, ccc: ChatCompletionRequest) -> ChatCompletionResponse:
-        return (await self.openai_chat_completion(openai.ChatCompletionRequest.from_chat_completion_create(ccc))).to_chat_completion()
+        return (await self.openai_chat_completion(openai.ChatCompletionRequest.from_chat_completion_request(ccc))).to_chat_completion_response()
 
 
 @dataclass
@@ -88,7 +88,7 @@ class Mistral(Service):
             return mistral.ChatCompletionResponse.model_validate(response.raise_for_status().json())
 
     async def chat_completion(self, ccc: ChatCompletionRequest) -> ChatCompletionResponse:
-        return (await self.mistral_chat_completion(mistral.ChatCompletionRequest.from_chat_completion_create(ccc))).to_chat_completion()
+        return (await self.mistral_chat_completion(mistral.ChatCompletionRequest.from_chat_completion_request(ccc))).to_chat_completion_response()
 
 @dataclass
 class Anthropic(Service):
@@ -113,7 +113,7 @@ class Anthropic(Service):
             return anthropic.ChatCompletionResponse.model_validate(response.raise_for_status().json())
 
     async def chat_completion(self, ccc: ChatCompletionRequest) -> ChatCompletionResponse:
-        return (await self.anthropic_chat_completion(anthropic.ChatCompletionRequest.from_chat_completion_create(ccc))).to_chat_completion()
+        return (await self.anthropic_chat_completion(anthropic.ChatCompletionRequest.from_chat_completion_request(ccc))).to_chat_completion_response()
 
 
 @dataclass
