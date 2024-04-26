@@ -7,6 +7,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app import crud
 from app.models import User, Event, EventCreate
 from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
+from app.ops import Computation
 from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys
 from app.ops.events import LogRequest, LogResponse, EventIdentifier
 from app.ops.lm import OpenAI, OpenAIRequest, Mistral, MistralRequest, Anthropic, AnthropicRequest, Chat, ChatRequest, Judge
@@ -103,5 +104,13 @@ async def chat_completion_request(
 async def chat_completion_response(
     session: SessionDep, current_user: CurrentUser, request_event: Event, chat_completion_response: ChatCompletionResponse
 ) -> Event:
+    api_keys = language_models_api_keys(session, current_user)
+    output = chat_completion_response
     response_event = LogResponse()(session, current_user, request_event, chat_completion_response)
-    return await response_event.evaluate()
+    event_identifier = EventIdentifier()(session, current_user, request_event, output.id)
+    computation = response_event.then(event_identifier)
+    # Optionally judge the result
+    if chat_completion_request.arena_parameters and chat_completion_request.arena_parameters.judge_evaluation:
+        judge_score = Judge()(api_keys, input, output)
+        computation = computation.then(judge_score)
+    return await computation.evaluate()
