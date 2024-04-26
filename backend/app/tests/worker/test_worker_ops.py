@@ -11,7 +11,7 @@ def test_evaluate(language_models_api_keys):
             Message(role="system", content="You are a helpful assistant."),
             Message(role="user", content="What is the capital of France? Give it a score strictly between 0 and 10. Do the same with London.")
         ]
-    ))
+    )).content
     immediate_result = evaluate(comp)
     deferred_result = evaluate.delay(comp)
     print(f"\immediate_result = {immediate_result.choices[0].message.content}")

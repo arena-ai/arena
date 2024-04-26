@@ -8,7 +8,7 @@ from app import crud
 from app.models import User, Event, EventCreate
 from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
 from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys
-from app.ops.events import LogRequest, LogResponse
+from app.ops.events import LogRequest, LogResponse, EventIdentifier
 from app.ops.lm import OpenAI, OpenAIRequest, Mistral, MistralRequest, Anthropic, AnthropicRequest, Chat, ChatRequest, Judge
 
 
@@ -28,7 +28,8 @@ async def openai_chat_completion(
     response = OpenAI()(openai_api_key(session, current_user), input)
     response_event = LogResponse()(session, current_user, request_event, response)
     output = response.content
-    return await request_event.then(response_event).then(output).evaluate()
+    event_identifier = EventIdentifier()(session, current_user, request_event, output.id)
+    return await request_event.then(response_event).then(event_identifier).then(output).evaluate()
 
 
 @router.post("/mistral/v1/chat/completions", response_model=mistral.ChatCompletionResponse)
@@ -44,7 +45,8 @@ async def mistral_chat_completion(
     response = Mistral()(mistral_api_key(session, current_user), input)
     response_event = LogResponse()(session, current_user, request_event, response)
     output = response.content
-    return await request_event.then(response_event).then(output).evaluate()
+    event_identifier = EventIdentifier()(session, current_user, request_event, output.id)
+    return await request_event.then(response_event).then(event_identifier).then(output).evaluate()
 
 
 @router.post("/anthropic/v1/messages", response_model=anthropic.ChatCompletionResponse)
@@ -60,7 +62,8 @@ async def anthropic_chat_completion(
     response = Anthropic()(anthropic_api_key(session, current_user), input)
     response_event = LogResponse()(session, current_user, request_event, response)
     output = response.content
-    return await request_event.then(response_event).then(output).evaluate()
+    event_identifier = EventIdentifier()(session, current_user, request_event, output.id)
+    return await request_event.then(response_event).then(event_identifier).then(output).evaluate()
 
 
 @router.post("/chat/completions", response_model=ChatCompletionResponse)
@@ -76,7 +79,8 @@ async def chat_completion(
     response = Chat()(language_models_api_keys(session, current_user), input)
     response_event = LogResponse()(session, current_user, request_event, response)
     output = response.content
-    return await request_event.then(response_event).then(output).evaluate()
+    event_identifier = EventIdentifier()(session, current_user, request_event, output.id)
+    return await request_event.then(response_event).then(event_identifier).then(output).evaluate()
 
 
 @router.post("/chat/completions/request", response_model=Event)

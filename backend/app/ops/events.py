@@ -5,7 +5,7 @@ from sqlmodel import Session
 
 from app.ops import Op
 from app import crud
-from app.models import Event, EventCreate, User
+from app.models import Event, EventCreate, User, EventIdentifier
 from app.services import lm, Request, Response
 
 
@@ -31,3 +31,11 @@ class LogRequest(LogEvent[Request]):
 class LogResponse(LogEvent[Response]):
     name: str = "response"
 
+
+class EventIdentifier(Op[tuple[Session, User, Event, str], EventIdentifier]):
+    name: str = "identifier"
+
+    async def call(self, session: Session, user: User, event: Event, identifier: str) -> EventIdentifier:
+        # Add the native identifier to the parent event
+        event_identifier = crud.create_event_identifier(session=session, event_identifier=identifier, event_id=event.id)
+        return event_identifier
