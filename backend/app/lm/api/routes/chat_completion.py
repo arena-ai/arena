@@ -76,11 +76,17 @@ async def chat_completion(
     input = ChatCompletionRequest.model_validate(chat_completion_request)
     request = ChatRequest()(input)
     request_event = LogRequest()(session, current_user, None, request)
-    response = Chat()(language_models_api_keys(session, current_user), input)
+    api_keys = language_models_api_keys(session, current_user)
+    response = Chat()(api_keys, input)
     response_event = LogResponse()(session, current_user, request_event, response)
     output = response.content
     event_identifier = EventIdentifier()(session, current_user, request_event, output.id)
-    return await request_event.then(response_event).then(event_identifier).then(output).evaluate()
+    computation = request_event.then(response_event).then(event_identifier)
+    # Optionally judge the result
+    if chat_completion_request.arena_parameters and chat_completion_request.arena_parameters.judge_evaluation:
+        judge_score = Judge()(api_keys, input, output)
+        computation = computation.then(judge_score)
+    return await computation.then(output).evaluate()
 
 
 @router.post("/chat/completions/request", response_model=Event)

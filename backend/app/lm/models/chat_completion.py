@@ -52,7 +52,7 @@ class ResponseFormat(BaseModel):
 
 class ArenaParameters(BaseModel):
     pii_filter: bool = False
-    judge_evaluation: bool = True
+    judge_evaluation: bool = False
 
 
 class ChatCompletionRequest(BaseModel):

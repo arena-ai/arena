@@ -3,7 +3,7 @@ from anyio import run
 
 from app.ops import tup
 from app.ops.lm import OpenAI, Mistral, Anthropic, Chat, Judge
-from app.lm.models import ChatCompletionRequest, Message, openai, mistral, anthropic
+from app.lm.models import ChatCompletionRequest, Message, openai, mistral, anthropic, ArenaParameters
 
 
 def test_openai_mistral_anthropic(language_models_api_keys) -> None:
@@ -74,3 +74,15 @@ def test_other_judge(language_models_api_keys) -> None:
     resp = chat(language_models_api_keys, req).content
     comp = tup(resp.choices[0].message.content, judge(language_models_api_keys, req, resp))
     print(run(comp.evaluate))
+
+def test_chat_judge(language_models_api_keys) -> None:
+    lm = Chat()
+    comp = lm(language_models_api_keys, ChatCompletionRequest(
+        model="gpt-3.5-turbo",
+        messages=[
+            Message(role="system", content="You are a helpful assistant."),
+            Message(role="user", content="What is the capital of France?")
+        ],
+        arena_parameters=ArenaParameters(judge_evaluation=True)
+    )).content
+    print(run(comp.evaluate).choices[0].message.content)
