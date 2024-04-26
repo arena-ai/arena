@@ -115,3 +115,14 @@ class Computation(BaseModel, Generic[B]):
             return arg
         else:
             return Const(arg)()
+
+
+class Tup(Op[*As, tuple[*As]], Generic[*As]):
+    """A tuple op"""
+    name: str = "tup"
+
+    async def call(self, *tup: *As) -> tuple[*As]:
+        return tup
+
+def tup(*tup: Computation) -> Computation[tuple[*As]]:
+    return Tup()(*tup)

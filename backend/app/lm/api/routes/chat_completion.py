@@ -68,7 +68,7 @@ async def chat_completion(
     """
     Abstract version
     """
-    return Chat()(language_models_api_keys(session, current_user), ChatCompletionRequest.model_validate(chat_completion_in)).content.evaluate()
+    return await Chat()(language_models_api_keys(session, current_user), ChatCompletionRequest.model_validate(chat_completion_in)).content.evaluate()
 
 
 @router.post("/chat/completions/request", response_model=Event)
