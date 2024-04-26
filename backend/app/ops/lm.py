@@ -56,7 +56,7 @@ class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletio
         service = lm.LanguageModels(api_keys=api_keys)
         reference_request = request.model_copy()
         reference_request.model = self.reference_model
-        reference_response = await service.chat_completion(reference_request).content
+        reference_response = await service.chat_completion(reference_request)
         judge_request = ChatCompletionRequest(
             model=self.judge_model,
             messages=[
@@ -69,7 +69,7 @@ and level of detail of their responses."""),
 {next((msg.content for msg in reference_request.messages if msg.role=="user"), "What?")}
 
 [Assistant response]
-{reference_response.choices[0].message.content}"""),
+{reference_response.content.choices[0].message.content}"""),
                 Message(role="assistant", content="0.7989"),
                 Message(role="user", content=f"""[User request]
 {next((msg.content for msg in request.messages if msg.role=="user"), "What?")}
@@ -78,5 +78,5 @@ and level of detail of their responses."""),
 {response.choices[0].message.content}"""),
             ]
         )
-        judge_response = await service.chat_completion(judge_request).content
-        return self.find_float(judge_response.choices[0].message.content)
+        judge_response = await service.chat_completion(judge_request)
+        return self.find_float(judge_response.content.choices[0].message.content)

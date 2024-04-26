@@ -22,7 +22,7 @@ async def openai_chat_completion(
     """
     OpenAI integration
     """
-    return await OpenAI()(openai_api_key(session, current_user), openai.ChatCompletionRequest.model_validate(chat_completion_in)).evaluate()
+    return await OpenAI()(openai_api_key(session, current_user), openai.ChatCompletionRequest.model_validate(chat_completion_in)).content.evaluate()
 
 
 @router.post("/mistral/v1/chat/completions", response_model=mistral.ChatCompletionResponse)
@@ -32,7 +32,7 @@ async def mistral_chat_completion(
     """
     Mistral integration
     """
-    return await Mistral()(mistral_api_key(session, current_user), mistral.ChatCompletionRequest.model_validate(chat_completion_in)).evaluate()
+    return await Mistral()(mistral_api_key(session, current_user), mistral.ChatCompletionRequest.model_validate(chat_completion_in)).content.evaluate()
 
 
 @router.post("/anthropic/v1/messages", response_model=anthropic.ChatCompletionResponse)
@@ -42,7 +42,7 @@ async def anthropic_chat_completion(
     """
     Anthropic integration
     """
-    return await Anthropic()(anthropic_api_key(session, current_user), anthropic.ChatCompletionRequest.model_validate(chat_completion_in)).evaluate()
+    return await Anthropic()(anthropic_api_key(session, current_user), anthropic.ChatCompletionRequest.model_validate(chat_completion_in)).content.evaluate()
 
 
 async def chat_completion_request_event(session: Session, current_user: User, chat_completion_create: ChatCompletionRequest) -> Event:
@@ -68,8 +68,7 @@ async def chat_completion(
     """
     Abstract version
     """
-    response = Chat()(language_models_api_keys(session, current_user), ChatCompletionRequest.model_validate(chat_completion_in))
-    return await response.evaluate()
+    return Chat()(language_models_api_keys(session, current_user), ChatCompletionRequest.model_validate(chat_completion_in)).content.evaluate()
 
 
 @router.post("/chat/completions/request", response_model=Event)
