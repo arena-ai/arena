@@ -34,7 +34,7 @@ def test_evaluation(
         eval = client.post(
             f"{settings.API_V1_STR}/lm/evaluation",
             headers = superuser_token_headers,
-            json = Evaluation(identifier=response.json()["id"], score=random()).model_dump(mode="json")
+            json = Evaluation(identifier=response.json()['id'], score=random()).model_dump(mode="json")
         )
         assert eval.status_code == 200
     events = db.exec(select(Event).where(Event.name=="evaluation")).all()

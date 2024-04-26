@@ -24,6 +24,17 @@ def var(name: str, value: B) -> Computation[B]:
     return Var(name=name)(cst(value))
 
 
+class Tup(Op[*As, tuple[*As]], Generic[*As]):
+    """A tuple op"""
+    name: str = "tup"
+
+    async def call(self, *tup: *As) -> tuple[*As]:
+        return tup
+
+def tup(*tup: Computation) -> Computation[tuple[*As]]:
+    return Tup()(*tup)
+
+
 class Fun(Op[tuple[A], B], Generic[A, B]):
     """A variable op"""
     name: str

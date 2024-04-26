@@ -1,7 +1,7 @@
 from sqlmodel import Session
 from anyio import run
 
-from app.ops.utils import tup
+from app.ops import tup
 from app.ops.lm import OpenAI, Mistral, Anthropic, Chat, Judge
 from app.lm.models import ChatCompletionRequest, Message, openai, mistral, anthropic
 

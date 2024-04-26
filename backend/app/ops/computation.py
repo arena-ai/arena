@@ -63,6 +63,14 @@ class Call(Op[*As, B], Generic[*As, B]):
         return a.__call__(*self.args)
 
 
+class Then(Op[tuple[A, B], B], Generic[A, B]):
+    """A then op"""
+    name: str = "then"
+
+    async def call(self, a: A, b: B) -> B:
+        return b
+
+
 class Computation(BaseModel, Generic[B]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     """An Op applied to arguments"""
@@ -108,6 +116,9 @@ class Computation(BaseModel, Generic[B]):
 
     def __call__(self, *args) -> 'Computation':
         return Call(args=args)(self)
+
+    def then(self, other: 'Computation') -> 'Computation':
+        return Then()(self, other)
     
     @classmethod
     def from_any(cls, arg: Any) -> 'Computation':
@@ -116,13 +127,3 @@ class Computation(BaseModel, Generic[B]):
         else:
             return Const(arg)()
 
-
-class Tup(Op[*As, tuple[*As]], Generic[*As]):
-    """A tuple op"""
-    name: str = "tup"
-
-    async def call(self, *tup: *As) -> tuple[*As]:
-        return tup
-
-def tup(*tup: Computation) -> Computation[tuple[*As]]:
-    return Tup()(*tup)
