@@ -10,13 +10,10 @@ As = TypeVarTuple('As')
 
 
 def cst(value: B) -> Computation[B]:
-    return Const(value)()
-
+    return Const(value=value)()
 
 class Var(Op[tuple[B], B], Generic[B]):
     """A variable op"""
-    name: str
-
     async def call(self, value: B) -> B:
         return value
 
@@ -26,8 +23,6 @@ def var(name: str, value: B) -> Computation[B]:
 
 class Tup(Op[*As, tuple[*As]], Generic[*As]):
     """A tuple op"""
-    name: str = "tup"
-
     async def call(self, *tup: *As) -> tuple[*As]:
         return tup
 
@@ -37,7 +32,6 @@ def tup(*tup: Computation) -> Computation[tuple[*As]]:
 
 class Fun(Op[tuple[A], B], Generic[A, B]):
     """A variable op"""
-    name: str
     fun: Callable[[A], B]
 
     async def call(self, a: A) -> B:
@@ -48,8 +42,6 @@ def fun(f: Callable[[A], B], a: Computation[A]) -> Computation[B]:
 
 
 class Rand(Op[tuple[()], float]):
-    name: str = "rand"
-
     async def call(self) -> float:
         return random()
 
@@ -58,8 +50,6 @@ def rnd() -> Computation[float]:
 
 
 class RandInt(Op[tuple[int, int], int]):
-    name: str = "randint"
-
     async def call(self, a: int, b: int) -> int:
         return randint(a, b)
 

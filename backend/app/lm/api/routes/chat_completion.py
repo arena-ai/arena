@@ -7,10 +7,11 @@ from app.api.deps import CurrentUser, SessionDep
 from app import crud
 from app.models import User, Event, EventCreate
 from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
-from app.ops import Computation
 from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys
 from app.ops.events import LogRequest, LogResponse, EventIdentifier
 from app.ops.lm import OpenAI, OpenAIRequest, Mistral, MistralRequest, Anthropic, AnthropicRequest, Chat, ChatRequest, Judge
+from app.ops.session import get_db
+from app.worker import evaluate
 
 
 router = APIRouter()
@@ -82,12 +83,16 @@ async def chat_completion(
     response_event = LogResponse()(session, current_user, request_event, response)
     output = response.content
     event_identifier = EventIdentifier()(session, current_user, request_event, output.id)
-    computation = request_event.then(response_event).then(event_identifier)
+    # Only the output has to be computed now
+    computation = output
+    # Everything else can be delayed
+    delayed_computation = request_event.then(response_event).then(event_identifier)
     # Optionally judge the result
     if chat_completion_request.arena_parameters and chat_completion_request.arena_parameters.judge_evaluation:
         judge_score = Judge()(api_keys, input, output)
-        computation = computation.then(judge_score)
-    return await computation.then(output).evaluate()
+        delayed_computation = delayed_computation.then(judge_score)
+    evaluate.delay(delayed_computation)
+    return await computation.evaluate()
 
 
 @router.post("/chat/completions/request", response_model=Event)
@@ -108,9 +113,14 @@ async def chat_completion_response(
     output = chat_completion_response
     response_event = LogResponse()(session, current_user, request_event, chat_completion_response)
     event_identifier = EventIdentifier()(session, current_user, request_event, output.id)
-    computation = response_event.then(event_identifier)
+    # Only the response_event has to be computed now for return
+    computation = response_event
+    # Everything else can be delayed
+    delayed_computation = event_identifier
     # Optionally judge the result
     if chat_completion_request.arena_parameters and chat_completion_request.arena_parameters.judge_evaluation:
         judge_score = Judge()(api_keys, input, output)
-        computation = computation.then(judge_score)
+        delayed_computation = delayed_computation.then(judge_score)
+    print(f"DEBUG {delayed_computation}")
+    evaluate.delay(delayed_computation)
     return await computation.evaluate()

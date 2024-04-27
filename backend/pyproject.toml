@@ -29,7 +29,7 @@ celery = {extras = ["redis"], version = "^5.3.6"}
 redis = "^5.0.3"
 # For integrations
 openai = "^1.23"
-anthropic = "^0.2"
+anthropic = "^0.25"
 mistralai = "^0.1"
 anyio = {extras = ["trio"], version = "^4.3.0"}
 

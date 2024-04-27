@@ -5,8 +5,8 @@ from anyio import run
 from app.ops import Op, Const, cst, rnd, rndi
 
 def test_const_op() -> None:
-    c = Const(4)
-    d = Const("hello")
+    c = cst(4).op
+    d = cst("hello").op
     print(f"c = {c.model_dump_json()}")
     print(f"d.call() = {run(d.call)}")
     print(f"d() = {d()}")

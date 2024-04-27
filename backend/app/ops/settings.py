@@ -6,6 +6,7 @@ from app.lm import models
 from app.ops import Op, Computation, Var
 
 class Setting(Op[tuple[Session, User], str]):
+    """An op to access setting by key"""
     name: str
 
     async def call(self, session: Session, user: User) -> str:

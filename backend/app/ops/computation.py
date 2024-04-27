@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from asyncio import TaskGroup, Task
 from anyio import run
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, SerializeAsAny
 
 
 As = TypeVarTuple('As')
@@ -12,7 +12,11 @@ B = TypeVar('B')
 
 class Op(BaseModel, ABC, Generic[*As, B]):
     """A basic template for ops"""
-    name: str
+    
+    @computed_field
+    @property
+    def opname(self) -> str:
+        return self.__class__.__name__
 
     @abstractmethod
     async def call(self, *args: *As) -> B:
@@ -26,11 +30,7 @@ class Op(BaseModel, ABC, Generic[*As, B]):
 
 class Const(Op[tuple[()], B], Generic[B]):
     """A constant op"""
-    name: str
     value: B
-
-    def __init__(self, value: B):
-        super().__init__(name=f"const_{value}", value=value)
 
     async def call(self) -> B:
         return self.value
@@ -38,7 +38,6 @@ class Const(Op[tuple[()], B], Generic[B]):
 
 class Getattr(Op[A, B], Generic[A, B]):
     """A getattr op"""
-    name: str = "getattr"
     attr: str
 
     async def call(self, a: A) -> B:
@@ -47,7 +46,6 @@ class Getattr(Op[A, B], Generic[A, B]):
 
 class Getitem(Op[*As, B], Generic[*As, B]):
     """A getitem op"""
-    name: str = "getitem"
     index: int
 
     async def call(self, a: A) -> B:
@@ -56,7 +54,6 @@ class Getitem(Op[*As, B], Generic[*As, B]):
 
 class Call(Op[*As, B], Generic[*As, B]):
     """A call op"""
-    name: str = "call"
     args: tuple
 
     async def call(self, a: A) -> B:
@@ -65,8 +62,6 @@ class Call(Op[*As, B], Generic[*As, B]):
 
 class Then(Op[tuple[A, B], B], Generic[A, B]):
     """A then op"""
-    name: str = "then"
-
     async def call(self, a: A, b: B) -> B:
         return b
 
@@ -74,7 +69,7 @@ class Then(Op[tuple[A, B], B], Generic[A, B]):
 class Computation(BaseModel, Generic[B]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     """An Op applied to arguments"""
-    op: Op
+    op: SerializeAsAny[Op]
     args: Sequence['Computation']
     task: Task | None = Field(None, exclude=True)
     
@@ -125,5 +120,5 @@ class Computation(BaseModel, Generic[B]):
         if isinstance(arg, Computation):
             return arg
         else:
-            return Const(arg)()
+            return Const(value=arg)()
 

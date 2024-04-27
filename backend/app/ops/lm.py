@@ -6,52 +6,36 @@ from app.ops import Op
 from app.ops.events import LogRequest, LogResponse
 
 class OpenAI(Op[tuple[str, openai.ChatCompletionRequest], Response[openai.ChatCompletionResponse]]):
-    name: str = "openai"
-
     async def call(self, api_key: str, input: openai.ChatCompletionRequest) -> Response[openai.ChatCompletionResponse]:
         return await lm.OpenAI(api_key=api_key).openai_chat_completion(input)
 
 class OpenAIRequest(Op[openai.ChatCompletionRequest, Request[openai.ChatCompletionRequest]]):
-    name: str = "openai_request"
-
     async def call(self, input: openai.ChatCompletionRequest) -> Request[openai.ChatCompletionRequest]:
         return lm.OpenAI().request(input)
 
 
 class Mistral(Op[tuple[str, mistral.ChatCompletionRequest], Response[mistral.ChatCompletionResponse]]):
-    name: str = "mistral"
-
     async def call(self, api_key: str, input: mistral.ChatCompletionRequest) -> Response[mistral.ChatCompletionResponse]:
         return await lm.Mistral(api_key=api_key).mistral_chat_completion(input)
 
 class MistralRequest(Op[mistral.ChatCompletionRequest, Request[mistral.ChatCompletionRequest]]):
-    name: str = "mistral_request"
-
     async def call(self, input: mistral.ChatCompletionRequest) -> Request[mistral.ChatCompletionRequest]:
         return lm.Mistral().request(input)
 
 class Anthropic(Op[tuple[str, anthropic.ChatCompletionRequest], Response[anthropic.ChatCompletionResponse]]):
-    name: str = "anthropic"
-
     async def call(self, api_key: str, input: anthropic.ChatCompletionRequest) -> Response[anthropic.ChatCompletionResponse]:
         return await lm.Anthropic(api_key=api_key).anthropic_chat_completion(input)
 
 class AnthropicRequest(Op[anthropic.ChatCompletionRequest, Request[anthropic.ChatCompletionRequest]]):
-    name: str = "anthropic_request"
-
     async def call(self, input: anthropic.ChatCompletionRequest) -> Request[anthropic.ChatCompletionRequest]:
         return lm.Anthropic().request(input)
 
 
 class Chat(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest], Response[ChatCompletionResponse]]):
-    name: str = "chat"
-
     async def call(self, api_keys: LanguageModelsApiKeys, input: ChatCompletionRequest) -> Response[ChatCompletionResponse]:
         return await lm.LanguageModels(api_keys=api_keys).chat_completion(input)
 
 class ChatRequest(Op[ChatCompletionRequest, Request[ChatCompletionRequest]]):
-    name: str = "anthropic_request"
-
     async def call(self, input: ChatCompletionRequest) -> Request[ChatCompletionRequest]:
         return lm.LanguageModels(api_keys=LanguageModelsApiKeys(openai_api_key="", mistral_api_key="", anthropic_api_key="")).request(input)
 
@@ -59,7 +43,6 @@ class ChatRequest(Op[ChatCompletionRequest, Request[ChatCompletionRequest]]):
 class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletionResponse], float]):
     """Implements a simple LLM-as-a-judge as in https://arxiv.org/pdf/2306.05685.pdf
     """
-    name: str = "judge"
     reference_model: str = "gpt-4-turbo"
     judge_model: str = "gpt-4-turbo"
     

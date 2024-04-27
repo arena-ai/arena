@@ -13,10 +13,8 @@ from app.services import lm, Request, Response
 A = TypeVar('A', bound=BaseModel)
 
 class LogEvent(Op[tuple[Session, User, Event | None, A], Event], Generic[A]):
-    name: str
-
     def event_create(self, parent: Event | None, a: A) -> EventCreate:
-        return EventCreate(name=self.name, content=a.model_dump_json(), parent_id=None if parent is None else parent.id)
+        return EventCreate(name=self.opname, content=a.model_dump_json(), parent_id=None if parent is None else parent.id)
 
     async def call(self, session: Session, user: User, parent: Event | None, a: A) -> Event:
         event_create = self.event_create(parent, a)
@@ -25,16 +23,12 @@ class LogEvent(Op[tuple[Session, User, Event | None, A], Event], Generic[A]):
 
 
 class LogRequest(LogEvent[Request]):
-    name: str = "request"
-
+    pass
 
 class LogResponse(LogEvent[Response]):
-    name: str = "response"
-
+    pass
 
 class EventIdentifier(Op[tuple[Session, User, Event, str], EventIdentifier]):
-    name: str = "identifier"
-
     async def call(self, session: Session, user: User, event: Event, identifier: str) -> EventIdentifier:
         # Add the native identifier to the parent event
         event_identifier = crud.create_event_identifier(session=session, event_identifier=identifier, event_id=event.id)
