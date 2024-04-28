@@ -23,7 +23,7 @@ def test_basic_op_def() -> None:
     print(f"Call Sum 1 2 = {run(s.call, 1,2)}")
     s12 = s(cst(1), cst(2))
     print(f"Sum 1 2 = {s12}")
-    s12._clear()
+    s12.computation_clear()
     print(f"Sum 1 2 = {s12}")
     print(f"Sum 1 2 = {run(s12.evaluate)} {s12}")
 

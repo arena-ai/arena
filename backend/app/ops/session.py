@@ -1,15 +1,10 @@
-from typing import Callable, TypeVar
-from sqlmodel import Session
-from app.core.db import engine
-from app.api.deps import get_db
+import sqlmodel
 from app.ops.computation import Op, Computation
 
-B = TypeVar('B')
-
-class WithSession(Op[Callable[[Session], B], B]):
+class Session(Op[tuple[()], sqlmodel.Session]):
     """A basic template for ops"""
-    async def call(self, require_session: Callable[[Session], B]) -> B:
-        """Execute the op"""
-        with Session(engine) as session:
-            result = require_session(session)
-        return result
+    async def call(self) -> sqlmodel.Session:
+        if "session" in self.context:
+            return self.context["session"]
+        else:
+            return None

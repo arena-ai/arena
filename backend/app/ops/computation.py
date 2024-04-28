@@ -5,13 +5,13 @@ from asyncio import TaskGroup, Task
 from anyio import run
 from pydantic import BaseModel, ConfigDict, Field, computed_field, SerializeAsAny
 
-
 As = TypeVarTuple('As')
 A = TypeVar('A')
 B = TypeVar('B')
 
 class Op(BaseModel, ABC, Generic[*As, B]):
     """A basic template for ops"""
+    context: dict[str, Any] = Field(default_factory=lambda: {}, exclude=True)
     
     @computed_field
     @property
@@ -73,7 +73,7 @@ class Computation(BaseModel, Generic[B]):
     args: Sequence['Computation']
     task: Task | None = Field(None, exclude=True)
     
-    def _clear(self):
+    def computation_clear(self):
         """Clear the values
         Clears only if value is set
         The following invariant MUST holds:
@@ -81,26 +81,36 @@ class Computation(BaseModel, Generic[B]):
         """
         if self.task is not None:
             for arg in self.args:
-                arg._clear()
+                arg.computation_clear()
             self.task = None
+            self.op.context.clear()
+    
+    def computation_context(self, **context: Any):
+        """Set the context in each op
+        """
+        if self.task is None:
+            for arg in self.args:
+                arg.computation_context(**context)
+            self.op.context |= context
 
-    async def _call(self):
+    async def computation_call(self):
         args = [await arg.task for arg in self.args]
         return await self.op.call(*args)
 
-    async def _evaluate(self, task_group: TaskGroup):
+    async def computation_evaluate(self, task_group: TaskGroup):
         """Execute the ops"""
         if self.task is None:
             for arg in self.args:
-                await arg._evaluate(task_group)
-            self.task = task_group.create_task(self._call())
+                await arg.computation_evaluate(task_group)
+            self.task = task_group.create_task(self.computation_call())
     
-    async def evaluate(self) -> B:
+    async def evaluate(self, **context: Any) -> B:
         """Execute the ops and clear all"""
+        self.computation_context(**context)
         async with TaskGroup() as task_group:
-            await self._evaluate(task_group)
+            await self.computation_evaluate(task_group)
             value = await self.task
-        self._clear()
+        self.computation_clear()
         return value
     
     def __getattr__(self, name: str) -> 'Computation':

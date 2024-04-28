@@ -1,7 +1,9 @@
 import os
+from sqlmodel import Session
 from anyio import run
 from celery import Celery
 from app.core.config import settings
+from app.core.db import engine
 from app.ops import Op, Computation
 
 app = Celery(__name__,
@@ -16,4 +18,10 @@ app = Celery(__name__,
 
 @app.task
 def evaluate(computation: Computation):
-    return run(computation.evaluate)
+    #  Define the evaluation method
+    async def evaluate_with_context():
+        return await computation.evaluate(session=session)
+    # Run the evaluation
+    with Session(engine) as session:
+        result = run(evaluate_with_context)
+    return result

@@ -1,4 +1,4 @@
-from typing import Mapping, TypeVar, Generic
+from typing import Any, TypeVar, Generic
 
 from pydantic import BaseModel
 from sqlmodel import Session

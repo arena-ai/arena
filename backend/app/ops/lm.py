@@ -43,6 +43,7 @@ class ChatRequest(Op[ChatCompletionRequest, Request[ChatCompletionRequest]]):
 class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletionResponse], float]):
     """Implements a simple LLM-as-a-judge as in https://arxiv.org/pdf/2306.05685.pdf
     """
+    name: str = "judge"
     reference_model: str = "gpt-4-turbo"
     judge_model: str = "gpt-4-turbo"
     
