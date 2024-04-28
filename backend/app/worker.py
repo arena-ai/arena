@@ -18,10 +18,10 @@ app = Celery(__name__,
 
 @app.task
 def evaluate(computation: Computation):
-    #  Define the evaluation method
-    async def evaluate_with_context():
-        return await computation.evaluate(session=session)
-    # Run the evaluation
     with Session(engine) as session:
+        #  Define the evaluation method
+        async def evaluate_with_context():
+            return await computation.evaluate(session=session)
+        # Run the evaluation
         result = run(evaluate_with_context)
     return result

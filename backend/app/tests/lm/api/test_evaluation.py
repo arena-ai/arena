@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 from random import random
 
-from app.models import Event
+from app.models import Event, EventIdentifier
 from app.core.config import settings
 from app.lm.models import ChatCompletionRequest, Evaluation
 

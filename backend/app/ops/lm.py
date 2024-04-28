@@ -22,6 +22,7 @@ class MistralRequest(Op[mistral.ChatCompletionRequest, Request[mistral.ChatCompl
     async def call(self, input: mistral.ChatCompletionRequest) -> Request[mistral.ChatCompletionRequest]:
         return lm.Mistral().request(input)
 
+
 class Anthropic(Op[tuple[str, anthropic.ChatCompletionRequest], Response[anthropic.ChatCompletionResponse]]):
     async def call(self, api_key: str, input: anthropic.ChatCompletionRequest) -> Response[anthropic.ChatCompletionResponse]:
         return await lm.Anthropic(api_key=api_key).anthropic_chat_completion(input)

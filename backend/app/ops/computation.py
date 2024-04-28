@@ -11,7 +11,7 @@ B = TypeVar('B')
 
 class Op(BaseModel, ABC, Generic[*As, B]):
     """A basic template for ops"""
-    context: dict[str, Any] = Field(default_factory=lambda: {}, exclude=True)
+    context: dict[str, Any] | None = Field(default=None, exclude=True)
     
     @computed_field
     @property
@@ -83,15 +83,15 @@ class Computation(BaseModel, Generic[B]):
             for arg in self.args:
                 arg.computation_clear()
             self.task = None
-            self.op.context.clear()
+            self.op.context = None
     
     def computation_context(self, **context: Any):
         """Set the context in each op
         """
-        if self.task is None:
+        if self.op.context is None:
             for arg in self.args:
                 arg.computation_context(**context)
-            self.op.context |= context
+            self.op.context = context
 
     async def computation_call(self):
         args = [await arg.task for arg in self.args]
