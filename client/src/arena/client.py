@@ -1,6 +1,6 @@
 from typing import Any
 import httpx
-from arena.models import ChatCompletionRequest, ChatCompletionResponse
+from arena.models import ChatCompletionRequest, ChatCompletionResponse, Evaluation, Score
 
 BASE_URL = "https://arena.sarus.app/api/v1"
 
@@ -85,5 +85,20 @@ class Client:
             )
         if resp.status_code == 200:
             return ChatCompletionResponse.model_validate(resp.json())
+        else:
+            raise RuntimeError(resp)
+    
+    def evaluation(self, identifier: str, score: float) -> int:
+        req = Evaluation(identifier=identifier, value=Score(value=score)).model_dump(mode="json", exclude_unset=True, exclude_none=True)
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(
+                url = f"{self.base_url}/lm/evaluation",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json=req,
+            )
+        if resp.status_code == 200:
+            return resp.json()["id"]
         else:
             raise RuntimeError(resp)

@@ -82,3 +82,23 @@ def test_judge():
         })
     assert(resp.choices[0].message.role == "assistant")
     print(f"\n{resp.choices[0].message.content}")
+
+
+def test_user_eval():
+    user = os.getenv("FIRST_SUPERUSER")
+    password = os.getenv("FIRST_SUPERUSER_PASSWORD")
+
+    # Connect to arena
+    client = Client(user=user, password=password)
+    
+    # Set the credentials
+    client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
+
+    # Run a query
+    resp = client.chat_completions(model="gpt-3.5-turbo", messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What is the fastest animal on earth?"},
+        ], arena_parameters={
+            "judge_evaluation": True,
+        })
+    print(client.evaluation(resp.id, 0.5))
