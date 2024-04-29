@@ -32,10 +32,19 @@ class Client:
                 },
             )
         self.api_key = resp.json()['access_token']
+    
+    def openai_api_key(self, api_key: str):
+        with httpx.Client() as client:
+            client.post(
+                url = f"{self.base_url}/lm/chat/completions",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json=req,
+            )
 
     def chat_completions(self, **kwargs: Any) -> ChatCompletionResponse:
         req = ChatCompletionRequest.model_validate(kwargs).model_dump(mode="json", exclude_unset=True, exclude_none=True)
-        print(f"\nDEBUG {req}")
         with httpx.Client() as client:
             resp = client.post(
                 url = f"{self.base_url}/lm/chat/completions",

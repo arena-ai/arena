@@ -68,7 +68,7 @@ def create_setting(
     return setting
 
 
-@router.post("/{name}/{content}", response_model=SettingOut)
+@router.get("/{name}/{content}", response_model=SettingOut)
 def create_setting_get(
     *, session: SessionDep, current_user: CurrentUser, name: str, content: str
 ) -> Any:
