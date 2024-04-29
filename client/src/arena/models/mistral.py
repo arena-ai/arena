@@ -2,8 +2,8 @@ from typing import Literal, Mapping, Sequence, Any
 
 from pydantic import BaseModel
 
-from app.lm import models
-from app.lm.models import Function, FunctionDefinition, ChatCompletionToolParam, Message, ResponseFormat, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage
+from arena import models
+from arena.models import Function, FunctionDefinition, ChatCompletionToolParam, Message, ResponseFormat, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage
 
 """
 models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion

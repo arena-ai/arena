@@ -1,10 +1,11 @@
 [tool.poetry]
-name = "client"
+name = "arena-client"
 version = "0.1.0"
 description = "A client to use arena AI"
 authors = ["Nicolas Grislain <ng@sarus.tech>"]
 license = "Apache-2"
 readme = "README.md"
+packages = [{from = "src", include = "arena"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -47,3 +48,8 @@ ignore = [
 [tool.ruff.lint.pyupgrade]
 # Preserve types, even if a file imports `from __future__ import annotations`.
 keep-runtime-typing = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-vv"
+pythonpath = ["src"]
