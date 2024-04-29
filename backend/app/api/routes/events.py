@@ -34,6 +34,7 @@ def read_events(
         statement = (
             select(Event)
             .where(Event.owner_id == current_user.id)
+            .order_by(desc(coalesce(Event.parent_id, Event.id)), Event.id)
             .offset(skip)
             .limit(limit)
         )
