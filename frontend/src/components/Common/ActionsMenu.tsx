@@ -11,13 +11,12 @@ import { BsThreeDotsVertical } from 'react-icons/bs'
 import { FiEdit, FiTrash } from 'react-icons/fi'
 
 import EditUser from '../Admin/EditUser'
-import EditItem from '../Items/EditItem'
 import Delete from './DeleteAlert'
-import { ItemOut, UserOut } from '../../client'
+import { UserOut } from '../../client'
 
 interface ActionsMenuProps {
   type: string
-  value: ItemOut | UserOut
+  value: UserOut
   disabled?: boolean
 }
 
@@ -55,13 +54,7 @@ const ActionsMenu: React.FC<ActionsMenuProps> = ({ type, value, disabled }) => {
             isOpen={editUserModal.isOpen}
             onClose={editUserModal.onClose}
           />
-        ) : (
-          <EditItem
-            item={value as ItemOut}
-            isOpen={editUserModal.isOpen}
-            onClose={editUserModal.onClose}
-          />
-        )}
+        ) : <></>}
         <Delete
           type={type}
           id={value.id}

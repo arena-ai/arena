@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { app__models__Message } from '../models/app__models__Message';
 import type { Body_login_login_access_token } from '../models/Body_login_login_access_token';
-import type { Message } from '../models/Message';
 import type { NewPassword } from '../models/NewPassword';
 import type { Token } from '../models/Token';
 import type { UserOut } from '../models/UserOut';
@@ -21,10 +21,10 @@ export class LoginService {
      * @throws ApiError
      */
     public static loginAccessToken({
-formData,
-}: {
-formData: Body_login_login_access_token,
-}): CancelablePromise<Token> {
+        formData,
+    }: {
+        formData: Body_login_login_access_token,
+    }): CancelablePromise<Token> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/login/access-token',
@@ -52,14 +52,14 @@ formData: Body_login_login_access_token,
     /**
      * Recover Password
      * Password Recovery
-     * @returns Message Successful Response
+     * @returns app__models__Message Successful Response
      * @throws ApiError
      */
     public static recoverPassword({
-email,
-}: {
-email: string,
-}): CancelablePromise<Message> {
+        email,
+    }: {
+        email: string,
+    }): CancelablePromise<app__models__Message> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/password-recovery/{email}',
@@ -75,19 +75,42 @@ email: string,
     /**
      * Reset Password
      * Reset password
-     * @returns Message Successful Response
+     * @returns app__models__Message Successful Response
      * @throws ApiError
      */
     public static resetPassword({
-requestBody,
-}: {
-requestBody: NewPassword,
-}): CancelablePromise<Message> {
+        requestBody,
+    }: {
+        requestBody: NewPassword,
+    }): CancelablePromise<app__models__Message> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/reset-password/',
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Recover Password Html Content
+     * HTML Content for Password Recovery
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static recoverPasswordHtmlContent({
+        email,
+    }: {
+        email: string,
+    }): CancelablePromise<string> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/password-recovery-html-content/{email}',
+            path: {
+                'email': email,
+            },
             errors: {
                 422: `Validation Error`,
             },

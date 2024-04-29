@@ -3,7 +3,6 @@ import { Button, Flex, Icon, useDisclosure } from '@chakra-ui/react'
 import { FaPlus } from 'react-icons/fa'
 
 import AddUser from '../Admin/AddUser'
-import AddItem from '../Items/AddItem'
 
 interface NavbarProps {
   type: string
@@ -11,7 +10,6 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ type }) => {
   const addUserModal = useDisclosure()
-  const addItemModal = useDisclosure()
 
   return (
     <>
@@ -27,12 +25,11 @@ const Navbar: React.FC<NavbarProps> = ({ type }) => {
           variant="primary"
           gap={1}
           fontSize={{ base: 'sm', md: 'inherit' }}
-          onClick={type === 'User' ? addUserModal.onOpen : addItemModal.onOpen}
+          onClick={type === 'User' ? addUserModal.onOpen : () => null}
         >
           <Icon as={FaPlus} /> Add {type}
         </Button>
         <AddUser isOpen={addUserModal.isOpen} onClose={addUserModal.onClose} />
-        <AddItem isOpen={addItemModal.isOpen} onClose={addItemModal.onClose} />
       </Flex>
     </>
   )
