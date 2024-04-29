@@ -1,12 +1,12 @@
 import React from 'react'
 import {
   Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
+  // FormControl,
+  // FormErrorMessage,
+  // FormLabel,
+  // Input,
   Modal,
-  ModalBody,
+  // ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalFooter,
@@ -29,10 +29,12 @@ const EditEvent: React.FC<EditEventProps> = ({ event: event, isOpen, onClose }) 
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
   const {
-    register,
+    // register,
     handleSubmit,
     reset,
-    formState: { isSubmitting, errors, isDirty },
+    formState: { isSubmitting,
+      // errors,
+      isDirty },
   } = useForm<EventsService>({
     mode: 'onBlur',
     criteriaMode: 'all',
@@ -78,7 +80,7 @@ const EditEvent: React.FC<EditEventProps> = ({ event: event, isOpen, onClose }) 
         <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader>Events</ModalHeader>
           <ModalCloseButton />
-          <ModalBody pb={6}>
+          {/* <ModalBody pb={6}>
             <FormControl isInvalid={!!errors.id}>
               <FormLabel htmlFor="title">Title</FormLabel>
               <Input
@@ -101,7 +103,7 @@ const EditEvent: React.FC<EditEventProps> = ({ event: event, isOpen, onClose }) 
                 type="text"
               />
             </FormControl>
-          </ModalBody>
+          </ModalBody> */}
           <ModalFooter gap={3}>
             <Button
               variant="primary"
