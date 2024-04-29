@@ -1,6 +1,6 @@
 import re
 
-from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, openai, mistral, anthropic
+from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, openai, mistral, anthropic, Score
 from app.services import lm, Request, Response
 from app.ops import Op
 from app.ops.events import LogRequest, LogResponse
@@ -41,7 +41,7 @@ class ChatRequest(Op[ChatCompletionRequest, Request[ChatCompletionRequest]]):
         return lm.LanguageModels(api_keys=LanguageModelsApiKeys(openai_api_key="", mistral_api_key="", anthropic_api_key="")).request(input)
 
 
-class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletionResponse], float]):
+class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletionResponse], Score]):
     """Implements a simple LLM-as-a-judge as in https://arxiv.org/pdf/2306.05685.pdf
     """
     name: str = "judge"
@@ -56,7 +56,7 @@ class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletio
         else:
             return 0.0
     
-    async def call(self, api_keys: LanguageModelsApiKeys, request: ChatCompletionRequest, response: ChatCompletionResponse) -> float:
+    async def call(self, api_keys: LanguageModelsApiKeys, request: ChatCompletionRequest, response: ChatCompletionResponse) -> Score:
         service = lm.LanguageModels(api_keys=api_keys)
         reference_request = request.model_copy()
         reference_request.model = self.reference_model
@@ -83,4 +83,4 @@ and level of detail of their responses."""),
             ]
         )
         judge_response = await service.chat_completion(judge_request)
-        return self.find_float(judge_response.content.choices[0].message.content)
+        return Score(value=self.find_float(judge_response.content.choices[0].message.content))

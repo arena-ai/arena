@@ -6,7 +6,8 @@ from sqlmodel import Session
 from app.ops import Op
 from app import crud
 from app.models import Event, EventCreate, User, EventIdentifier
-from app.services import lm, Request, Response
+from app.lm.models import Score
+from app.services import Request, Response
 
 
 
@@ -33,3 +34,11 @@ class EventIdentifier(Op[tuple[Session, User, Event, str], EventIdentifier]):
         # Add the native identifier to the parent event
         event_identifier = crud.create_event_identifier(session=session, event_identifier=identifier, event_id=event.id)
         return event_identifier
+
+
+
+class LMJudgeEvaluation(LogEvent[Score]):
+    pass
+
+class UserEvaluation(LogEvent[Score]):
+    pass

@@ -10,7 +10,7 @@ class Client:
         self.password = password
         self.api_key = api_key
         self.base_url = base_url
-        self.timeout = httpx.Timeout(30., read=None)
+        self.timeout = 30.0
         if not self.api_key:
             self.login()
     
@@ -61,7 +61,7 @@ class Client:
             )
     
     def anthropic_api_key(self, api_key: str):
-        with httpx.Client() as client:
+        with httpx.Client(timeout=self.timeout) as client:
             client.post(
                 url = f"{self.base_url}/settings/",
                 headers = {
@@ -75,7 +75,7 @@ class Client:
 
     def chat_completions(self, **kwargs: Any) -> ChatCompletionResponse:
         req = ChatCompletionRequest.model_validate(kwargs).model_dump(mode="json", exclude_unset=True, exclude_none=True)
-        with httpx.Client() as client:
+        with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
                 url = f"{self.base_url}/lm/chat/completions",
                 headers = {

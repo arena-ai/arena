@@ -7,9 +7,9 @@ from app import crud
 from app.models import Event
 from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
 from app.services import Request, Response
-from app.ops import cst
+from app.ops import cst, tup
 from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys
-from app.ops.events import LogRequest, LogResponse, EventIdentifier
+from app.ops.events import LogRequest, LogResponse, EventIdentifier, LMJudgeEvaluation, UserEvaluation
 from app.ops.lm import OpenAI, OpenAIRequest, Mistral, MistralRequest, Anthropic, AnthropicRequest, Chat, ChatRequest, Judge
 from app.ops.session import Session, User
 from app.worker import evaluate
@@ -93,13 +93,14 @@ async def chat_completion(
     chat_completion_response = response.content
     event_identifier = EventIdentifier()(sess, user, request_event, chat_completion_response.id)
     # Only the output has to be computed now
-    chat_completion_response = await request_event.then(response_event).then(event_identifier).then(chat_completion_response).evaluate(session=session)
+    request_event, chat_completion_response = await response_event.then(event_identifier).then(tup(request_event, chat_completion_response)).evaluate(session=session)
     # Everything else can be delayed
-    delayed_computation = cst(chat_completion_response)
+    delayed_computation = cst(request_event).then(cst(chat_completion_response))
     # Optionally judge the result
     if chat_completion_request.arena_parameters and chat_completion_request.arena_parameters.judge_evaluation:
         judge_score = Judge()(api_keys, chat_completion_request, chat_completion_response)
-        delayed_computation = delayed_computation.then(judge_score)
+        judge_score_event = LMJudgeEvaluation()(sess, user, request_event, judge_score)
+        delayed_computation = delayed_computation.then(judge_score).then(judge_score_event)
     evaluate.delay(delayed_computation)
     return chat_completion_response
 
@@ -132,6 +133,7 @@ async def chat_completion_response(
     # Optionally judge the result
     if chat_completion_request.arena_parameters and chat_completion_request.arena_parameters.judge_evaluation:
         judge_score = Judge()(api_keys, chat_completion_request, chat_completion_response)
-        computation = computation.then(judge_score)
+        judge_score_event = LMJudgeEvaluation()(sess, user, request_event, judge_score)
+        computation = computation.then(judge_score).then(judge_score_event)
     computation = computation.then(response_event)
     return await computation.evaluate(session=session)
