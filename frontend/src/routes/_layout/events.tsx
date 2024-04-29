@@ -14,23 +14,22 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from 'react-query'
 
-import { ApiError, ItemsService } from '../../client'
-import ActionsMenu from '../../components/Common/ActionsMenu'
-import Navbar from '../../components/Common/Navbar'
+import { ApiError, EventsService } from '../../client'
+import EventsSummary from '../../components/Common/EventsSummary'
 import useCustomToast from '../../hooks/useCustomToast'
 
 export const Route = createFileRoute('/_layout/events')({
-  component: Items,
+  component: Events,
 })
 
-function Items() {
+function Events() {
   const showToast = useCustomToast()
   const {
-    data: items,
+    data: events,
     isLoading,
     isError,
     error,
-  } = useQuery('items', () => ItemsService.readItems({}))
+  } = useQuery('events', () => EventsService.readEvents({}))
 
   if (isError) {
     const errDetail = (error as ApiError).body?.detail
@@ -45,37 +44,39 @@ function Items() {
           <Spinner size="xl" color="ui.main" />
         </Flex>
       ) : (
-        items && (
+        events && (
           <Container maxW="full">
             <Heading
               size="lg"
               textAlign={{ base: 'center', md: 'left' }}
               pt={12}
             >
-              Items Management
+              Events
             </Heading>
-            <Navbar type={'Item'} />
+            <EventsSummary/>
             <TableContainer>
               <Table size={{ base: 'sm', md: 'md' }}>
                 <Thead>
                   <Tr>
-                    <Th>ID</Th>
-                    <Th>Title</Th>
-                    <Th>Description</Th>
-                    <Th>Actions</Th>
+                    <Th>Id</Th>
+                    <Th>Name</Th>
+                    <Th>Timestamp</Th>
+                    <Th>Content</Th>
+                    <Th>Parent id</Th>
+                    <Th>Owner</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {items.data.map((item) => (
-                    <Tr key={item.id}>
-                      <Td>{item.id}</Td>
-                      <Td>{item.title}</Td>
-                      <Td color={!item.description ? 'gray.400' : 'inherit'}>
-                        {item.description || 'N/A'}
+                  {events.data.map((event) => (
+                    <Tr key={event.id}>
+                      <Td>{event.id}</Td>
+                      <Td>{event.name}</Td>
+                      <Td>{event.timestamp}</Td>
+                      <Td color={!event.content ? 'gray.400' : 'inherit'}>
+                        {JSON.parse(event.content) || 'N/A'}
                       </Td>
-                      <Td>
-                        <ActionsMenu type={'Item'} value={item} />
-                      </Td>
+                      <Td>{event.parent_id}</Td>
+                      <Td>{event.owner_id}</Td>
                     </Tr>
                   ))}
                 </Tbody>
@@ -88,4 +89,4 @@ function Items() {
   )
 }
 
-export default Items
+export default Events
