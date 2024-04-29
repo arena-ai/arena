@@ -4,14 +4,14 @@ from fastapi import APIRouter
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
-from app.models import User, Event, EventCreate
+from app.models import Event
 from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
 from app.services import Request, Response
 from app.ops import cst
 from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys
 from app.ops.events import LogRequest, LogResponse, EventIdentifier
 from app.ops.lm import OpenAI, OpenAIRequest, Mistral, MistralRequest, Anthropic, AnthropicRequest, Chat, ChatRequest, Judge
-from app.ops.session import Session
+from app.ops.session import Session, User
 from app.worker import evaluate
 
 
@@ -26,13 +26,14 @@ async def openai_chat_completion(
     OpenAI integration
     """
     sess = Session()()
+    user = User(id=current_user.id)(sess)
     input = openai.ChatCompletionRequest.model_validate(chat_completion_request)
     request = OpenAIRequest()(input)
-    request_event = LogRequest()(sess, current_user, None, request)
-    response = OpenAI()(openai_api_key(sess, current_user), input)
-    response_event = LogResponse()(sess, current_user, request_event, response)
+    request_event = LogRequest()(sess, user, None, request)
+    response = OpenAI()(openai_api_key(sess, user), input)
+    response_event = LogResponse()(sess, user, request_event, response)
     output = response.content
-    event_identifier = EventIdentifier()(sess, current_user, request_event, output.id)
+    event_identifier = EventIdentifier()(sess, user, request_event, output.id)
     return await request_event.then(response_event).then(event_identifier).then(output).evaluate(session=session)
 
 
@@ -44,13 +45,14 @@ async def mistral_chat_completion(
     Mistral integration
     """
     sess = Session()()
+    user = User(id=current_user.id)(sess)
     input = mistral.ChatCompletionRequest.model_validate(chat_completion_request)
     request = MistralRequest()(input)
-    request_event = LogRequest()(sess, current_user, None, request)
-    response = Mistral()(mistral_api_key(sess, current_user), input)
-    response_event = LogResponse()(sess, current_user, request_event, response)
+    request_event = LogRequest()(sess, user, None, request)
+    response = Mistral()(mistral_api_key(sess, user), input)
+    response_event = LogResponse()(sess, user, request_event, response)
     output = response.content
-    event_identifier = EventIdentifier()(sess, current_user, request_event, output.id)
+    event_identifier = EventIdentifier()(sess, user, request_event, output.id)
     return await request_event.then(response_event).then(event_identifier).then(output).evaluate(session=session)
 
 
@@ -62,13 +64,14 @@ async def anthropic_chat_completion(
     Anthropic integration
     """
     sess = Session()()
+    user = User(id=current_user.id)(sess)
     input = anthropic.ChatCompletionRequest.model_validate(chat_completion_request)
     request = AnthropicRequest()(input)
-    request_event = LogRequest()(session, current_user, None, request)
-    response = Anthropic()(anthropic_api_key(session, current_user), input)
-    response_event = LogResponse()(session, current_user, request_event, response)
+    request_event = LogRequest()(session, user, None, request)
+    response = Anthropic()(anthropic_api_key(session, user), input)
+    response_event = LogResponse()(session, user, request_event, response)
     output = response.content
-    event_identifier = EventIdentifier()(session, current_user, request_event, output.id)
+    event_identifier = EventIdentifier()(session, user, request_event, output.id)
     return await request_event.then(response_event).then(event_identifier).then(output).evaluate(session=session)
 
 
@@ -80,14 +83,15 @@ async def chat_completion(
     Abstract version
     """
     sess = Session()()
+    user = User(id=current_user.id)(sess)
     chat_completion_request = ChatCompletionRequest.model_validate(chat_completion_request)
     request = ChatRequest()(chat_completion_request)
-    request_event = LogRequest()(sess, current_user, None, request)
-    api_keys = language_models_api_keys(sess, current_user)
+    request_event = LogRequest()(sess, user, None, request)
+    api_keys = language_models_api_keys(sess, user)
     response = Chat()(api_keys, chat_completion_request)
-    response_event = LogResponse()(sess, current_user, request_event, response)
+    response_event = LogResponse()(sess, user, request_event, response)
     chat_completion_response = response.content
-    event_identifier = EventIdentifier()(sess, current_user, request_event, chat_completion_response.id)
+    event_identifier = EventIdentifier()(sess, user, request_event, chat_completion_response.id)
     # Only the output has to be computed now
     chat_completion_response = await request_event.then(response_event).then(event_identifier).then(chat_completion_response).evaluate(session=session)
     # Everything else can be delayed
@@ -105,9 +109,10 @@ async def chat_completion_request(
     session: SessionDep, current_user: CurrentUser, chat_completion_request: ChatCompletionRequest
 ) -> Event:
     sess = Session()()
+    user = User(id=current_user.id)(sess)
     chat_completion_request = ChatCompletionRequest.model_validate(chat_completion_request)
     request = ChatRequest()(chat_completion_request)
-    request_event = LogRequest()(sess, current_user, None, request)
+    request_event = LogRequest()(sess, user, None, request)
     return await request_event.evaluate(session=session)
 
 
@@ -116,11 +121,12 @@ async def chat_completion_response(
     session: SessionDep, current_user: CurrentUser, request_event: Event, chat_completion_response: ChatCompletionResponse
 ) -> Event:
     sess = Session()()
+    user = User(id=current_user.id)(sess)
     chat_completion_request = Request.model_validate_json(request_event.content)
     response = Response(status_code=200, headers={}, content=chat_completion_response)
-    response_event = LogResponse()(sess, current_user, request_event, response)
-    api_keys = language_models_api_keys(sess, current_user)
-    event_identifier = EventIdentifier()(sess, current_user, request_event, chat_completion_response.id)
+    response_event = LogResponse()(sess, user, request_event, response)
+    api_keys = language_models_api_keys(sess, user)
+    event_identifier = EventIdentifier()(sess, user, request_event, chat_completion_response.id)
     # Everything can be delayed
     computation = event_identifier
     # Optionally judge the result
