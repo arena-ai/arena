@@ -10,12 +10,13 @@ class Client:
         self.password = password
         self.api_key = api_key
         self.base_url = base_url
+        self.timeout = httpx.Timeout(30., read=None)
         if not self.api_key:
             self.login()
     
     def login(self):
         assert(self.user and self.password)
-        with httpx.Client() as client:
+        with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
                 url = f"{self.base_url}/login/access-token",
                 headers =  {
@@ -34,7 +35,7 @@ class Client:
         self.api_key = resp.json()['access_token']
     
     def openai_api_key(self, api_key: str):
-        with httpx.Client() as client:
+        with httpx.Client(timeout=self.timeout) as client:
             client.post(
                 url = f"{self.base_url}/settings/",
                 headers = {
@@ -47,7 +48,7 @@ class Client:
             )
     
     def mistral_api_key(self, api_key: str):
-        with httpx.Client() as client:
+        with httpx.Client(timeout=self.timeout) as client:
             client.post(
                 url = f"{self.base_url}/settings/",
                 headers = {
