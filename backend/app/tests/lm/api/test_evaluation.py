@@ -34,10 +34,10 @@ def test_evaluation(
         eval = client.post(
             f"{settings.API_V1_STR}/lm/evaluation",
             headers = superuser_token_headers,
-            json = Evaluation(identifier=response.json()['id'], score=Score(value=random())).model_dump(mode="json")
+            json = Evaluation(identifier=response.json()['id'], value=Score(value=random())).model_dump(mode="json")
         )
         assert eval.status_code == 200
-    events = db.exec(select(Event).where(Event.name=="evaluation")).all()
+    events = db.exec(select(Event).where(Event.name=="UserEvaluation")).all()
     for event in events:
         print(event)
 
@@ -70,6 +70,6 @@ def test_evaluation_get(
             headers = superuser_token_headers,
         )
         assert eval.status_code == 200
-    events = db.exec(select(Event).where(Event.name.in_(["evaluation", "chat_completion_request"]))).all()
+    events = db.exec(select(Event).where(Event.name.in_(["UserEvaluation", "LogRequest"]))).all()
     for event in events:
         print(event)

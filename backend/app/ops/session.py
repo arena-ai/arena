@@ -12,23 +12,14 @@ class Session(Op[tuple[()], sqlmodel.Session]):
 
 
 class User(Op[sqlmodel.Session, models.User]):
-    id: int
-
-    """A basic template for ops"""
-    async def call(self, session: sqlmodel.Session) -> models.User:
-        return session.get(models.User, self.id)
+    async def call(self, session: sqlmodel.Session, id: int) -> models.User:
+        return session.get(models.User, id)
 
 class Event(Op[sqlmodel.Session, models.Event]):
-    id: int
-
-    """A basic template for ops"""
-    async def call(self, session: sqlmodel.Session) -> models.Event:
-        return session.get(models.Event, self.id)
+    async def call(self, session: sqlmodel.Session, id: int) -> models.Event:
+        return session.get(models.Event, id)
 
 
 class EventIdentifier(Op[sqlmodel.Session, models.EventIdentifier]):
-    id: str
-
-    """A basic template for ops"""
-    async def call(self, session: sqlmodel.Session) -> models.EventIdentifier:
-        return session.get(models.EventIdentifier, self.id)
+    async def call(self, session: sqlmodel.Session, id: str) -> models.EventIdentifier:
+        return session.get(models.EventIdentifier, id)
