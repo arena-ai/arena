@@ -36,11 +36,40 @@ class Client:
     def openai_api_key(self, api_key: str):
         with httpx.Client() as client:
             client.post(
-                url = f"{self.base_url}/lm/chat/completions",
+                url = f"{self.base_url}/settings/",
                 headers = {
                     "Authorization": f"Bearer {self.api_key}"
                 },
-                json=req,
+                json={
+                    "name": "OPENAI_API_KEY",
+                    "content": api_key
+                },
+            )
+    
+    def mistral_api_key(self, api_key: str):
+        with httpx.Client() as client:
+            client.post(
+                url = f"{self.base_url}/settings/",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json={
+                    "name": "MISTRAL_API_KEY",
+                    "content": api_key
+                },
+            )
+    
+    def anthropic_api_key(self, api_key: str):
+        with httpx.Client() as client:
+            client.post(
+                url = f"{self.base_url}/settings/",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json={
+                    "name": "ANTHROPIC_API_KEY",
+                    "content": api_key
+                },
             )
 
     def chat_completions(self, **kwargs: Any) -> ChatCompletionResponse:
@@ -53,4 +82,7 @@ class Client:
                 },
                 json=req,
             )
-        return resp
+        if resp.status_code == 200:
+            return ChatCompletionResponse.model_validate(resp.json())
+        else:
+            raise RuntimeError(resp)

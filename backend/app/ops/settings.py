@@ -10,7 +10,11 @@ class Setting(Op[tuple[Session, User], str]):
     name: str
 
     async def call(self, session: Session, user: User) -> str:
-        return crud.get_setting(session=session, setting_name=self.name, owner_id=user.id).content
+        setting = crud.get_setting(session=session, setting_name=self.name, owner_id=user.id)
+        if setting:
+            return setting.content
+        else:
+            return ""
 
 
 def openai_api_key(session: Session, user: User) -> Computation[str]:
