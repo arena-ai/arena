@@ -1,6 +1,10 @@
-from typing import Any
+from typing import Any, Type, Literal
 import httpx
+import mistralai.client
 from arena.models import ChatCompletionRequest, ChatCompletionResponse, Evaluation, Score
+import openai
+import mistralai
+import anthropic
 
 BASE_URL = "https://arena.sarus.app/api/v1"
 
@@ -102,3 +106,22 @@ class Client:
             return resp.json()["id"]
         else:
             raise RuntimeError(resp)
+    
+    def decorate(self, client: Type, mode: Literal['proxy', 'instrument'] = 'proxy'):
+        if client == openai.OpenAI:
+            self.decorate_openai(client)
+        elif client == mistralai.client.MistralClient:
+            client._arena_ = True
+        elif client == anthropic.Anthropic:
+            client._arena_ = True
+
+    def decorate_openai(self, client: Type[openai.OpenAI], mode: Literal['proxy', 'instrument'] = 'proxy'):
+        arena = self
+        openai_init = client.__init__
+        def init(self, *args: Any, **kwargs: Any):
+            openai_init(self, *args, **kwargs)
+            arena.openai_api_key(self.api_key)
+            self.api_key = arena.api_key
+            self.base_url = f"{arena.base_url}/lm/openai"
+        
+        client.__init__ = init

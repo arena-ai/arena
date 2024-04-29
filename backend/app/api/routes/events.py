@@ -1,7 +1,8 @@
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
+from sqlmodel import func, select, desc
+from sqlalchemy.sql.functions import coalesce
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
@@ -21,7 +22,7 @@ def read_events(
     if current_user.is_superuser:
         statement = select(func.count()).select_from(Event)
         count = session.exec(statement).one()
-        statement = select(Event).offset(skip).limit(limit)
+        statement = select(Event).order_by(desc(coalesce(Event.parent_id, Event.id)), Event.id).offset(skip).limit(limit)
         events = session.exec(statement).all()
     else:
         statement = (

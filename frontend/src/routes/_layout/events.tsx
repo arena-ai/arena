@@ -29,7 +29,7 @@ function Events() {
     isLoading,
     isError,
     error,
-  } = useQuery('events', () => EventsService.readEvents({}))
+  } = useQuery('events', () => EventsService.readEvents({limit: 10000}))
 
   if (isError) {
     const errDetail = (error as ApiError).body?.detail
@@ -73,7 +73,7 @@ function Events() {
                       <Td>{event.name}</Td>
                       <Td>{event.timestamp}</Td>
                       <Td color={!event.content ? 'gray.400' : 'inherit'}>
-                        {JSON.parse(event.content) || 'N/A'}
+                        {event.content || 'N/A'}
                       </Td>
                       <Td>{event.parent_id}</Td>
                       <Td>{event.owner_id}</Td>
