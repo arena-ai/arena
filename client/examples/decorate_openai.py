@@ -65,7 +65,24 @@ def arena_chat_completion_with_user_eval():
     # Added this
     arena.evaluation(resp.id, 0.98)
 
+def arena_chat_completion_with_test_user_eval():
+    user = "test@sarus.tech"
+    password = "Password1"
+    arena = Client(user=user, password=password, base_url="http://localhost/api/v1")
+    arena.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
+
+    resp = arena.chat_completions(model="gpt-3.5-turbo", messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What are the 10 first even prime numbers?"},
+        ],
+        arena_parameters={"judge_evaluation": True}
+    )
+    print(resp.choices[0].message.content)
+    # Added this
+    arena.evaluation(resp.id, 0.98)
+
 # simple_chat_completion()
 # decorated_chat_completion()
 # decorated_chat_completion_with_user_eval()
-arena_chat_completion_with_user_eval()
+# arena_chat_completion_with_user_eval()
+arena_chat_completion_with_test_user_eval()

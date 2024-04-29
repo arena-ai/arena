@@ -29,8 +29,8 @@ class Client:
                 },
                 data = {
                     "grant_type": "",
-                    "username": "admin@sarus.tech",
-                    "password": "EToqWBv5j9yjZTa",
+                    "username": self.user,
+                    "password": self.password,
                     "scope": "",
                     "client_id": "",
                     "client_secret": "",
