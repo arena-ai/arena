@@ -24,13 +24,17 @@ export const Route = createFileRoute('/_layout/events')({
 })
 
 function format_event(e: EventOut) {
-  if (e.name === "LogRequest") {
-    return format_chat_request(JSON.parse(e.content));
-  } else if (e.name === "LogResponse") {
-    return format_chat_response(JSON.parse(e.content));
-  } else if (e.name === "UserEvaluation" || e.name === "LMJudgeEvaluation") {
-    return format_evaluation(JSON.parse(e.content));
-  } else {
+  try {
+    if (e.name === "LogRequest") {
+      return format_chat_request(JSON.parse(e.content));
+    } else if (e.name === "LogResponse") {
+      return format_chat_response(JSON.parse(e.content));
+    } else if (e.name === "UserEvaluation" || e.name === "LMJudgeEvaluation") {
+      return format_evaluation(JSON.parse(e.content));
+    } else {
+      return <div>{e.content || 'N/A'}</div>
+    }
+  } catch(error) {
     return <div>{e.content || 'N/A'}</div>
   }
 }

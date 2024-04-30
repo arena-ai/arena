@@ -1,0 +1,31 @@
+name: Publish Python 🐍 distribution 📦 to PyPI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+
+      - name: Configure Poetry
+        run: poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Build and publish
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: poetry publish --build
