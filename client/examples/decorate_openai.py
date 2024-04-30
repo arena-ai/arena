@@ -7,7 +7,8 @@ from arena.client import Client
 # Load .env
 load_dotenv()
 
-BASE_URL = "http://localhost/api/v1"
+# BASE_URL = "http://localhost/api/v1"
+BASE_URL = "http://arena.sarus.app/api/v1"
 
 def simple_chat_completion():
     print("\n[bold red]Simple OpenAI chat completion")
