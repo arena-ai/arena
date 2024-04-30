@@ -8,7 +8,7 @@ from arena.client import Client
 load_dotenv()
 
 # BASE_URL = "http://localhost/api/v1"
-BASE_URL = "http://arena.sarus.app/api/v1"
+BASE_URL = "https://arena.sarus.app/api/v1"
 
 def simple_chat_completion():
     print("\n[bold red]Simple OpenAI chat completion")
@@ -79,7 +79,7 @@ def arena_chat_completion_with_eval():
 def arena_chat_completion_with_eval_from_test():
     print("\n[bold red]Arena chat completion with user eval from test")
     user = "test@sarus.tech"
-    password = "Password1"
+    password = "password"
     arena = Client(user=user, password=password, base_url=BASE_URL)
     arena.mistral_api_key(os.getenv("ARENA_MISTRAL_API_KEY"))
     t = time()
