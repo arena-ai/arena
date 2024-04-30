@@ -1,9 +1,11 @@
-name: Publish Python 🐍 distribution 📦 to PyPI
+name: Publish Python 🐍 client 📦 to PyPI
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'arena/client/**'  # Only run workflow if changes in the package directory
 
 jobs:
   build-and-publish:
@@ -24,8 +26,12 @@ jobs:
         run: poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Install dependencies
-        run: poetry install
+        run: |
+          cd arena/client
+          poetry install
 
       - name: Build and publish
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: poetry publish --build
+        run: |
+          cd arena/client
+          poetry publish --build
