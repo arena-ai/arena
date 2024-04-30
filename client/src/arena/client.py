@@ -110,7 +110,7 @@ class Client:
     def decorate(self, client: Type, mode: Literal['proxy', 'instrument'] = 'proxy'):
         if not hasattr(client, "_arena_decorated_"):
             client._arena_decorated_ = True
-            if client == openai.OpenAI and not hasattr(client, "_arena_decorated_"):
+            if client == openai.OpenAI:
                 self.decorate_openai(client)
             elif client == mistralai.client.MistralClient:
                 self.decorate_mistral(client)
@@ -137,7 +137,7 @@ class Client:
             self.base_url = f"{arena.base_url}/lm/mistral"
         client.__init__ = init
     
-    def decorate_openai(self, client: Type[openai.OpenAI], mode: Literal['proxy', 'instrument'] = 'proxy'):
+    def decorate_anthropic(self, client: Type[openai.OpenAI], mode: Literal['proxy', 'instrument'] = 'proxy'):
         arena = self
         openai_init = client.__init__
         def init(self, *args: Any, **kwargs: Any):

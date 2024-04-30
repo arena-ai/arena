@@ -93,8 +93,8 @@ def arena_chat_completion_with_eval_from_test():
     # Added this
     arena.evaluation(resp.id, 0.98)
 
-# simple_chat_completion()
-# decorated_chat_completion()
+simple_chat_completion()
+decorated_chat_completion()
 decorated_chat_completion_with_user_eval()
-# arena_chat_completion_with_eval()
-# arena_chat_completion_with_eval_from_test()
+arena_chat_completion_with_eval()
+arena_chat_completion_with_eval_from_test()
