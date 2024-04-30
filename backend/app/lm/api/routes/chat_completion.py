@@ -101,7 +101,7 @@ async def chat_completion(
         judge_score = Judge()(api_keys, chat_completion_request, chat_completion_response)
         judge_score_event = LMJudgeEvaluation()(sess, user, request_event, judge_score)
         delayed_computation = delayed_computation.then(judge_score).then(judge_score_event)
-    evaluate.delay(delayed_computation).get()
+    evaluate.delay(delayed_computation)
     return chat_completion_response
 
 

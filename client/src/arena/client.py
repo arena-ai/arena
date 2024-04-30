@@ -108,12 +108,14 @@ class Client:
             raise RuntimeError(resp)
     
     def decorate(self, client: Type, mode: Literal['proxy', 'instrument'] = 'proxy'):
-        if client == openai.OpenAI:
-            self.decorate_openai(client)
-        elif client == mistralai.client.MistralClient:
-            client._arena_ = True
-        elif client == anthropic.Anthropic:
-            client._arena_ = True
+        if not hasattr(client, "_arena_decorated_"):
+            client._arena_decorated_ = True
+            if client == openai.OpenAI and not hasattr(client, "_arena_decorated_"):
+                self.decorate_openai(client)
+            elif client == mistralai.client.MistralClient:
+                self.decorate_mistral(client)
+            elif client == anthropic.Anthropic:
+                self.decorate_anthropic(client)
 
     def decorate_openai(self, client: Type[openai.OpenAI], mode: Literal['proxy', 'instrument'] = 'proxy'):
         arena = self
@@ -123,5 +125,24 @@ class Client:
             arena.openai_api_key(self.api_key)
             self.api_key = arena.api_key
             self.base_url = f"{arena.base_url}/lm/openai"
-        
+        client.__init__ = init
+    
+    def decorate_mistral(self, client: Type[openai.OpenAI], mode: Literal['proxy', 'instrument'] = 'proxy'):
+        arena = self
+        openai_init = client.__init__
+        def init(self, *args: Any, **kwargs: Any):
+            openai_init(self, *args, **kwargs)
+            arena.mistral_api_key(self.api_key)
+            self.api_key = arena.api_key
+            self.base_url = f"{arena.base_url}/lm/mistral"
+        client.__init__ = init
+    
+    def decorate_openai(self, client: Type[openai.OpenAI], mode: Literal['proxy', 'instrument'] = 'proxy'):
+        arena = self
+        openai_init = client.__init__
+        def init(self, *args: Any, **kwargs: Any):
+            openai_init(self, *args, **kwargs)
+            arena.anthropic_api_key(self.api_key)
+            self.api_key = arena.api_key
+            self.base_url = f"{arena.base_url}/lm/anthropic"
         client.__init__ = init
