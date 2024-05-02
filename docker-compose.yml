@@ -75,7 +75,8 @@ services:
       - REDIS_SERVER=redis
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SENTRY_DSN=${SENTRY_DSN}
-
+      - PRESIDIO_ANALYZER_SERVER=presidio-analyzer
+      - PRESIDIO_ANONYMIZER_SERVER=presidio-anonymizer
     build:
       context: ./backend
       args:
@@ -126,6 +127,8 @@ services:
       - REDIS_SERVER=redis
       - REDIS_PASSWORD=${REDIS_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - PRESIDIO_ANALYZER_SERVER=presidio-analyzer
+      - PRESIDIO_ANONYMIZER_SERVER=presidio-anonymizer
     build:
       context: ./backend
       args:
@@ -169,7 +172,7 @@ services:
       # to disable www redirection remove the section: ${STACK_NAME?Variable not set}-www-redirect,
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect,${STACK_NAME?Variable not set}-www-redirect
   
-  presidio-analyser:
+  presidio-analyzer:
     image: mcr.microsoft.com/presidio-analyzer:latest
     restart: always
     deploy:
