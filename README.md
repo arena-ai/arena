@@ -4,7 +4,7 @@
 
 To start the test environment, run:
 
-`docker compose up -d`
+`docker compose up`
 
 ## Inspiration
 
