@@ -89,7 +89,8 @@ masking:
     registry: mcr.microsoft.com
     # The text analyzer
     analyzer:
-      name: presidio-analyzer
+      image: presidio-analyzer
+      tag: latest
       replicas: 1
       # imagePullPolicy: Always
       container:
@@ -107,7 +108,8 @@ masking:
         name: http
     # The text anonymizer
     anonymizer:
-      name: presidio-anonymizer
+      image: presidio-anonymizer
+      tag: latest
       replicas: 1
       # imagePullPolicy: Always
       container:
