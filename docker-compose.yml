@@ -185,8 +185,6 @@ services:
           cpus: "2.000"
     environment:
       - PORT=5001
-    ports:
-      - "5001:5001"
     env_file:
       - .env
   
@@ -202,9 +200,7 @@ services:
           memory: "512M"
           cpus: "0.500"
     environment:
-      - PORT=5001
-    ports:
-      - "5002:5001"
+      - PORT=5002
     env_file:
       - .env
 
