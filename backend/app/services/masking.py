@@ -54,7 +54,7 @@ class Analyzer:
 
 class Replace(BaseModel):
     type: Literal["replace"] = "replace"
-    new_value: str
+    new_value: str | None = None
 
 class Redact(BaseModel):
     type: Literal["redact"] = "redact"
@@ -73,28 +73,31 @@ class Encrypt(BaseModel):
     type: Literal["encrypt"] = "encrypt"
     key: str
 
+class Keep(BaseModel):
+    type: Literal["keep"] = "keep"
+
 
 class Anonymizers(BaseModel):
     # From https://microsoft.github.io/presidio/supported_entities/
-    PHONE_NUMBER: Replace | Redact | Mask | Hash | Encrypt
-    US_DRIVER_LICENSE: Replace | Redact | Mask | Hash | Encrypt
-    US_PASSPORT: Replace | Redact | Mask | Hash | Encrypt
-    LOCATION: Replace | Redact | Mask | Hash | Encrypt
-    CREDIT_CARD: Replace | Redact | Mask | Hash | Encrypt
-    CRYPTO: Replace | Redact | Mask | Hash | Encrypt
-    UK_NHS: Replace | Redact | Mask | Hash | Encrypt
-    US_SSN: Replace | Redact | Mask | Hash | Encrypt
-    US_BANK_NUMBER: Replace | Redact | Mask | Hash | Encrypt
-    EMAIL_ADDRESS: Replace | Redact | Mask | Hash | Encrypt
-    DATE_TIME: Replace | Redact | Mask | Hash | Encrypt
-    IP_ADDRESS: Replace | Redact | Mask | Hash | Encrypt
-    PERSON: Replace | Redact | Mask | Hash | Encrypt
-    IBAN_CODE: Replace | Redact | Mask | Hash | Encrypt
-    NRP: Replace | Redact | Mask | Hash | Encrypt
-    US_ITIN: Replace | Redact | Mask | Hash | Encrypt
-    MEDICAL_LICENSE: Replace | Redact | Mask | Hash | Encrypt
-    URL: Replace | Redact | Mask | Hash | Encrypt
-    DEFAULT: Replace | Redact | Mask | Hash | Encrypt
+    PHONE_NUMBER: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    US_DRIVER_LICENSE: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    US_PASSPORT: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    LOCATION: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    CREDIT_CARD: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    CRYPTO: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    UK_NHS: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    US_SSN: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    US_BANK_NUMBER: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    EMAIL_ADDRESS: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    DATE_TIME: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    IP_ADDRESS: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    PERSON: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    IBAN_CODE: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    NRP: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    US_ITIN: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    MEDICAL_LICENSE: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    URL: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
+    DEFAULT: Replace | Redact | Mask | Hash | Encrypt | Keep | None = None
 
 
 class AnonymizerRequest(BaseModel):
@@ -133,3 +136,4 @@ class Anonymizer:
                 return AnonymizerResponse.model_validate(response.raise_for_status().json())
             except httpx.HTTPStatusError:
                 return None
+    
