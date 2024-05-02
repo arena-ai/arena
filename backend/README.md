@@ -151,6 +151,12 @@ For example, to stop on first error:
 docker compose exec backend bash /app/tests-start.sh -x
 ```
 
+To run only specific tests, you can use:
+
+```bash
+docker compose exec backend bash /app/specific-tests-start.sh app/tests/path/to/test_file.py::test_particular
+```
+
 #### Test Coverage
 
 When the tests are run, a file `htmlcov/index.html` is generated, you can open it in your browser to see the coverage of the tests.
