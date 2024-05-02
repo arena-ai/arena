@@ -168,6 +168,43 @@ services:
       # Middleware to redirect www, and redirect HTTP to HTTPS
       # to disable www redirection remove the section: ${STACK_NAME?Variable not set}-www-redirect,
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect,${STACK_NAME?Variable not set}-www-redirect
+  
+  presidio-analyser:
+    image: mcr.microsoft.com/presidio-analyzer:latest
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          memory: "1500M"
+          cpus: "1.000"
+        limits:
+          memory: "3000M"
+          cpus: "2.000"
+    environment:
+      - PORT=5001
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env
+  
+  presidio-anonymizer:
+    image: mcr.microsoft.com/presidio-anonymizer:latest
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          memory: "128M"
+          cpus: "0.125"
+        limits:
+          memory: "512M"
+          cpus: "0.500"
+    environment:
+      - PORT=5001
+    ports:
+      - "5002:5001"
+    env_file:
+      - .env
+
 volumes:
   app-db-data:
 

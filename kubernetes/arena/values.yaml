@@ -104,7 +104,7 @@ masking:
       service:
         type: ClusterIP
         externalPort: 80
-        internalPort: 8080
+        internalPort: 5001
         name: http
     # The text anonymizer
     anonymizer:
@@ -123,5 +123,5 @@ masking:
       service:
         type: ClusterIP
         externalPort: 80
-        internalPort: 8080
+        internalPort: 5001
         name: http
