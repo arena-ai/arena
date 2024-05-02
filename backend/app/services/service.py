@@ -33,7 +33,7 @@ class Service(ABC, Generic[Req, Res]):
                 method=request.method,
                 url=request.url,
                 headers=request.headers,
-                json=request.content.model_dump(exclude_unset=True, exclude_none=True),
+                json=request.content.model_dump(exclude_none=True),
             )
             if response.status_code==200:
                 return Response(

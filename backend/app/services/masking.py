@@ -10,7 +10,7 @@ from app.core.config import settings
 
 class AnalyzerRequest(BaseModel):
     text: str
-    language: str = "EN"
+    language: str = "en"
     entities: Sequence[str] | None = Field(default=None, description="""A list of values among the possible entities:
                                            PHONE_NUMBER, US_DRIVER_LICENSE, US_PASSPORT, LOCATION, CREDIT_CARD,
                                            CRYPTO, UK_NHS, US_SSN, US_BANK_NUMBER, EMAIL_ADDRESS, DATE_TIME,
@@ -32,6 +32,6 @@ class Analyzer:
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 url=f"{self.url}",
-                json=req.model_dump(exclude_unset=True, exclude_none=True),
+                json=req.model_dump(exclude_none=True),
             )
             return response.raise_for_status().json()

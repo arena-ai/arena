@@ -85,7 +85,7 @@ class ChatCompletionRequest(BaseModel):
     arena_parameters: ArenaParameters | None = None
 
     def to_dict(self) -> Mapping[str, Any]:
-        return self.model_dump(exclude_unset=True, exclude_none=True)
+        return self.model_dump(exclude_none=True)
 
 
 """ChatCompletion"""

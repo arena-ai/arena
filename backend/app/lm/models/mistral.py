@@ -39,7 +39,7 @@ class ChatCompletionRequest(BaseModel):
         return ChatCompletionRequest.model_validate(ccc)
 
     def to_dict(self) -> Mapping[str, Any]:
-        return self.model_dump(exclude_unset=True, exclude_none=True)
+        return self.model_dump(exclude_none=True)
 
 
 class ChatCompletionResponse(models.ChatCompletionResponse):
@@ -51,4 +51,4 @@ class ChatCompletionResponse(models.ChatCompletionResponse):
         return ChatCompletionResponse.model_validate(m)
 
     def to_chat_completion_response(self) -> models.ChatCompletionResponse:
-        return models.ChatCompletionResponse.model_validate(self.model_dump(exclude_unset=True, exclude_none=True))
+        return models.ChatCompletionResponse.model_validate(self.model_dump(exclude_none=True))
