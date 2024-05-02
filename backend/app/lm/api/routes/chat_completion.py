@@ -10,6 +10,7 @@ from app.ops import cst, tup
 from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys
 from app.ops.events import LogRequest, LogResponse, EventIdentifier, LMJudgeEvaluation, UserEvaluation
 from app.ops.lm import OpenAI, OpenAIRequest, Mistral, MistralRequest, Anthropic, AnthropicRequest, Chat, ChatRequest, Judge
+from app.ops.masking import Masking, ReplaceMasking
 from app.ops.session import Session, User, Event
 from app.worker import evaluate
 
@@ -84,6 +85,13 @@ async def chat_completion(
     sess = Session()()
     user = User()(sess, current_user.id)
     chat_completion_request = ChatCompletionRequest.model_validate(chat_completion_request)
+    if chat_completion_request.arena_parameters and chat_completion_request.arena_parameters.pii_removal:# TODO This should be asynchronously launched
+        if chat_completion_request.arena_parameters.pii_removal == "masking":
+            for message in chat_completion_request.messages:
+                message.content = await Masking()(message.content).evaluate()
+        if chat_completion_request.arena_parameters.pii_removal == "replace":
+            for message in chat_completion_request.messages:
+                message.content, _ = await ReplaceMasking()(message.content).evaluate()
     request = ChatRequest()(chat_completion_request)
     request_event = LogRequest()(sess, user, None, request)
     api_keys = language_models_api_keys(sess, user)
@@ -91,6 +99,7 @@ async def chat_completion(
     response_event = LogResponse()(sess, user, request_event, response)
     chat_completion_response = response.content
     event_identifier = EventIdentifier()(sess, user, request_event, chat_completion_response.id)
+
     # Only the output has to be computed now
     request_event, chat_completion_response = await response_event.then(event_identifier).then(tup(request_event, chat_completion_response)).evaluate(session=session)
     # Everything else can be delayed

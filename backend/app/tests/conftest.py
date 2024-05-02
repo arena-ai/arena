@@ -211,3 +211,8 @@ def chat_completion_anthropic() -> anthropic.ChatCompletionResponse:
         type="message",
         usage=anthropic.CompletionUsage(input_tokens=10, output_tokens=20)
     )
+
+@pytest.fixture
+def text_with_pii() -> str:
+    return """Hello I am Henry Smith and my account IBAN is GB87 BARC 2065 8244 9716 55, John Dean should have my phone number: +1-202-688-5500.
+If not send me a message at henry.smith@sarus.tech or a letter at: 32 rue Alexandre Dumas, Paris 11"""

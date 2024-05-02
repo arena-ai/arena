@@ -208,3 +208,33 @@ def test_language_models_with_judges(
     events = db.exec(select(Event)).all()
     for event in events:
         print(f"\nEVENT {event}")
+
+
+def test_language_models_with_pii_removal(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session, text_with_pii: str
+) -> None:
+    # Setup all tokens
+    for api in ["OPENAI", "MISTRAL", "ANTHROPIC"]:
+        print(f"Set {api} token")
+        client.post(
+            f"{settings.API_V1_STR}/settings",
+            headers=superuser_token_headers,
+            json={"name": f"{api}_API_KEY", "content": os.getenv(f"ARENA_{api}_API_KEY")},
+        )
+    # Call Arena
+    response = client.post(
+        f"{settings.API_V1_STR}/lm/chat/completions",
+        headers = superuser_token_headers,
+        json = {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": text_with_pii,
+                }
+            ],
+            "model": "gpt-3.5-turbo",
+            "arena_parameters": {"pii_removal": "replace"},
+            },
+        )
+    assert response.status_code == 200
+    print(response.json())

@@ -51,7 +51,7 @@ class ResponseFormat(BaseModel):
 
 
 class ArenaParameters(BaseModel):
-    pii_filter: bool = False
+    pii_removal: Literal["masking", "replace"] | None = None
     judge_evaluation: bool = False
 
 

@@ -3,19 +3,17 @@ from anyio import run
 
 from app.ops.masking import Masking, ReplaceMasking
 
-TEXT = """Hello I am Henry Smith and my account IBAN is GB87 BARC 2065 8244 9716 55, John Dean should have my phone number: +1-202-688-5500."""
-
-def test_masking() -> None:
+def test_masking(text_with_pii) -> None:
     masking = Masking()
-    text = TEXT
+    text = text_with_pii
     result = masking(text)
     print(f"Computation = {result}")
     print(run(result.evaluate))
 
 
-def test_replace_masking() -> None:
+def test_replace_masking(text_with_pii) -> None:
     synth_masking = ReplaceMasking()
-    text = TEXT
+    text = text_with_pii
     result = synth_masking(text)
     print(f"Computation = {result}")
     print(run(result.evaluate))
