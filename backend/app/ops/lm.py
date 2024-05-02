@@ -3,7 +3,7 @@ import re
 from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, openai, mistral, anthropic, Score
 from app.services import lm, Request, Response
 from app.ops import Op
-from app.ops.events import LogRequest, LogResponse
+
 
 class OpenAI(Op[tuple[str, openai.ChatCompletionRequest], Response[openai.ChatCompletionResponse]]):
     async def call(self, api_key: str, input: openai.ChatCompletionRequest) -> Response[openai.ChatCompletionResponse]:
