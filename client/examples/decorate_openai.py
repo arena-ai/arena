@@ -70,7 +70,7 @@ def arena_chat_completion_with_eval():
         {"role": "user", "content": "What is the fastest animal on earth?"},
         ],
         max_tokens=100,
-        arena_parameters={"judge_evaluation": True},
+        lm_config={"judge_evaluation": True},
     )
     print(f"resp = {resp.choices[0].message.content} ({time()-t}) [bold]{resp.id}[/bold]")
     # Added this
@@ -88,7 +88,7 @@ def arena_chat_completion_with_eval_from_test():
         {"role": "user", "content": "What are the 10 first even prime numbers?"},
         ],
         temperature=1.0,
-        arena_parameters={"judge_evaluation": True},
+        lm_config={"judge_evaluation": True},
     )
     print(f"resp = {resp.choices[0].message.content} ({time()-t}) [bold]{resp.id}[/bold]")
     # Added this

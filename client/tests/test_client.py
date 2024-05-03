@@ -55,7 +55,7 @@ def test_judge():
     resp = client.chat_completions(model="gpt-3.5-turbo", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
-        ], arena_parameters={
+        ], lm_config={
             "judge_evaluation": True,
         })
     assert(resp.choices[0].message.role == "assistant")
@@ -66,7 +66,7 @@ def test_judge():
     resp = client.chat_completions(model="mistral-small", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
-        ], arena_parameters={
+        ], lm_config={
             "judge_evaluation": True,
         })
     assert(resp.choices[0].message.role == "assistant")
@@ -77,7 +77,7 @@ def test_judge():
     resp = client.chat_completions(model="claude-2.0", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
-        ], max_tokens=500, arena_parameters={
+        ], max_tokens=500, lm_config={
             "judge_evaluation": True,
         })
     assert(resp.choices[0].message.role == "assistant")
@@ -98,7 +98,7 @@ def test_user_eval():
     resp = client.chat_completions(model="gpt-3.5-turbo", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
-        ], arena_parameters={
+        ], lm_config={
             "judge_evaluation": True,
         })
     print(client.evaluation(resp.id, 0.5))
