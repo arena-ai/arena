@@ -18,6 +18,7 @@ class Masking(Op[str, str]):
         ))
         return anonymized.text
 
+masking = Masking()
 
 class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -86,3 +87,5 @@ class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
                 mapping[replacement] = item.text
             anonymized.text = f"{anonymized.text[:item.start]}{replacement}{anonymized.text[item.end:]}"
         return (anonymized.text, mapping)
+
+replace_masking = ReplaceMasking()

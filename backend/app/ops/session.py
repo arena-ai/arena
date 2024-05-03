@@ -10,16 +10,23 @@ class Session(Op[tuple[()], sqlmodel.Session]):
         else:
             return None
 
+session = Session()
 
 class User(Op[sqlmodel.Session, models.User]):
     async def call(self, session: sqlmodel.Session, id: int) -> models.User:
         return session.get(models.User, id)
 
+user = User()
+
+
 class Event(Op[sqlmodel.Session, models.Event]):
     async def call(self, session: sqlmodel.Session, id: int) -> models.Event:
         return session.get(models.Event, id)
 
+event = User()
 
 class EventIdentifier(Op[sqlmodel.Session, models.EventIdentifier]):
     async def call(self, session: sqlmodel.Session, id: str) -> models.EventIdentifier:
         return session.get(models.EventIdentifier, id)
+
+event_identifier = EventIdentifier()

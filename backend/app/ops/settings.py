@@ -1,6 +1,6 @@
 from sqlmodel import Session
 from app import crud
-from app.models import User
+from app.models import User, LMConfig
 from app.lm import models
 
 from app.ops import Op, Computation, Var
@@ -29,9 +29,11 @@ def anthropic_api_key(session: Session, user: User) -> Computation[str]:
     return Setting(name="ANTHROPIC_API_KEY")(session, user)
 
 
-class LanguageModelsApiKeys(Op[tuple[str, str, str], str]):
-    name: str = "language_models_api_keys"
+def lm_config(session: Session, user: User) -> Computation[LMConfig]:
+    return LMConfig.model_validate_json(Setting(name="LM_CONFIG")(session, user))
 
+
+class LanguageModelsApiKeys(Op[tuple[str, str, str], str]):
     async def call(self, openai_api_key: str, mistral_api_key: str, anthropic_api_key: str) -> models.LanguageModelsApiKeys:
         return models.LanguageModelsApiKeys(openai_api_key=openai_api_key, mistral_api_key=mistral_api_key, anthropic_api_key=anthropic_api_key)
 

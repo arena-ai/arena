@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlmodel import Session
 
 from app.ops import Op
-from app import crud
+import app.crud as crud
 from app.models import Event, EventCreate, User, EventIdentifier
 from app.lm.models import Score
 from app.services import Request, Response
@@ -26,8 +26,12 @@ class LogEvent(Op[tuple[Session, User, Event | None, A], Event], Generic[A]):
 class LogRequest(LogEvent[Request]):
     pass
 
+log_request = LogRequest()
+
 class LogResponse(LogEvent[Response]):
     pass
+
+log_response = LogResponse()
 
 class EventIdentifier(Op[tuple[Session, User, Event, str], EventIdentifier]):
     async def call(self, session: Session, user: User, event: Event, identifier: str) -> EventIdentifier:
@@ -35,10 +39,14 @@ class EventIdentifier(Op[tuple[Session, User, Event, str], EventIdentifier]):
         event_identifier = crud.create_event_identifier(session=session, event_identifier=identifier, event_id=event.id)
         return event_identifier
 
-
+event_identifier = EventIdentifier()
 
 class LMJudgeEvaluation(LogEvent[Score]):
     pass
 
+lm_judge_evaluation = LMJudgeEvaluation()
+
 class UserEvaluation(LogEvent[Score]):
     pass
+
+user_evaluation = UserEvaluation()
