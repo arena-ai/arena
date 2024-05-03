@@ -1,7 +1,7 @@
 from typing import Any, Type, Literal
 import httpx
 import mistralai.client
-from arena.models import ChatCompletionRequest, ChatCompletionResponse, Evaluation, Score
+from arena.models import ChatCompletionRequest, ChatCompletionResponse, Evaluation, Score, LMConfig
 import openai
 import mistralai
 import anthropic
@@ -82,7 +82,7 @@ class Client:
         self.mistral_api_key(mistral_api_key)
         self.anthropic_api_key(anthropic_api_key)
 
-    def lm_config(self, api_key: str):
+    def lm_config(self, lm_config: LMConfig):
         with httpx.Client(timeout=self.timeout) as client:
             client.post(
                 url = f"{self.base_url}/settings/",
@@ -90,8 +90,8 @@ class Client:
                     "Authorization": f"Bearer {self.api_key}"
                 },
                 json={
-                    "name": "ANTHROPIC_API_KEY",
-                    "content": api_key
+                    "name": "LM_CONFIG",
+                    "content": lm_config
                 },
             )
 
