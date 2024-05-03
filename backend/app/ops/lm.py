@@ -1,6 +1,6 @@
 import re
 
-from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, Score
+from app.lm.models import LMApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, Score
 import app.lm.models.openai as oai
 import app.lm.models.mistral as mis
 import app.lm.models.anthropic as ant
@@ -45,19 +45,19 @@ class AnthropicRequest(Op[ant.ChatCompletionRequest, Request[ant.ChatCompletionR
 anthropic = Anthropic()
 anthropic_request = AnthropicRequest()
 
-class Chat(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest], Response[ChatCompletionResponse]]):
-    async def call(self, api_keys: LanguageModelsApiKeys, input: ChatCompletionRequest) -> Response[ChatCompletionResponse]:
+class Chat(Op[tuple[LMApiKeys, ChatCompletionRequest], Response[ChatCompletionResponse]]):
+    async def call(self, api_keys: LMApiKeys, input: ChatCompletionRequest) -> Response[ChatCompletionResponse]:
         return await slm.LanguageModels(api_keys=api_keys).chat_completion(input)
 
 class ChatRequest(Op[ChatCompletionRequest, Request[ChatCompletionRequest]]):
     async def call(self, input: ChatCompletionRequest) -> Request[ChatCompletionRequest]:
-        return slm.LanguageModels(api_keys=LanguageModelsApiKeys(openai_api_key="", mistral_api_key="", anthropic_api_key="")).request(input)
+        return slm.LanguageModels(api_keys=LMApiKeys(openai_api_key="", mistral_api_key="", anthropic_api_key="")).request(input)
 
 # instances
 chat = Chat()
 chat_request = ChatRequest()
 
-class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletionResponse], Score]):
+class Judge(Op[tuple[LMApiKeys, ChatCompletionRequest, ChatCompletionResponse], Score]):
     """Implements a simple LLM-as-a-judge as in https://arxiv.org/pdf/2306.05685.pdf
     """
     name: str = "judge"
@@ -72,7 +72,7 @@ class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletio
         else:
             return 0.0
     
-    async def call(self, api_keys: LanguageModelsApiKeys, request: ChatCompletionRequest, response: ChatCompletionResponse) -> Score:
+    async def call(self, api_keys: LMApiKeys, request: ChatCompletionRequest, response: ChatCompletionResponse) -> Score:
         service = slm.LanguageModels(api_keys=api_keys)
         reference_request = request.model_copy()
         reference_request.model = self.reference_model

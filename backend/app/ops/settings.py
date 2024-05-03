@@ -1,9 +1,9 @@
 from sqlmodel import Session
 from app import crud
-from app.models import User, LMConfig
-from app.lm import models
+from app.models import User
+from app.lm.models import LMApiKeys, LMConfig
 
-from app.ops import Op, Computation, Var
+from app.ops import Op, Computation
 
 class Setting(Op[tuple[Session, User], str]):
     """An op to access setting by name"""
@@ -45,13 +45,13 @@ def lm_config(session: Session, user: User, override: LMConfig | None = None) ->
     return LMConfigSetting(override=override)(session, user)
 
 
-class LanguageModelsApiKeys(Op[tuple[str, str, str], str]):
-    async def call(self, openai_api_key: str, mistral_api_key: str, anthropic_api_key: str) -> models.LanguageModelsApiKeys:
-        return models.LanguageModelsApiKeys(openai_api_key=openai_api_key, mistral_api_key=mistral_api_key, anthropic_api_key=anthropic_api_key)
+class LMApiKeys(Op[tuple[str, str, str], str]):
+    async def call(self, openai_api_key: str, mistral_api_key: str, anthropic_api_key: str) -> LMApiKeys:
+        return LMApiKeys(openai_api_key=openai_api_key, mistral_api_key=mistral_api_key, anthropic_api_key=anthropic_api_key)
 
 
-def language_models_api_keys(session: Session, user: User) -> Computation[LanguageModelsApiKeys]:
-    return LanguageModelsApiKeys()(
+def language_models_api_keys(session: Session, user: User) -> Computation[LMApiKeys]:
+    return LMApiKeys()(
         openai_api_key(session, user),
         mistral_api_key(session, user),
         anthropic_api_key(session, user),

@@ -9,7 +9,7 @@ import httpx
 
 from app.services import Service, Request, Response
 from app import crud
-from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
+from app.lm.models import LMApiKeys, ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
 
 
 @dataclass
@@ -140,7 +140,7 @@ class Anthropic(Service[anthropic.ChatCompletionRequest, anthropic.ChatCompletio
 
 @dataclass
 class LanguageModels:
-    api_keys: LanguageModelsApiKeys
+    api_keys: LMApiKeys
     timeout: httpx.Timeout = field(default_factory=lambda: httpx.Timeout(30., read=None))
 
     @cached_property

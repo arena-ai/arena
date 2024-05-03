@@ -1,7 +1,7 @@
 from typing import Mapping
 from pydantic import Field, ConfigDict
 from faker import Faker
-from app.lm.models import LanguageModelsApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, openai, mistral, anthropic, Score
+from app.lm.models import LMApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, openai, mistral, anthropic, Score
 from app.services.masking import Analyzer, AnalyzerRequest, Anonymizer, AnonymizerRequest, Anonymizers, Replace, Redact, Mask, Hash, Encrypt, Keep
 from app.ops import Op
 

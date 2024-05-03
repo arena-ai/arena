@@ -1,11 +1,11 @@
 from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel
-from app.lm.models import LMConfig
+from app.lm.models.settings import LMConfig
 
 
 """All LanguageModels"""
 
-class LanguageModelsApiKeys(BaseModel):
+class LMApiKeys(BaseModel):
     openai_api_key: str
     mistral_api_key: str
     anthropic_api_key: str

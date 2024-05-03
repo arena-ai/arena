@@ -1,5 +1,5 @@
 from app.lm.models.chat_completion import (
-    LanguageModelsApiKeys,
+    LMApiKeys,
     Function, FunctionDefinition,
     ChatCompletionToolParam, Message, ResponseFormat, ChatCompletionRequest,
     TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage, ChatCompletionResponse

@@ -2,9 +2,9 @@ import os
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
-from app.models import Event, LMConfig
+from app.models import Event
 from app.core.config import settings
-from app.lm.models import anthropic, ChatCompletionRequest
+from app.lm.models import anthropic, ChatCompletionRequest, LMConfig
 
 from openai import OpenAI
 from mistralai.client import MistralClient

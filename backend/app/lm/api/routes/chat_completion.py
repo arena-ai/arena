@@ -6,8 +6,8 @@ from fastapi import APIRouter
 from sqlmodel import Session
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import User, Event, LMConfig
-from app.lm.models import ChatCompletionResponse, ChatCompletionRequest
+from app.models import User, Event
+from app.lm.models import ChatCompletionResponse, ChatCompletionRequest, LMConfig
 import app.lm.models.openai as oai
 import app.lm.models.mistral as mis
 import app.lm.models.anthropic as ant
