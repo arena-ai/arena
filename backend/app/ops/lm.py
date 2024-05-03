@@ -73,7 +73,7 @@ class Judge(Op[tuple[LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletio
             return 0.0
     
     async def call(self, api_keys: LanguageModelsApiKeys, request: ChatCompletionRequest, response: ChatCompletionResponse) -> Score:
-        service = lm.LanguageModels(api_keys=api_keys)
+        service = slm.LanguageModels(api_keys=api_keys)
         reference_request = request.model_copy()
         reference_request.model = self.reference_model
         reference_response = await service.chat_completion(reference_request)
