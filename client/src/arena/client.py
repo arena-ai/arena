@@ -82,7 +82,7 @@ class Client:
         self.mistral_api_key(mistral_api_key)
         self.anthropic_api_key(anthropic_api_key)
 
-    def anthropic_api_key(self, api_key: str):
+    def lm_config(self, api_key: str):
         with httpx.Client(timeout=self.timeout) as client:
             client.post(
                 url = f"{self.base_url}/settings/",

@@ -35,10 +35,10 @@ class ChatCompletionRequest(models.ChatCompletionRequest):
 
     @classmethod
     def from_chat_completion_request(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
-        return ChatCompletionRequest.model_validate(ccc.model_dump(exclude=["arena_parameters"]))
+        return ChatCompletionRequest.model_validate(ccc.model_dump(exclude=["lm_config"]))
 
     def to_dict(self) -> Mapping[str, Any]:
-        return self.model_dump(exclude_unset=True, exclude_none=True)
+        return self.model_dump(exclude_none=True)
 
 class ChatCompletionResponse(models.ChatCompletionResponse):
     """
@@ -49,5 +49,5 @@ class ChatCompletionResponse(models.ChatCompletionResponse):
         return ChatCompletionResponse.model_validate(m)
 
     def to_chat_completion_response(self) -> models.ChatCompletionResponse:
-        return models.ChatCompletionResponse.model_validate(self.model_dump(exclude_unset=True, exclude_none=True))
+        return models.ChatCompletionResponse.model_validate(self.model_dump(exclude_none=True))
 
