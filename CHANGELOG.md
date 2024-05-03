@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added evaluation logging
 - Add a "config" endpoint for masking and evaluation
 - Wrote a post
+  - On installation
+  - On masking
 - Improved the frontend
   - Underline the parent request
   - Wrap lines for the message representation

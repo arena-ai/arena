@@ -11,7 +11,7 @@ import app.lm.models.anthropic as ant
 from app.services import Request, Response
 from app.ops import cst, tup
 from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys
-from app.ops.events import log_request, log_response, event_identifier, lm_judge_evaluation, user_evaluation
+from app.ops.events import log_request, log_response, event_identifier, lm_judge_evaluation
 from app.ops.lm import openai, openai_request, mistral, mistral_request, anthropic, anthropic_request, chat, chat_request, judge
 from app.ops.masking import masking, replace_masking
 from app.ops.session import session, user, event
@@ -80,7 +80,7 @@ async def anthropic_chat_completion(
 
 @router.post("/chat/completions", response_model=ChatCompletionResponse)
 async def chat_completion(
-    session: SessionDep, current_user: CurrentUser, chat_completion_request: ChatCompletionRequest
+    session_dep: SessionDep, current_user: CurrentUser, chat_completion_request: ChatCompletionRequest
 ) -> ChatCompletionResponse:
     """
     Abstract version
@@ -104,7 +104,7 @@ async def chat_completion(
     event_id = event_identifier(sess, usr, request_event, chat_completion_response.id)
 
     # Only the output has to be computed now
-    request_event, chat_completion_response = await response_event.then(event_id).then(tup(request_event, chat_completion_response)).evaluate(session=session)
+    request_event, chat_completion_response = await response_event.then(event_id).then(tup(request_event, chat_completion_response)).evaluate(session=session_dep)
     # Everything else can be delayed
     request_event = event(sess, request_event.id)
     delayed_computation = request_event.then(chat_completion_response)
@@ -119,19 +119,19 @@ async def chat_completion(
 
 @router.post("/chat/completions/request", response_model=models.Event)
 async def chat_completion_request(
-    session: SessionDep, current_user: CurrentUser, chat_completion_request: ChatCompletionRequest
+    session_dep: SessionDep, current_user: CurrentUser, chat_completion_request: ChatCompletionRequest
 ) -> models.Event:
     sess = session()
     usr = user(sess, current_user.id)
     chat_completion_request = ChatCompletionRequest.model_validate(chat_completion_request)
     request = chat_request(chat_completion_request)
     request_event = log_request(sess, usr, None, request)
-    return await request_event.evaluate(session=session)
+    return await request_event.evaluate(session=session_dep)
 
 
 @router.post("/chat/completions/response/{request_event_id}", response_model=models.Event)
 async def chat_completion_response(
-    session: SessionDep, current_user: CurrentUser, request_event: models.Event, chat_completion_response: ChatCompletionResponse
+    session_dep: SessionDep, current_user: CurrentUser, request_event: models.Event, chat_completion_response: ChatCompletionResponse
 ) -> models.Event:
     sess = session()
     usr = user(sess, current_user.id)
@@ -148,4 +148,4 @@ async def chat_completion_response(
         judge_score_event = lm_judge_evaluation(sess, usr, request_event, judge_score)
         computation = computation.then(judge_score).then(judge_score_event)
     computation = computation.then(response_event)
-    return await computation.evaluate(session=session)
+    return await computation.evaluate(session=session_dep)
