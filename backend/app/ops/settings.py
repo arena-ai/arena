@@ -28,9 +28,21 @@ def mistral_api_key(session: Session, user: User) -> Computation[str]:
 def anthropic_api_key(session: Session, user: User) -> Computation[str]:
     return Setting(name="ANTHROPIC_API_KEY")(session, user)
 
+class LMConfigSetting(Op[tuple[Session, User], LMConfig]):
+    name: str = "LM_CONFIG"
+    override: LMConfig | None = None
 
-def lm_config(session: Session, user: User) -> Computation[LMConfig]:
-    return LMConfig.model_validate_json(Setting(name="LM_CONFIG")(session, user))
+    async def call(self, session: Session, user: User) -> LMConfig:
+        if self.override:
+            return self.override
+        setting = crud.get_setting(session=session, setting_name=self.name, owner_id=user.id)
+        if setting:
+            return LMConfig.model_validate_json(setting.content)
+        else:
+            return LMConfig()
+
+def lm_config(session: Session, user: User, override: LMConfig | None = None) -> Computation[LMConfig]:
+    return LMConfigSetting(override=override)(session, user)
 
 
 class LanguageModelsApiKeys(Op[tuple[str, str, str], str]):

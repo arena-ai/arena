@@ -53,8 +53,8 @@ class ChatCompletionRequest(BaseModel):
             ccc["system"] = None
         else:
             ccc["system"] = system[0]
-        if "arena_parameters" in ccc:
-            del ccc["arena_parameters"]
+        if "lm_config" in ccc:
+            del ccc["lm_config"]
         ccc["messages"] = messages
         return ChatCompletionRequest.model_validate(ccc)
 

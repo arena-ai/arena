@@ -1,9 +1,10 @@
 from sqlmodel import Session
 from anyio import run
 
+from app.models import LMConfig
 from app.ops import tup
 from app.ops.lm import openai, mistral, anthropic, chat, judge
-from app.lm.models import ChatCompletionRequest, Message, ArenaParameters
+from app.lm.models import ChatCompletionRequest, Message
 import app.lm.models.openai as oai
 import app.lm.models.mistral as mis
 import app.lm.models.anthropic as ant
@@ -77,6 +78,6 @@ def test_chat_judge(language_models_api_keys) -> None:
             Message(role="system", content="You are a helpful assistant."),
             Message(role="user", content="What is the capital of France?")
         ],
-        arena_parameters=ArenaParameters(judge_evaluation=True)
+        lm_config=LMConfig(judge_evaluation=True)
     )).content
     print(run(comp.evaluate).choices[0].message.content)

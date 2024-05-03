@@ -2,9 +2,9 @@ import os
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
-from app.models import Event
+from app.models import Event, LMConfig
 from app.core.config import settings
-from app.lm.models import anthropic, ChatCompletionRequest, ArenaParameters
+from app.lm.models import anthropic, ChatCompletionRequest
 
 from openai import OpenAI
 from mistralai.client import MistralClient
@@ -197,7 +197,7 @@ def test_language_models_with_judges(
         (ChatCompletionRequest(**chat_input_gen("mistral-small"))),
         (ChatCompletionRequest(**chat_input_gen("claude-2.1"))),
         ]:
-        ccc.arena_parameters = ArenaParameters(judge_evaluation=True)
+        ccc.lm_config = LMConfig(judge_evaluation=True)
         # Call Arena
         response = client.post(
             f"{settings.API_V1_STR}/lm/chat/completions",
@@ -233,7 +233,7 @@ def test_language_models_with_pii_removal(
                 }
             ],
             "model": "gpt-3.5-turbo",
-            "arena_parameters": {"pii_removal": "replace"},
+            "lm_config": {"pii_removal": "replace"},
             },
         )
     assert response.status_code == 200

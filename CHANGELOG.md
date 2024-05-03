@@ -11,12 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added masking using presidio
 - Added masking plus faker
-<!-- TODO -->
-- Added logging before and after masking 
+- Added logging before and after masking
 - Added masking from any wrapper
-- Added instrumental evaluation
-- Added evaluation logging
 - Add a "config" endpoint for masking and evaluation
+<!-- TODO -->
+- Added instrumental evaluation
 - Wrote a post
   - On installation
   - On masking

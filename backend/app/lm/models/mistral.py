@@ -34,8 +34,8 @@ class ChatCompletionRequest(BaseModel):
         if "seed" in ccc:
             ccc["random_seed"] = ccc["seed"]
             del ccc["seed"]
-        if "arena_parameters" in ccc:
-            del ccc["arena_parameters"]
+        if "lm_config" in ccc:
+            del ccc["lm_config"]
         return ChatCompletionRequest.model_validate(ccc)
 
     def to_dict(self) -> Mapping[str, Any]:

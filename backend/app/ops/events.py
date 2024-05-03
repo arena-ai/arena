@@ -22,7 +22,6 @@ class LogEvent(Op[tuple[Session, User, Event | None, A], Event], Generic[A]):
         event = crud.create_event(session=session, event_in=event_create, owner_id=user.id)
         return event
 
-
 class LogRequest(LogEvent[Request]):
     pass
 
