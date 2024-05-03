@@ -1,7 +1,7 @@
 from sqlmodel import Session
 from anyio import run
 
-from app.models import LMConfig
+from app.lm.models import LMConfig
 from app.ops import tup
 from app.ops.lm import openai, mistral, anthropic, chat, judge
 from app.lm.models import ChatCompletionRequest, Message

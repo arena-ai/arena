@@ -5,3 +5,4 @@ from app.lm.models.chat_completion import (
     TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage, ChatCompletionResponse
     )
 from app.lm.models.evaluation import Evaluation, Score
+from app.lm.models.settings import LMConfig

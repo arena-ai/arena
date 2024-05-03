@@ -1,6 +1,6 @@
 from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel
-from app.models import LMConfig
+from app.lm.models import LMConfig
 
 
 """All LanguageModels"""

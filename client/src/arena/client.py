@@ -76,6 +76,24 @@ class Client:
                     "content": api_key
                 },
             )
+    
+    def api_keys(self, openai_api_key: str, mistral_api_key: str, anthropic_api_key: str):
+        self.openai_api_key(openai_api_key)
+        self.mistral_api_key(mistral_api_key)
+        self.anthropic_api_key(anthropic_api_key)
+
+    def anthropic_api_key(self, api_key: str):
+        with httpx.Client(timeout=self.timeout) as client:
+            client.post(
+                url = f"{self.base_url}/settings/",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json={
+                    "name": "ANTHROPIC_API_KEY",
+                    "content": api_key
+                },
+            )
 
     def chat_completions(self, **kwargs: Any) -> ChatCompletionResponse:
         req = ChatCompletionRequest.model_validate(kwargs).model_dump(mode="json", exclude_unset=True, exclude_none=True)

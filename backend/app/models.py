@@ -1,6 +1,5 @@
 from typing import Optional, Literal
 from datetime import datetime
-from pydantic import BaseModel
 from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func
 
 # Shared properties
@@ -200,9 +199,3 @@ class Attribute(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, unique=True)
     events: EventAttribute = Relationship(back_populates="attribute")
-
-
-# A LM config setting
-class LMConfig(BaseModel):
-    pii_removal: Literal["masking", "replace"] | None = None
-    judge_evaluation: bool = False
