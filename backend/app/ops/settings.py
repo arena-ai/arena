@@ -1,7 +1,7 @@
 from sqlmodel import Session
 from app import crud
 from app.models import User
-from app.lm.models import LMApiKeys, LMConfig
+import app.lm.models as lmm
 
 from app.ops import Op, Computation
 
@@ -28,26 +28,26 @@ def mistral_api_key(session: Session, user: User) -> Computation[str]:
 def anthropic_api_key(session: Session, user: User) -> Computation[str]:
     return Setting(name="ANTHROPIC_API_KEY")(session, user)
 
-class LMConfigSetting(Op[tuple[Session, User], LMConfig]):
+class LMConfigSetting(Op[tuple[Session, User], lmm.LMConfig]):
     name: str = "LM_CONFIG"
-    override: LMConfig | None = None
+    override: lmm.LMConfig | None = None
 
-    async def call(self, session: Session, user: User) -> LMConfig:
+    async def call(self, session: Session, user: User) -> lmm.LMConfig:
         if self.override:
             return self.override
         setting = crud.get_setting(session=session, setting_name=self.name, owner_id=user.id)
         if setting:
-            return LMConfig.model_validate_json(setting.content)
+            return lmm.LMConfig.model_validate_json(setting.content)
         else:
-            return LMConfig()
+            return lmm.LMConfig()
 
-def lm_config(session: Session, user: User, override: LMConfig | None = None) -> Computation[LMConfig]:
+def lm_config(session: Session, user: User, override: lmm.LMConfig | None = None) -> Computation[lmm.LMConfig]:
     return LMConfigSetting(override=override)(session, user)
 
 
 class LMApiKeys(Op[tuple[str, str, str], str]):
-    async def call(self, openai_api_key: str, mistral_api_key: str, anthropic_api_key: str) -> LMApiKeys:
-        return LMApiKeys(openai_api_key=openai_api_key, mistral_api_key=mistral_api_key, anthropic_api_key=anthropic_api_key)
+    async def call(self, openai_api_key: str, mistral_api_key: str, anthropic_api_key: str) -> lmm.LMApiKeys:
+        return lmm.LMApiKeys(openai_api_key=openai_api_key, mistral_api_key=mistral_api_key, anthropic_api_key=anthropic_api_key)
 
 
 def language_models_api_keys(session: Session, user: User) -> Computation[LMApiKeys]:
