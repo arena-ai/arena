@@ -6,7 +6,8 @@ import openai
 import mistralai
 import anthropic
 
-BASE_URL = "https://arena.sarus.app/api/v1"
+# BASE_URL = "https://arena.sarus.app/api/v1"
+BASE_URL = "http://localhost/api/v1"
 
 class Client:
     def __init__(self, user: str | None = None, password: str | None = None, api_key: str | None = None, base_url: str = BASE_URL):
@@ -91,7 +92,7 @@ class Client:
                 },
                 json={
                     "name": "LM_CONFIG",
-                    "content": lm_config
+                    "content": lm_config.model_dump(mode="json")
                 },
             )
 

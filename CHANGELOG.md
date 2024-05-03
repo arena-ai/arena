@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a "config" endpoint for masking and evaluation
 <!-- TODO -->
 - Added instrumental evaluation
+- Added open user registration
 - Wrote a post
   - On installation
   - On masking

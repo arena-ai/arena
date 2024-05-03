@@ -7,7 +7,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app import crud, models
 from app.lm.models import Evaluation, Score
 from app.ops.session import Session, User, EventIdentifier, Event
-from app.ops.events import UserEvaluation
+from app.ops.events import LogUserEvaluation
 
 
 
@@ -22,7 +22,7 @@ async def evaluation(
     user = User()(sess, current_user.id)
     event_identifier = EventIdentifier()(sess, evaluation.identifier)
     event = Event()(sess, event_identifier.event_id)
-    user_evaluation = UserEvaluation()(sess, user, event, evaluation.value)
+    user_evaluation = LogUserEvaluation()(sess, user, event, evaluation.value)
     return await user_evaluation.evaluate(session=session)
 
 
@@ -34,6 +34,6 @@ async def evaluation_get(
     user = User()(sess, current_user.id)
     event_identifier = EventIdentifier()(sess, identifier)
     event = Event()(sess, event_identifier.event_id)
-    user_evaluation = UserEvaluation()(sess, user, event, Score(value=score))
+    user_evaluation = LogUserEvaluation()(sess, user, event, Score(value=score))
     return await user_evaluation.evaluate(session=session)
 

@@ -14,8 +14,10 @@ from app.services import Request, Response
 A = TypeVar('A', bound=BaseModel)
 
 class LogEvent(Op[tuple[Session, User, Event | None, A], Event], Generic[A]):
+    name: str
+
     def event_create(self, parent: Event | None, a: A) -> EventCreate:
-        return EventCreate(name=self.opname, content=a.model_dump_json(), parent_id=None if parent is None else parent.id)
+        return EventCreate(name=self.name, content=a.model_dump_json(), parent_id=None if parent is None else parent.id)
 
     async def call(self, session: Session, user: User, parent: Event | None, a: A) -> Event:
         event_create = self.event_create(parent, a)
@@ -23,29 +25,29 @@ class LogEvent(Op[tuple[Session, User, Event | None, A], Event], Generic[A]):
         return event
 
 class LogRequest(LogEvent[Request]):
-    pass
+    name: str = "request"
 
 log_request = LogRequest()
 
 class LogResponse(LogEvent[Response]):
-    pass
+    name: str = "response"
 
 log_response = LogResponse()
 
-class EventIdentifier(Op[tuple[Session, User, Event, str], EventIdentifier]):
+class LogEventIdentifier(Op[tuple[Session, User, Event, str], EventIdentifier]):
     async def call(self, session: Session, user: User, event: Event, identifier: str) -> EventIdentifier:
         # Add the native identifier to the parent event
         event_identifier = crud.create_event_identifier(session=session, event_identifier=identifier, event_id=event.id)
         return event_identifier
 
-event_identifier = EventIdentifier()
+log_event_identifier = LogEventIdentifier()
 
-class LMJudgeEvaluation(LogEvent[Score]):
-    pass
+class LogLMJudgeEvaluation(LogEvent[Score]):
+    name: str = "ll_judge_evaluation"
 
-lm_judge_evaluation = LMJudgeEvaluation()
+log_lm_judge_evaluation = LogLMJudgeEvaluation()
 
-class UserEvaluation(LogEvent[Score]):
-    pass
+class LogUserEvaluation(LogEvent[Score]):
+    name: str = "user_evaluation"
 
-user_evaluation = UserEvaluation()
+log_user_evaluation = LogUserEvaluation()
