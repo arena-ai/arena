@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from sqlmodel import Session
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import User, Event
+from app.models import User, UserOut, Event, EventOut
 from app.lm.models import ChatCompletionResponse, ChatCompletionRequest, LMConfig
 import app.lm.models.openai as oai
 import app.lm.models.mistral as mis
@@ -40,7 +40,7 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
     def arena_request(self) -> Request[Req]:
         pass
 
-    def config(self, ses: Computation[Session], usr: Computation[User]) -> Computation[LMConfig]:
+    def config(self, ses: Computation[Session], usr: Computation[UserOut]) -> Computation[LMConfig]:
         return lm_config(ses, usr)
 
     @abstractmethod
@@ -48,7 +48,7 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         pass
     
     @abstractmethod
-    def lm_response(self, ses: Computation[Session], usr: Computation[User], request: Request[Req]) -> Computation[Response[Resp]]:
+    def lm_response(self, ses: Computation[Session], usr: Computation[UserOut], request: Request[Req]) -> Computation[Response[Resp]]:
         pass
 
     async def process_request(self) -> Resp:
@@ -107,7 +107,7 @@ class OpenAIHandler(ChatCompletionHandler[oai.ChatCompletionRequest, oai.ChatCom
     def lm_request(self) -> Computation[Request[oai.ChatCompletionRequest]]:
         return openai_request(self.chat_completion_request.model_copy())
 
-    def lm_response(self, ses: Computation[Session], usr: Computation[User], request: Request[oai.ChatCompletionRequest]) -> Computation[Response[oai.ChatCompletionResponse]]:
+    def lm_response(self, ses: Computation[Session], usr: Computation[UserOut], request: Request[oai.ChatCompletionRequest]) -> Computation[Response[oai.ChatCompletionResponse]]:
         return openai(openai_api_key(ses, usr), request.content)
 
 @router.post("/openai/chat/completions", response_model=oai.ChatCompletionResponse)
@@ -134,7 +134,7 @@ class MistralHandler(ChatCompletionHandler[mis.ChatCompletionRequest, mis.ChatCo
     def lm_request(self) -> Computation[Request[mis.ChatCompletionRequest]]:
         return mistral_request(self.chat_completion_request.model_copy())
 
-    def lm_response(self, ses: Computation[Session], usr: Computation[User], request: Request[mis.ChatCompletionRequest]) -> Computation[Response[mis.ChatCompletionResponse]]:
+    def lm_response(self, ses: Computation[Session], usr: Computation[UserOut], request: Request[mis.ChatCompletionRequest]) -> Computation[Response[mis.ChatCompletionResponse]]:
         return mistral(mistral_api_key(ses, usr), request.content)
 
 @router.post("/mistral/v1/chat/completions", response_model=mis.ChatCompletionResponse)
@@ -161,7 +161,7 @@ class AnthropicHandler(ChatCompletionHandler[ant.ChatCompletionRequest, ant.Chat
     def lm_request(self) -> Computation[Request[ant.ChatCompletionRequest]]:
         return anthropic_request(self.chat_completion_request.model_copy())
 
-    def lm_response(self, ses: Computation[Session], usr: Computation[User], request: Request[ant.ChatCompletionRequest]) -> Computation[Response[ant.ChatCompletionResponse]]:
+    def lm_response(self, ses: Computation[Session], usr: Computation[UserOut], request: Request[ant.ChatCompletionRequest]) -> Computation[Response[ant.ChatCompletionResponse]]:
         return anthropic(anthropic_api_key(ses, usr), request.content)
 
 @router.post("/anthropic/v1/messages", response_model=ant.ChatCompletionResponse)
@@ -185,13 +185,13 @@ class ArenaHandler(ChatCompletionHandler[ChatCompletionRequest, ChatCompletionRe
             content=self.chat_completion_request
         )
 
-    def config(self, ses: Computation[Session], usr: Computation[User]) -> Computation[LMConfig]:
+    def config(self, ses: Computation[Session], usr: Computation[UserOut]) -> Computation[LMConfig]:
         return lm_config(ses, usr, override=self.chat_completion_request.lm_config)
     
     def lm_request(self) -> Computation[Request[ChatCompletionRequest]]:
         return chat_request(self.chat_completion_request.model_copy())
 
-    def lm_response(self, ses: Computation[Session], usr: Computation[User], request: Request[ChatCompletionRequest]) -> Computation[Response[ChatCompletionResponse]]:
+    def lm_response(self, ses: Computation[Session], usr: Computation[UserOut], request: Request[ChatCompletionRequest]) -> Computation[Response[ChatCompletionResponse]]:
         return chat(language_models_api_keys(ses, usr), request.content)
 
 @router.post("/chat/completions", response_model=ChatCompletionResponse)

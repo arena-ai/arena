@@ -110,12 +110,20 @@ class Computation(BaseModel, Generic[B]):
             for arg in self.args:
                 arg.tasks(task_group)
             self.task = task_group.create_task(self.compute())
+            from rich import print
+            print(f"\nDEBUG no self.task {self.op} \n {self.task}")
+        else:
+            from rich import print
+            print(f"\nDEBUG self.task {self.task}")
     
     async def evaluate(self, **context: Any) -> B:
         """Execute the ops and clear all"""
         self.context(**context)
         async with TaskGroup() as task_group:
             self.tasks(task_group)
+            from rich import print
+            print(f"\nDEBUG task_group {task_group}")
+            print(f"\nDEBUG task_group._tasks {task_group._tasks}")
         computed = self.computed
         self.clear()
         return computed

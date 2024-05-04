@@ -22,7 +22,7 @@ def test_evaluation(
     for ccc in [
         (ChatCompletionRequest(**chat_input_gen("gpt-3.5-turbo"))),
         (ChatCompletionRequest(**chat_input_gen("mistral-small"))),
-        (ChatCompletionRequest(**chat_input_gen("claude-2.1"))),
+        (ChatCompletionRequest(**chat_input_gen("claude-2.0"))),
         ]:
         # Call Arena
         response = client.post(
@@ -30,6 +30,7 @@ def test_evaluation(
             headers = superuser_token_headers,
             json = ccc.to_dict()
         )
+        print(f"DEBUG {response.content}")
         assert response.status_code == 200
         eval = client.post(
             f"{settings.API_V1_STR}/lm/evaluation",
