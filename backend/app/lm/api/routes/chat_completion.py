@@ -58,7 +58,7 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         arena_request = self.arena_request()
         arena_request_event = log_request(ses, usr, None, arena_request)
         # Build the request
-        lm_request = await self.lm_request().evaluate()
+        lm_request = await self.lm_request().evaluate(session=self.session)
         lm_request_event = arena_request_event
         # Do the masking
         if config.pii_removal:
@@ -66,27 +66,28 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
                         async def set_content():
-                            message.content = await masking(message.content).evaluate()
+                            message.content = await masking(message.content).evaluate(session=self.session)
                         tg.start_soon(set_content)
             if config.pii_removal == "replace":
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
                         async def set_content():
-                            message.content, _ = await replace_masking(message.content).evaluate()
+                            message.content, _ = await replace_masking(message.content).evaluate(session=self.session)
                         tg.start_soon(set_content)
             # Log the request event
             lm_request_event = LogRequest(name="modified_request")(ses, usr, arena_request_event, lm_request)
         # compute the response
-        lm_response = self.lm_response(ses, usr, lm_request)
+        lm_response = await self.lm_response(ses, usr, lm_request).evaluate(session=self.session)
         lm_response_event = log_response(ses, usr, arena_request_event, lm_response)
         chat_completion_response = lm_response.content
-        event_id = log_event_identifier(ses, usr, arena_request_event, chat_completion_response.id)
+        event_identifier = log_event_identifier(ses, usr, arena_request_event, chat_completion_response.id)
         # Evaluate before post-processing
-        arena_request_event, lm_request_event, lm_response_event, event_id, chat_completion_response = await tup(arena_request_event, lm_request_event, lm_response_event, event_id, chat_completion_response).evaluate(session=self.session)
+        arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response = await tup(arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response).evaluate(session=self.session)
         # post-process the (request, response) pair
+        print(f"DEBUG JUDGE {arena_request_event} | {lm_request_event} | {lm_response_event}")
         if config.judge_evaluation:
-            judge_score = judge(language_models_api_keys(ses, usr), lm_request, lm_response)
-            judge_score_event = log_lm_judge_evaluation(ses, usr, arena_request_event, judge_score)
+            judge_score = judge(language_models_api_keys(ses, usr), self.chat_completion_request, chat_completion_response)
+            judge_score_event = log_lm_judge_evaluation(ses, usr, event(ses, arena_request_event.id), judge_score)
             evaluate.delay(judge_score.then(judge_score_event))
         return chat_completion_response
 

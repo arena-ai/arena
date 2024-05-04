@@ -4,11 +4,12 @@ from rich import print
 from dotenv import load_dotenv
 from openai import OpenAI
 from arena.client import Client
+from arena.models import LMConfig
 # Load .env
 load_dotenv()
 
-# BASE_URL = "http://localhost/api/v1"
-BASE_URL = "https://arena.sarus.app/api/v1"
+BASE_URL = "http://localhost/api/v1"
+# BASE_URL = "https://arena.sarus.app/api/v1"
 
 def simple_chat_completion():
     print("\n[bold red]Simple OpenAI chat completion")
@@ -19,7 +20,7 @@ def simple_chat_completion():
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
     ])
-    print(f"resp = {resp.choices[0].message.content} ({time()-t}) [bold]{resp.id}[/bold]")
+    print(f"resp = {resp.choices[0].message.content} ({time()-t})")
 
 
 def decorated_chat_completion():
@@ -37,7 +38,7 @@ def decorated_chat_completion():
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
     ])
-    print(f"resp = {resp.choices[0].message.content} ({time()-t}) [bold]{resp.id}[/bold]")
+    print(f"resp = {resp.choices[0].message.content} ({time()-t})")
 
 
 def decorated_chat_completion_with_user_eval():
@@ -46,6 +47,7 @@ def decorated_chat_completion_with_user_eval():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
     arena = Client(user=user, password=password, base_url=BASE_URL)
     arena.decorate(OpenAI)
+    # arena.lm_config(lm_config=LMConfig(pii_removal="replace"))
     t = time()
     api_key = os.getenv("ARENA_OPENAI_API_KEY")
     client = OpenAI(api_key=api_key)
@@ -54,7 +56,7 @@ def decorated_chat_completion_with_user_eval():
         {"role": "user", "content": "What is the fastest animal on earth?"},
         ],
     )
-    print(f"resp = {resp.choices[0].message.content} ({time()-t}) [bold]{resp.id}[/bold]")
+    print(f"resp = {resp.choices[0].message.content} ({time()-t})")
     # Added this
     arena.evaluation(resp.id, 0.98)
 
@@ -72,7 +74,7 @@ def arena_chat_completion_with_eval():
         max_tokens=100,
         lm_config={"judge_evaluation": True},
     )
-    print(f"resp = {resp.choices[0].message.content} ({time()-t}) [bold]{resp.id}[/bold]")
+    print(f"resp = {resp.choices[0].message.content} ({time()-t})")
     # Added this
     arena.evaluation(resp.id, 0.98)
 
@@ -82,6 +84,7 @@ def arena_chat_completion_with_eval_from_test():
     password = "password"
     arena = Client(user=user, password=password, base_url=BASE_URL)
     arena.mistral_api_key(os.getenv("ARENA_MISTRAL_API_KEY"))
+    arena.lm_config(lm_config=LMConfig(pii_removal="replace"))
     t = time()
     resp = arena.chat_completions(model="mistral-small", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
@@ -90,12 +93,12 @@ def arena_chat_completion_with_eval_from_test():
         temperature=1.0,
         lm_config={"judge_evaluation": True},
     )
-    print(f"resp = {resp.choices[0].message.content} ({time()-t}) [bold]{resp.id}[/bold]")
+    print(f"resp = {resp.choices[0].message.content} ({time()-t})")
     # Added this
     arena.evaluation(resp.id, 0.98)
 
-simple_chat_completion()
-decorated_chat_completion()
-decorated_chat_completion_with_user_eval()
+# simple_chat_completion()
+# decorated_chat_completion()
+# decorated_chat_completion_with_user_eval()
 arena_chat_completion_with_eval()
-arena_chat_completion_with_eval_from_test()
+# arena_chat_completion_with_eval_from_test()

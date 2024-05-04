@@ -72,46 +72,53 @@ class Computation(BaseModel, Generic[B]):
     op: SerializeAsAny[Op]
     args: Sequence['Computation']
     task: Task | None = Field(None, exclude=True)
+    computed: B | None = Field(None, exclude=True)
     
-    def computation_clear(self):
+    def clear(self):
         """Clear the values
         Clears only if value is set
         The following invariant MUST holds:
         If a value is set, all its parents are
         """
-        if self.task is not None:
+        if self.task or self.computed or self.op.context:
             for arg in self.args:
-                arg.computation_clear()
+                arg.clear()
             self.task = None
+            self.computed = None
             self.op.context = None
     
-    def computation_context(self, **context: Any):
+    def context(self, **context: Any):
         """Set the context in each op
         """
-        if self.op.context is None:
+        if not self.op.context:
             for arg in self.args:
-                arg.computation_context(**context)
+                arg.context(**context)
             self.op.context = context
 
-    async def computation_call(self):
-        args = [await arg.task for arg in self.args]
-        return await self.op.call(*args)
+    async def compute(self) -> B:
+        """Compute the value if not already done
+        """
+        if not self.computed:
+            args = [await arg.compute() for arg in self.args]
+            self.computed = await self.op.call(*args)
+        return self.computed
 
-    async def computation_evaluate(self, task_group: TaskGroup):
-        """Execute the ops"""
-        if self.task is None:
+    def tasks(self, task_group: TaskGroup):
+        """Create all tasks
+        """
+        if not self.task:
             for arg in self.args:
-                await arg.computation_evaluate(task_group)
-            self.task = task_group.create_task(self.computation_call())
+                arg.tasks(task_group)
+            self.task = task_group.create_task(self.compute())
     
     async def evaluate(self, **context: Any) -> B:
         """Execute the ops and clear all"""
-        self.computation_context(**context)
+        self.context(**context)
         async with TaskGroup() as task_group:
-            await self.computation_evaluate(task_group)
-            value = await self.task
-        self.computation_clear()
-        return value
+            self.tasks(task_group)
+        computed = self.computed
+        self.clear()
+        return computed
     
     def __getattr__(self, name: str) -> 'Computation':
         return Getattr(attr=name)(self)

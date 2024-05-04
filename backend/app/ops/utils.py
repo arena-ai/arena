@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Callable, TypeVarTuple
+from typing import TypeVar, Generic, Callable, TypeVarTuple, Any
 from random import random, randint
 
 from app.ops.computation import Op, Computation, Const
@@ -26,7 +26,7 @@ class Tup(Op[*As, tuple[*As]], Generic[*As]):
     async def call(self, *tup: *As) -> tuple[*As]:
         return tup
 
-def tup(*tup: Computation) -> Computation[tuple[*As]]:
+def tup(*tup: Any) -> Computation[tuple[*As]]:
     return Tup()(*tup)
 
 

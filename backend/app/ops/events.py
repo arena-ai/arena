@@ -22,7 +22,8 @@ class LogEvent(Op[tuple[Session, User, Event | None, A], Event], Generic[A]):
     async def call(self, session: Session, user: User, parent: Event | None, a: A) -> Event:
         event_create = self.event_create(parent, a)
         event = crud.create_event(session=session, event_in=event_create, owner_id=user.id)
-        return event
+        # Create a copy to avoid future mutations
+        return event.model_copy()
 
 class LogRequest(LogEvent[Request]):
     name: str = "request"
@@ -38,7 +39,8 @@ class LogEventIdentifier(Op[tuple[Session, User, Event, str], EventIdentifier]):
     async def call(self, session: Session, user: User, event: Event, identifier: str) -> EventIdentifier:
         # Add the native identifier to the parent event
         event_identifier = crud.create_event_identifier(session=session, event_identifier=identifier, event_id=event.id)
-        return event_identifier
+        # Create a copy to avoid future mutations
+        return event_identifier.model_copy()
 
 log_event_identifier = LogEventIdentifier()
 

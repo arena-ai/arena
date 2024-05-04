@@ -1,5 +1,5 @@
 import sqlmodel
-from app import models
+import app.models as am
 from app.ops.computation import Op
 
 class Session(Op[tuple[()], sqlmodel.Session]):
@@ -12,21 +12,24 @@ class Session(Op[tuple[()], sqlmodel.Session]):
 
 session = Session()
 
-class User(Op[sqlmodel.Session, models.User]):
-    async def call(self, session: sqlmodel.Session, id: int) -> models.User:
-        return session.get(models.User, id)
+class User(Op[sqlmodel.Session, am.User]):
+    async def call(self, session: sqlmodel.Session, id: int) -> am.User:
+        # Create defensive copy to prevent unexpected mutations
+        return session.get(am.User, id).model_copy()
 
 user = User()
 
 
-class Event(Op[sqlmodel.Session, models.Event]):
-    async def call(self, session: sqlmodel.Session, id: int) -> models.Event:
-        return session.get(models.Event, id)
+class Event(Op[sqlmodel.Session, am.Event]):
+    async def call(self, session: sqlmodel.Session, id: int) -> am.Event:
+        # Create defensive copy to prevent unexpected mutations
+        return session.get(am.Event, id).model_copy()
 
-event = User()
+event = Event()
 
-class EventIdentifier(Op[sqlmodel.Session, models.EventIdentifier]):
-    async def call(self, session: sqlmodel.Session, id: str) -> models.EventIdentifier:
-        return session.get(models.EventIdentifier, id)
+class EventIdentifier(Op[sqlmodel.Session, am.EventIdentifier]):
+    async def call(self, session: sqlmodel.Session, id: str) -> am.EventIdentifier:
+        # Create defensive copy to prevent unexpected mutations
+        return session.get(am.EventIdentifier, id).model_copy()
 
 event_identifier = EventIdentifier()
