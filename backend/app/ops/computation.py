@@ -98,7 +98,7 @@ class Computation(BaseModel, Generic[B]):
     async def compute(self) -> B:
         """Compute the value if not already done
         """
-        if not self.computed:
+        if not self.computed: # Todo ERROR we can call this many times
             args = [await arg.compute() for arg in self.args]
             self.computed = await self.op.call(*args)
         return self.computed
@@ -111,10 +111,10 @@ class Computation(BaseModel, Generic[B]):
                 arg.tasks(task_group)
             self.task = task_group.create_task(self.compute())
             from rich import print
-            print(f"\nDEBUG no self.task {self.op} \n {self.task}")
+            print(f"\nDEBUG no self.task {self.op.opname} {self.task}")
         else:
             from rich import print
-            print(f"\nDEBUG self.task {self.task}")
+            print(f"\nDEBUG self.task {self.op.opname} {self.task}")
     
     async def evaluate(self, **context: Any) -> B:
         """Execute the ops and clear all"""
