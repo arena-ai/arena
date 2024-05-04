@@ -14,7 +14,7 @@ import app.lm.models.anthropic as ant
 from app.services import Request, Response
 from app.ops import cst, tup, Computation
 from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys, lm_config
-from app.ops.events import log_request, LogRequest, log_response, log_event_identifier, log_lm_judge_evaluation
+from app.ops.events import log_request, LogRequest, log_response, create_event_identifier, log_lm_judge_evaluation
 from app.ops.lm import openai, openai_request, mistral, mistral_request, anthropic, anthropic_request, chat, chat_request, judge
 from app.ops.masking import masking, replace_masking
 from app.ops.session import session, user, event
@@ -81,8 +81,9 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         lm_response = self.lm_response(ses, usr, lm_request)
         lm_response_event = log_response(ses, usr, arena_request_event, lm_response)
         chat_completion_response = lm_response.content
-        event_identifier = log_event_identifier(ses, usr, arena_request_event, chat_completion_response.id)
+        event_identifier = create_event_identifier(ses, usr, arena_request_event, chat_completion_response.id)
         # Evaluate before post-processing
+        #TODO The response seem to be computed twice
         arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response = await tup(arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response).evaluate(session=self.session)
         # post-process the (request, response) pair
         if config.judge_evaluation:
@@ -226,7 +227,7 @@ async def chat_completion_response(
     lm_response = Response(status_code=200, headers={}, content=chat_completion_response)
     lm_response_event = log_response(ses, usr, request_event, lm_response)
     api_keys = language_models_api_keys(ses, usr)
-    event_id = log_event_identifier(ses, usr, request_event, chat_completion_response.id)
+    event_id = create_event_identifier(ses, usr, request_event, chat_completion_response.id)
     # Everything can be delayed
     computation = event_id
     # Optionally judge the result

@@ -1,4 +1,5 @@
 import os
+from time import sleep
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
@@ -205,6 +206,8 @@ def test_language_models_with_judges(
             json = ccc.to_dict()
         )
         assert response.status_code == 200
+    # Wait for the last judge to finish
+    sleep(3)
     events = db.exec(select(Event)).all()
     for event in events:
         print(f"\nEVENT {event}")
@@ -238,3 +241,6 @@ def test_language_models_with_pii_removal(
         )
     assert response.status_code == 200
     print(response.json())
+    events = db.exec(select(Event)).all()
+    for event in events:
+        print(f"\nEVENT {event}")
