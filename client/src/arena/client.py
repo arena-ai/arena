@@ -1,7 +1,7 @@
 from typing import Any, Type, Literal
 import httpx
 import mistralai.client
-from arena.models import ChatCompletionRequest, ChatCompletionResponse, Evaluation, Score, LMConfig
+from arena.models import ChatCompletionRequest, ChatCompletionResponse, Evaluation, Score, LMConfig, ChatCompletionRequestEventResponse
 import openai
 import mistralai
 import anthropic
@@ -20,6 +20,7 @@ class Client:
             self.login()
     
     def login(self):
+        """Used internally to get a connection token from a user and a password"""
         assert(self.user and self.password)
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
@@ -40,6 +41,7 @@ class Client:
         self.api_key = resp.json()['access_token']
     
     def openai_api_key(self, api_key: str):
+        """Set the OpenAI API token"""
         with httpx.Client(timeout=self.timeout) as client:
             client.post(
                 url = f"{self.base_url}/settings/",
@@ -53,6 +55,7 @@ class Client:
             )
     
     def mistral_api_key(self, api_key: str):
+        """Set the Mistral API token"""
         with httpx.Client(timeout=self.timeout) as client:
             client.post(
                 url = f"{self.base_url}/settings/",
@@ -66,6 +69,7 @@ class Client:
             )
     
     def anthropic_api_key(self, api_key: str):
+        """Set the Anthropic API token"""
         with httpx.Client(timeout=self.timeout) as client:
             client.post(
                 url = f"{self.base_url}/settings/",
@@ -79,11 +83,13 @@ class Client:
             )
     
     def api_keys(self, openai_api_key: str, mistral_api_key: str, anthropic_api_key: str):
+        """Set all API tokens"""
         self.openai_api_key(openai_api_key)
         self.mistral_api_key(mistral_api_key)
         self.anthropic_api_key(anthropic_api_key)
 
     def lm_config(self, lm_config: LMConfig):
+        """Set LM config"""
         with httpx.Client(timeout=self.timeout) as client:
             client.post(
                 url = f"{self.base_url}/settings/",
@@ -97,6 +103,7 @@ class Client:
             )
 
     def chat_completions(self, **kwargs: Any) -> ChatCompletionResponse:
+        """Abstract chat completion"""
         req = ChatCompletionRequest.model_validate(kwargs).model_dump(mode="json", exclude_unset=True, exclude_none=True)
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
@@ -111,7 +118,38 @@ class Client:
         else:
             raise RuntimeError(resp)
     
+    def chat_completions_request(self, **kwargs: Any) -> Event:
+        req = ChatCompletionRequest.model_validate(kwargs).model_dump(mode="json", exclude_unset=True, exclude_none=True)
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(
+                url = f"{self.base_url}/lm/chat/completions/request",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json=req,
+            )
+        if resp.status_code == 200:
+            return ChatCompletionResponse.model_validate(resp.json())
+        else:
+            raise RuntimeError(resp)
+    
+    def chat_completions_response(self, **kwargs: Any) -> Event:
+        req = ChatCompletionRequestEventResponse.model_validate(kwargs).model_dump(mode="json", exclude_unset=True, exclude_none=True)
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(
+                url = f"{self.base_url}/lm/chat/completions/request",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json=req,
+            )
+        if resp.status_code == 200:
+            return ChatCompletionResponse.model_validate(resp.json())
+        else:
+            raise RuntimeError(resp)
+
     def evaluation(self, identifier: str, score: float) -> int:
+        """Evaluate the response"""
         req = Evaluation(identifier=identifier, value=Score(value=score)).model_dump(mode="json", exclude_unset=True, exclude_none=True)
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
@@ -127,6 +165,7 @@ class Client:
             raise RuntimeError(resp)
     
     def decorate(self, client: Type, mode: Literal['proxy', 'instrument'] = 'proxy'):
+        """Decorate the client"""
         if not hasattr(client, "_arena_decorated_"):
             client._arena_decorated_ = mode
             if client == openai.OpenAI:
@@ -137,6 +176,7 @@ class Client:
                 self.decorate_anthropic_proxy(client)
 
     def decorate_openai_proxy(self, client: Type[openai.OpenAI]):
+        """Decorate openai client in proxy mode"""
         arena = self
         openai_init = client.__init__
         def init(self, *args: Any, **kwargs: Any):
@@ -147,6 +187,7 @@ class Client:
         client.__init__ = init
     
     def decorate_mistral_proxy(self, client: Type[mistralai.client.MistralClient]):
+        """Decorate mistral client in proxy mode"""
         arena = self
         mistral_init = client.__init__
         def init(self, *args: Any, **kwargs: Any):
@@ -156,7 +197,8 @@ class Client:
             self.base_url = f"{arena.base_url}/lm/mistral"
         client.__init__ = init
     
-    def decorate_anthropic_proxy(self, client: Type[openai.OpenAI]):
+    def decorate_anthropic_proxy(self, client: Type[anthropic.Anthropic]):
+        """Decorate anthropic client in proxy mode"""
         arena = self
         anthropic_init = client.__init__
         def init(self, *args: Any, **kwargs: Any):
@@ -167,9 +209,10 @@ class Client:
         client.__init__ = init
     
     def decorate_openai_instrument(self, client: Type[openai.OpenAI]):
+        """Decorate openai client in instrument mode"""
         arena = self
         openai_chat_completion = client.chat.completions.create
         def chat_completion(self, *args: Any, **kwargs: Any):
-            arena.
+            # arena.
             openai_chat_completion(self, *args, **kwargs)
         client.chat.completions.create = openai_chat_completion

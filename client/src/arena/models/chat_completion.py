@@ -1,4 +1,5 @@
 from typing import Literal, Mapping, Sequence, Any
+from datetime import datetime
 from pydantic import BaseModel
 from arena.models.settings import LMConfig
 
@@ -135,3 +136,18 @@ class ChatCompletionResponse(BaseModel):
     @classmethod
     def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletionResponse":
         return ChatCompletionResponse.model_validate(m)
+
+
+class EventOut(BaseModel):
+    id: int
+    timestamp: datetime
+    name: str
+    content: str
+    owner_id: int
+    parent_id: int | None = None
+
+
+class ChatCompletionRequestEventResponse(BaseModel):
+    request: ChatCompletionRequest | None = None
+    request_event: EventOut
+    response: ChatCompletionResponse

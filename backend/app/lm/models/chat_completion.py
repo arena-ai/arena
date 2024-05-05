@@ -1,5 +1,6 @@
 from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel
+from app.models import EventOut
 from app.lm.models.settings import LMConfig
 
 
@@ -135,3 +136,9 @@ class ChatCompletionResponse(BaseModel):
     @classmethod
     def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletionResponse":
         return ChatCompletionResponse.model_validate(m)
+
+
+class ChatCompletionRequestEventResponse(BaseModel):
+    request: ChatCompletionRequest | None = None
+    request_event: EventOut
+    response: ChatCompletionResponse
