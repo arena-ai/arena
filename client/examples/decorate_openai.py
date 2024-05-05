@@ -8,8 +8,8 @@ from arena.models import LMConfig
 # Load .env
 load_dotenv()
 
-# BASE_URL = "http://localhost/api/v1"
-BASE_URL = "https://arena.sarus.app/api/v1"
+BASE_URL = "http://localhost/api/v1"
+# BASE_URL = "https://arena.sarus.app/api/v1"
 
 def simple_chat_completion():
     print("\n[bold red]Simple OpenAI chat completion")
@@ -83,8 +83,9 @@ def arena_chat_completion_with_eval_from_test():
     user = "test@sarus.tech"
     password = "password"
     arena = Client(user=user, password=password, base_url=BASE_URL)
+    arena.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
     arena.mistral_api_key(os.getenv("ARENA_MISTRAL_API_KEY"))
-    arena.lm_config(lm_config=LMConfig(pii_removal="replace"))
+    arena.lm_config(lm_config=LMConfig(judge_evaluation=True, pii_removal="replace"))
     t = time()
     resp = arena.chat_completions(model="mistral-small", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
@@ -97,8 +98,9 @@ def arena_chat_completion_with_eval_from_test():
     # Added this
     arena.evaluation(resp.id, 0.98)
 
-# simple_chat_completion()
-# decorated_chat_completion()
-# decorated_chat_completion_with_user_eval()
+simple_chat_completion()
+decorated_chat_completion()
+decorated_chat_completion_with_user_eval()
 arena_chat_completion_with_eval()
-# arena_chat_completion_with_eval_from_test()
+for _ in range(5):
+    arena_chat_completion_with_eval_from_test()

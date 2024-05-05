@@ -128,15 +128,15 @@ class Client:
     
     def decorate(self, client: Type, mode: Literal['proxy', 'instrument'] = 'proxy'):
         if not hasattr(client, "_arena_decorated_"):
-            client._arena_decorated_ = True
+            client._arena_decorated_ = mode
             if client == openai.OpenAI:
-                self.decorate_openai(client)
+                self.decorate_openai_proxy(client)
             elif client == mistralai.client.MistralClient:
-                self.decorate_mistral(client)
+                self.decorate_mistral_proxy(client)
             elif client == anthropic.Anthropic:
-                self.decorate_anthropic(client)
+                self.decorate_anthropic_proxy(client)
 
-    def decorate_openai(self, client: Type[openai.OpenAI], mode: Literal['proxy', 'instrument'] = 'proxy'):
+    def decorate_openai_proxy(self, client: Type[openai.OpenAI]):
         arena = self
         openai_init = client.__init__
         def init(self, *args: Any, **kwargs: Any):
@@ -146,22 +146,30 @@ class Client:
             self.base_url = f"{arena.base_url}/lm/openai"
         client.__init__ = init
     
-    def decorate_mistral(self, client: Type[openai.OpenAI], mode: Literal['proxy', 'instrument'] = 'proxy'):
+    def decorate_mistral_proxy(self, client: Type[mistralai.client.MistralClient]):
         arena = self
-        openai_init = client.__init__
+        mistral_init = client.__init__
         def init(self, *args: Any, **kwargs: Any):
-            openai_init(self, *args, **kwargs)
+            mistral_init(self, *args, **kwargs)
             arena.mistral_api_key(self.api_key)
             self.api_key = arena.api_key
             self.base_url = f"{arena.base_url}/lm/mistral"
         client.__init__ = init
     
-    def decorate_anthropic(self, client: Type[openai.OpenAI], mode: Literal['proxy', 'instrument'] = 'proxy'):
+    def decorate_anthropic_proxy(self, client: Type[openai.OpenAI]):
         arena = self
-        openai_init = client.__init__
+        anthropic_init = client.__init__
         def init(self, *args: Any, **kwargs: Any):
-            openai_init(self, *args, **kwargs)
+            anthropic_init(self, *args, **kwargs)
             arena.anthropic_api_key(self.api_key)
             self.api_key = arena.api_key
             self.base_url = f"{arena.base_url}/lm/anthropic"
         client.__init__ = init
+    
+    def decorate_openai_instrument(self, client: Type[openai.OpenAI]):
+        arena = self
+        openai_chat_completion = client.chat.completions.create
+        def chat_completion(self, *args: Any, **kwargs: Any):
+            arena.
+            openai_chat_completion(self, *args, **kwargs)
+        client.chat.completions.create = openai_chat_completion

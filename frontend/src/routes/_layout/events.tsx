@@ -25,11 +25,11 @@ export const Route = createFileRoute('/_layout/events')({
 
 function format_event(e: EventOut) {
   try {
-    if (e.name === "LogRequest") {
+    if (e.name === "request" || e.name === "modified_request") {
       return format_chat_request(JSON.parse(e.content));
-    } else if (e.name === "LogResponse") {
+    } else if (e.name === "response") {
       return format_chat_response(JSON.parse(e.content));
-    } else if (e.name === "UserEvaluation" || e.name === "LMJudgeEvaluation") {
+    } else if (e.name === "user_evaluation" || e.name === "lm_judge_evaluation") {
       return format_evaluation(JSON.parse(e.content));
     } else {
       return <div>{e.content || 'N/A'}</div>

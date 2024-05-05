@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from sqlmodel import Session
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import User, UserOut, Event, EventOut
+from app.models import UserOut, EventOut
 from app.lm.models import ChatCompletionResponse, ChatCompletionRequest, LMConfig
 import app.lm.models.openai as oai
 import app.lm.models.mistral as mis
@@ -83,7 +83,6 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         chat_completion_response = lm_response.content
         event_identifier = create_event_identifier(ses, usr, arena_request_event, chat_completion_response.id)
         # Evaluate before post-processing
-        #TODO The response seem to be computed twice
         arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response = await tup(arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response).evaluate(session=self.session)
         # post-process the (request, response) pair
         if config.judge_evaluation:
@@ -204,10 +203,10 @@ async def chat_completion(
     return await ArenaHandler(session_dep, current_user, chat_completion_request).process_request()
 
 
-@router.post("/chat/completions/request", response_model=Event)
+@router.post("/chat/completions/request", response_model=EventOut)
 async def chat_completion_request(
     session_dep: SessionDep, current_user: CurrentUser, chat_completion_request: ChatCompletionRequest
-) -> Event:
+) -> EventOut:
     ses = session()
     usr = user(ses, current_user.id)
     chat_completion_request = ChatCompletionRequest.model_validate(chat_completion_request)
@@ -216,24 +215,22 @@ async def chat_completion_request(
     return await lm_request_event.evaluate(session=session_dep)
 
 
-@router.post("/chat/completions/response/{request_event_id}", response_model=Event)
+@router.post("/chat/completions/response/{request_event_id}", response_model=EventOut)
 async def chat_completion_response(
-    session_dep: SessionDep, current_user: CurrentUser, request_event: Event, chat_completion_response: ChatCompletionResponse
-) -> Event:
+    session_dep: SessionDep, current_user: CurrentUser, request_event: EventOut, chat_completion_response: ChatCompletionResponse
+) -> EventOut:
     ses = session()
     usr = user(ses, current_user.id)
     chat_completion_request = Request.model_validate_json(request_event.content).content
     config = await lm_config(ses, usr, override=chat_completion_request.lm_config).evaluate(session=session_dep)
     lm_response = Response(status_code=200, headers={}, content=chat_completion_response)
     lm_response_event = log_response(ses, usr, request_event, lm_response)
-    api_keys = language_models_api_keys(ses, usr)
-    event_id = create_event_identifier(ses, usr, request_event, chat_completion_response.id)
-    # Everything can be delayed
-    computation = event_id
-    # Optionally judge the result
+    event_identifier = create_event_identifier(ses, usr, request_event, chat_completion_response.id)
+    # Evaluate before post-processing
+    lm_response_event, event_identifier = await tup(lm_response_event, event_identifier).evaluate(session=session_dep)
+    # post-process the (request, response) pair
     if config.judge_evaluation:
-        judge_score = judge(api_keys, chat_completion_request, chat_completion_response)
+        judge_score = judge(language_models_api_keys(ses, usr), chat_completion_request, chat_completion_response)
         judge_score_event = log_lm_judge_evaluation(ses, usr, request_event, judge_score)
-        computation = computation.then(judge_score).then(judge_score_event)
-    computation = computation.then(lm_response_event)
-    return await computation.evaluate(session=session_dep)
+        evaluate.delay(judge_score.then(judge_score_event))
+    return lm_response_event

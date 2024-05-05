@@ -30,7 +30,6 @@ def test_evaluation(
             headers = superuser_token_headers,
             json = ccc.to_dict()
         )
-        print(f"DEBUG {response.content}")
         assert response.status_code == 200
         eval = client.post(
             f"{settings.API_V1_STR}/lm/evaluation",

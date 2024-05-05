@@ -47,8 +47,6 @@ anthropic_request = AnthropicRequest()
 
 class Chat(Op[tuple[LMApiKeys, ChatCompletionRequest], Response[ChatCompletionResponse]]):
     async def call(self, api_keys: LMApiKeys, input: ChatCompletionRequest) -> Response[ChatCompletionResponse]:
-        from rich import print
-        print(f"\nDEBUG CALL {input}")
         return await slm.LanguageModels(api_keys=api_keys).chat_completion(input)
 
 class ChatRequest(Op[ChatCompletionRequest, Request[ChatCompletionRequest]]):
