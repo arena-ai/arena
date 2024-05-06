@@ -1,7 +1,7 @@
 from typing import Any, Type, Literal
 import httpx
 import mistralai.client
-from arena.models import ChatCompletionRequest, ChatCompletionResponse, Evaluation, Score, LMConfig, ChatCompletionRequestEventResponse
+from arena.models import ChatCompletionRequest, ChatCompletionResponse, Evaluation, Score, LMConfig, EventOut, ChatCompletionRequestEventResponse
 import openai
 import mistralai
 import anthropic
@@ -104,7 +104,7 @@ class Client:
 
     def chat_completions(self, **kwargs: Any) -> ChatCompletionResponse:
         """Abstract chat completion"""
-        req = ChatCompletionRequest.model_validate(kwargs).model_dump(mode="json", exclude_unset=True, exclude_none=True)
+        req = ChatCompletionRequest.model_validate(kwargs).model_dump(mode="json", exclude_none=True)
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
                 url = f"{self.base_url}/lm/chat/completions",
@@ -118,8 +118,8 @@ class Client:
         else:
             raise RuntimeError(resp)
     
-    def chat_completions_request(self, **kwargs: Any) -> Event:
-        req = ChatCompletionRequest.model_validate(kwargs).model_dump(mode="json", exclude_unset=True, exclude_none=True)
+    def chat_completions_request(self, **kwargs: Any) -> EventOut:
+        req = ChatCompletionRequest.model_validate(kwargs).model_dump(mode="json", exclude_none=True)
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
                 url = f"{self.base_url}/lm/chat/completions/request",
@@ -129,28 +129,28 @@ class Client:
                 json=req,
             )
         if resp.status_code == 200:
-            return ChatCompletionResponse.model_validate(resp.json())
+            return EventOut.model_validate(resp.json())
         else:
             raise RuntimeError(resp)
     
-    def chat_completions_response(self, **kwargs: Any) -> Event:
-        req = ChatCompletionRequestEventResponse.model_validate(kwargs).model_dump(mode="json", exclude_unset=True, exclude_none=True)
+    def chat_completions_response(self, **kwargs: Any) -> EventOut:
+        req = ChatCompletionRequestEventResponse.model_validate(kwargs).model_dump(mode="json", exclude_none=True)
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
-                url = f"{self.base_url}/lm/chat/completions/request",
+                url = f"{self.base_url}/lm/chat/completions/response",
                 headers = {
                     "Authorization": f"Bearer {self.api_key}"
                 },
                 json=req,
             )
         if resp.status_code == 200:
-            return ChatCompletionResponse.model_validate(resp.json())
+            return EventOut.model_validate(resp.json())
         else:
             raise RuntimeError(resp)
 
     def evaluation(self, identifier: str, score: float) -> int:
         """Evaluate the response"""
-        req = Evaluation(identifier=identifier, value=Score(value=score)).model_dump(mode="json", exclude_unset=True, exclude_none=True)
+        req = Evaluation(identifier=identifier, value=Score(value=score)).model_dump(mode="json", exclude_none=True)
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
                 url = f"{self.base_url}/lm/evaluation",
