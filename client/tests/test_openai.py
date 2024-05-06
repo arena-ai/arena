@@ -1,4 +1,5 @@
 import os
+from random import randint
 from openai import OpenAI
 from dotenv import load_dotenv
 # Load .env
@@ -12,6 +13,23 @@ def test_chat():
     resp = client.chat.completions.create(model="gpt-3.5-turbo", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
+    ])
+    assert(resp.choices[0].message.role == "assistant")
+    print(resp.choices[0].message.content)
+    assert(len(resp.choices[0].message.content) > 10)
+
+
+def test_instrumented_chat():
+    api_key = os.getenv("ARENA_OPENAI_API_KEY")
+    user = os.getenv("FIRST_SUPERUSER")
+    password = os.getenv("FIRST_SUPERUSER_PASSWORD")
+    arena = Client(user=user, password=password)
+    arena.decorate(OpenAI, mode="instrument")
+
+    client = OpenAI(api_key=api_key)
+    resp = client.chat.completions.create(model="gpt-3.5-turbo", messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": f"What are instrumental variables in statistics? ({randint(0, 100)})"},
     ])
     assert(resp.choices[0].message.role == "assistant")
     print(resp.choices[0].message.content)

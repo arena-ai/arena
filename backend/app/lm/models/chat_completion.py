@@ -1,9 +1,6 @@
 from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel
 from app.lm.models.settings import LMConfig
-import app.lm.models.openai as oai
-import app.lm.models.mistral as mis
-import app.lm.models.anthropic as ant
 
 
 """All LanguageModels"""
@@ -138,9 +135,3 @@ class ChatCompletionResponse(BaseModel):
     @classmethod
     def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletionResponse":
         return ChatCompletionResponse.model_validate(m)
-
-
-class ChatCompletionRequestEventResponse(BaseModel):
-    request: ChatCompletionRequest | oai.ChatCompletionRequest | mis.ChatCompletionRequest | ant.ChatCompletionRequest | None = None
-    request_event_id: int
-    response: ChatCompletionResponse | oai.ChatCompletionResponse | mis.ChatCompletionResponse | ant.ChatCompletionResponse
