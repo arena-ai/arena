@@ -65,7 +65,7 @@ function format_evaluation(content: { type: string, value: number }) {
 
 function format_json(content: string) {
   return <Box>
-      <Code w={1024}>{JSON.stringify(content, null, 2)}</Code>;
+      <Code>{content}</Code>
     </Box>
 }
 
