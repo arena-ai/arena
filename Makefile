@@ -49,7 +49,8 @@ kubernetes:
 	--set postgresql.password=${POSTGRES_PASSWORD} \
 	--set redis.password=${REDIS_PASSWORD} \
 	--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
-	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
+	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 
 
 .PHONY: all build push version build-backend push-backend build-frontend push-frontend clean dev kubernetes

@@ -46,6 +46,7 @@ backend:
   firstSuperUser:
     user: ""
     password: ""
+  usersOpenRegistration: false
 
 worker:
   image: arena_backend

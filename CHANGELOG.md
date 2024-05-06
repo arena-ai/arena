@@ -18,7 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved the frontend
   - Underline the parent request
   - Wrap lines for the message representation
-<!-- TODO -->
 - Added open user registration
 
 ## [0.1.38] - 2024-05-02
