@@ -14,7 +14,8 @@ helm install ${RELEASE_NAME} kubernetes/arena \
 --set postgresql.password=${POSTGRES_PASSWORD} \
 --set redis.password=${REDIS_PASSWORD} \
 --set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
---set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
+--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 ```
 
 Or if you use a `.env` file:
@@ -26,7 +27,8 @@ source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set postgresql.password=${POSTGRES_PASSWORD} \
 --set redis.password=${REDIS_PASSWORD} \
 --set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
---set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD}
+--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 ```
 
 To uninstall:

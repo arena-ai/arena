@@ -47,7 +47,7 @@ spec:
         - name: FIRST_SUPERUSER_PASSWORD
           value: {{.Values.backend.firstSuperUser.password}}
         - name: USERS_OPEN_REGISTRATION
-          value: {{.Values.backend.usersOpenRegistration}}
+          value: {{.Values.backend.usersOpenRegistration | quote}}
         - name: POSTGRES_PASSWORD
           value: {{.Values.postgresql.password}}
         - name: POSTGRES_SERVER
