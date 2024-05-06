@@ -14,15 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added logging before and after masking
 - Added masking from any wrapper
 - Add a "config" endpoint for masking and evaluation
-<!-- TODO -->
 - Added instrumental evaluation
-- Added open user registration
-- Wrote a post
-  - On installation
-  - On masking
 - Improved the frontend
   - Underline the parent request
   - Wrap lines for the message representation
+<!-- TODO -->
+- Added open user registration
 
 ## [0.1.38] - 2024-05-02
 
