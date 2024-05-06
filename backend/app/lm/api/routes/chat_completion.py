@@ -223,7 +223,7 @@ async def chat_completion_response(
     ses = session()
     usr = user(ses, current_user.id)
     request_event = event(ses, chat_completion_request_event_response.request_event_id)
-    config = await lm_config(ses, usr, override=chat_completion_request_event_response.request.lm_config).evaluate(session=session_dep)
+    config = await lm_config(ses, usr).evaluate(session=session_dep)
     lm_response = Response(status_code=200, headers={}, content=chat_completion_request_event_response.response)
     lm_response_event = log_response(ses, usr, request_event, lm_response)
     event_identifier = create_event_identifier(ses, usr, request_event, chat_completion_request_event_response.response.id)

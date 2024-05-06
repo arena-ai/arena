@@ -2,6 +2,9 @@ from typing import Any, Type, Literal
 import httpx
 import mistralai.client
 from arena.models import ChatCompletionRequest, ChatCompletionResponse, Evaluation, Score, LMConfig, EventOut, ChatCompletionRequestEventResponse
+import arena.models.openai as oai
+import arena.models.mistral as mis
+import arena.models.anthropic as ant
 import openai
 import mistralai
 import anthropic
@@ -212,7 +215,9 @@ class Client:
         """Decorate openai client in instrument mode"""
         arena = self
         openai_chat_completion = client.chat.completions.create
-        def chat_completion(self, *args: Any, **kwargs: Any):
-            # arena.
-            openai_chat_completion(self, *args, **kwargs)
+        def chat_completion(self, **kwargs: Any):
+            request = oai.ChatCompletionRequest(**kwargs)
+            request_event = arena.chat_completions_request(**kwargs)
+            response = oai.ChatCompletionResponse.from_dict(openai_chat_completion(self, **kwargs))
+            arena.chat_completions_response(request=request.model_dump(mode="json", exclude_none=True), request_event_id=request_event.id, response=response)
         client.chat.completions.create = openai_chat_completion
