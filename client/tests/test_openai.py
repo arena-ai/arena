@@ -7,6 +7,8 @@ load_dotenv()
 from arena.client import Client
 from arena.models import LMConfig
 
+BASE_URL = "http://localhost/api/v1"
+
 def test_chat():
     api_key = os.getenv("ARENA_OPENAI_API_KEY")
     client = OpenAI(api_key=api_key)
@@ -23,7 +25,7 @@ def test_instrumented_chat():
     api_key = os.getenv("ARENA_OPENAI_API_KEY")
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
-    arena = Client(user=user, password=password)
+    arena = Client(user=user, password=password, base_url=BASE_URL)
     arena.decorate(OpenAI, mode="instrument")
 
     client = OpenAI(api_key=api_key)
@@ -40,7 +42,7 @@ def test_masked_chat():
     api_key = os.getenv("ARENA_OPENAI_API_KEY")
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
-    arena = Client(user=user, password=password)
+    arena = Client(user=user, password=password, base_url=BASE_URL)
     arena.decorate(OpenAI)
     arena.lm_config(lm_config=LMConfig(pii_removal="replace"))
 
@@ -58,7 +60,7 @@ def test_chat_with_judge():
     api_key = os.getenv("ARENA_OPENAI_API_KEY")
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
-    arena = Client(user=user, password=password)
+    arena = Client(user=user, password=password, base_url=BASE_URL)
     arena.decorate(OpenAI)
     arena.lm_config(lm_config=LMConfig(judge_evaluation=True))
 

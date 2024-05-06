@@ -6,12 +6,14 @@ load_dotenv()
 from arena.models import Choice, Message
 from arena import Client, LMConfig, ChatCompletionRequest, ChatCompletionResponse, ChatCompletionRequestEventResponse
 
+BASE_URL = "http://localhost/api/v1"
+
 def test_chat():
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
 
     # Connect to arena
-    client = Client(user=user, password=password)
+    client = Client(user=user, password=password, base_url=BASE_URL)
     
     # Set the credentials
     client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
@@ -48,7 +50,7 @@ def test_judge():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
 
     # Connect to arena
-    client = Client(user=user, password=password)
+    client = Client(user=user, password=password, base_url=BASE_URL)
     
     # Set the credentials
     client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
@@ -111,7 +113,7 @@ def test_instruments():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
 
     # Connect to arena
-    client = Client(user=user, password=password)
+    client = Client(user=user, password=password, base_url=BASE_URL)
     
     # Set the credentials
     client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
