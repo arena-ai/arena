@@ -140,5 +140,5 @@ class ChatCompletionResponse(BaseModel):
 
 class ChatCompletionRequestEventResponse(BaseModel):
     request: ChatCompletionRequest | None = None
-    request_event: EventOut
+    request_event_id: int
     response: ChatCompletionResponse

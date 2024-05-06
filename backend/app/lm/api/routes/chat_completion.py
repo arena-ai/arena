@@ -219,18 +219,19 @@ async def chat_completion_request(
 async def chat_completion_response(
     session_dep: SessionDep, current_user: CurrentUser, chat_completion_request_event_response: ChatCompletionRequestEventResponse
 ) -> EventOut:
+    print(f"\nDEBUG chat_completion_request_event_response {chat_completion_request_event_response}\n")
     ses = session()
     usr = user(ses, current_user.id)
-    chat_completion_request = Request.model_validate_json(chat_completion_request_event_response.request_event.content).content
-    config = await lm_config(ses, usr, override=chat_completion_request.lm_config).evaluate(session=session_dep)
-    lm_response = Response(status_code=200, headers={}, content=chat_completion_request_event_response.chat_completion_response)
-    lm_response_event = log_response(ses, usr, chat_completion_request_event_response.request_event, lm_response)
-    event_identifier = create_event_identifier(ses, usr, chat_completion_request_event_response.request_event, chat_completion_request_event_response.chat_completion_response.id)
+    request_event = event(ses, chat_completion_request_event_response.request_event_id)
+    config = await lm_config(ses, usr, override=chat_completion_request_event_response.request.lm_config).evaluate(session=session_dep)
+    lm_response = Response(status_code=200, headers={}, content=chat_completion_request_event_response.response)
+    lm_response_event = log_response(ses, usr, request_event, lm_response)
+    event_identifier = create_event_identifier(ses, usr, request_event, chat_completion_request_event_response.response.id)
     # Evaluate before post-processing
     lm_response_event, event_identifier = await tup(lm_response_event, event_identifier).evaluate(session=session_dep)
     # post-process the (request, response) pair
     if config.judge_evaluation:
-        judge_score = judge(language_models_api_keys(ses, usr), chat_completion_request, chat_completion_request_event_response.chat_completion_response)
-        judge_score_event = log_lm_judge_evaluation(ses, usr, chat_completion_request_event_response.request_event, judge_score)
+        judge_score = judge(language_models_api_keys(ses, usr), chat_completion_request_event_response.request, chat_completion_request_event_response.response)
+        judge_score_event = log_lm_judge_evaluation(ses, usr, request_event, judge_score)
         evaluate.delay(judge_score.then(judge_score_event))
     return lm_response_event
