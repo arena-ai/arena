@@ -47,7 +47,13 @@ spec:
         - name: FIRST_SUPERUSER_PASSWORD
           value: {{.Values.backend.firstSuperUser.password}}
         - name: USERS_OPEN_REGISTRATION
-          value: {{.Values.backend.usersOpenRegistration | quote}}
+          value: {{.Values.backend.usersOpenRegistration}}
+        - name: SMTP_HOST
+          value: {{.Values.backend.smtpHost}}
+        - name: EMAILS_FROM_EMAIL
+          value: {{.Values.backend.emailsFromEmail}}
+        - name: EMAILS_FROM_NAME
+          value: {{.Values.backend.emailsFromName}}
         - name: POSTGRES_PASSWORD
           value: {{.Values.postgresql.password}}
         - name: POSTGRES_SERVER

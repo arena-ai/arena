@@ -47,6 +47,10 @@ backend:
     user: ""
     password: ""
   usersOpenRegistration: false
+  smtpHost: smtp-relay.gmail.com
+  emailsFromEmail: arena@sarus.tech
+  emailsFromName: Sarus Arena
+
 
 worker:
   image: arena_backend

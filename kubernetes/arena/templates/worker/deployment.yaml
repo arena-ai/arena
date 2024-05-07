@@ -42,5 +42,11 @@ spec:
           value: {{.Values.redis.password}}
         - name: REDIS_SERVER
           value: "{{.Release.Name}}-redis-service.{{.Values.namespace}}.svc.cluster.local"
+        - name: SMTP_HOST
+          value: {{.Values.backend.smtpHost}}
+        - name: EMAILS_FROM_EMAIL
+          value: {{.Values.backend.emailsFromEmail}}
+        - name: EMAILS_FROM_NAME
+          value: {{.Values.backend.emailsFromName}}
       imagePullSecrets:
       - name: {{ .Release.Name -}}-docker-registry-secret
