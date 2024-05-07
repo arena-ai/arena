@@ -171,6 +171,11 @@ class EventIdentifier(SQLModel, table=True):
     event: Event = Relationship(back_populates="identifiers")
 
 
+class EventIdentifierOut(SQLModel):
+    id: str
+    event_id: int
+
+
 # Shared properties
 class EventAttributeBase(SQLModel):
     event_id: int

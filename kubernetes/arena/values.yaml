@@ -46,6 +46,7 @@ backend:
   firstSuperUser:
     user: ""
     password: ""
+  usersOpenRegistration: false
 
 worker:
   image: arena_backend
@@ -89,7 +90,8 @@ masking:
     registry: mcr.microsoft.com
     # The text analyzer
     analyzer:
-      name: presidio-analyzer
+      image: presidio-analyzer
+      tag: latest
       replicas: 1
       # imagePullPolicy: Always
       container:
@@ -103,11 +105,12 @@ masking:
       service:
         type: ClusterIP
         externalPort: 80
-        internalPort: 8080
+        internalPort: 5001
         name: http
     # The text anonymizer
     anonymizer:
-      name: presidio-anonymizer
+      image: presidio-anonymizer
+      tag: latest
       replicas: 1
       # imagePullPolicy: Always
       container:
@@ -121,5 +124,5 @@ masking:
       service:
         type: ClusterIP
         externalPort: 80
-        internalPort: 8080
+        internalPort: 5001
         name: http

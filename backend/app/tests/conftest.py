@@ -11,7 +11,7 @@ from app.main import app
 from app.models import User, Setting, Event, EventIdentifier, Attribute, EventAttribute
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
-from app.lm.models import LanguageModelsApiKeys, ChatCompletionRequest, ChatCompletionResponse, openai, mistral, anthropic
+from app.lm.models import LMApiKeys, ChatCompletionRequest, ChatCompletionResponse, openai, mistral, anthropic
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -53,7 +53,7 @@ def normal_user_token_headers(client: TestClient, db: Session) -> dict[str, str]
 
 @pytest.fixture
 def language_models_api_keys():
-    return LanguageModelsApiKeys(
+    return LMApiKeys(
         openai_api_key=os.getenv("ARENA_OPENAI_API_KEY"),
         mistral_api_key=os.getenv("ARENA_MISTRAL_API_KEY"),
         anthropic_api_key=os.getenv("ARENA_ANTHROPIC_API_KEY"),
@@ -211,3 +211,8 @@ def chat_completion_anthropic() -> anthropic.ChatCompletionResponse:
         type="message",
         usage=anthropic.CompletionUsage(input_tokens=10, output_tokens=20)
     )
+
+@pytest.fixture
+def text_with_pii() -> str:
+    return """Hello I am Henry Smith and my account IBAN is GB87 BARC 2065 8244 9716 55, John Dean should have my phone number: +1-202-688-5500.
+If not send me a message at henry.smith@sarus.tech or a letter at: 32 rue Alexandre Dumas, Paris 11"""

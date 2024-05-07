@@ -53,13 +53,13 @@ class ChatCompletionRequest(BaseModel):
             ccc["system"] = None
         else:
             ccc["system"] = system[0]
-        if "arena_parameters" in ccc:
-            del ccc["arena_parameters"]
+        if "lm_config" in ccc:
+            del ccc["lm_config"]
         ccc["messages"] = messages
         return ChatCompletionRequest.model_validate(ccc)
 
     def to_dict(self) -> Mapping[str, Any]:
-        return self.model_dump(exclude_unset=True, exclude_none=True)
+        return self.model_dump(exclude_none=True)
 
 
 class TextBlock(BaseModel):

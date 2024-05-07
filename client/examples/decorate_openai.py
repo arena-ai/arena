@@ -4,6 +4,7 @@ from rich import print
 from dotenv import load_dotenv
 from openai import OpenAI
 from arena.client import Client
+from arena.models import LMConfig
 # Load .env
 load_dotenv()
 
@@ -46,6 +47,7 @@ def decorated_chat_completion_with_user_eval():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
     arena = Client(user=user, password=password, base_url=BASE_URL)
     arena.decorate(OpenAI)
+    # arena.lm_config(lm_config=LMConfig(pii_removal="replace"))
     t = time()
     api_key = os.getenv("ARENA_OPENAI_API_KEY")
     client = OpenAI(api_key=api_key)
@@ -70,7 +72,7 @@ def arena_chat_completion_with_eval():
         {"role": "user", "content": "What is the fastest animal on earth?"},
         ],
         max_tokens=100,
-        arena_parameters={"judge_evaluation": True},
+        lm_config={"judge_evaluation": True},
     )
     print(f"resp = {resp.choices[0].message.content} ({time()-t})")
     # Added this
@@ -81,14 +83,16 @@ def arena_chat_completion_with_eval_from_test():
     user = "test@sarus.tech"
     password = "password"
     arena = Client(user=user, password=password, base_url=BASE_URL)
+    arena.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
     arena.mistral_api_key(os.getenv("ARENA_MISTRAL_API_KEY"))
+    arena.lm_config(lm_config=LMConfig(judge_evaluation=True, pii_removal="replace"))
     t = time()
     resp = arena.chat_completions(model="mistral-small", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What are the 10 first even prime numbers?"},
         ],
         temperature=1.0,
-        arena_parameters={"judge_evaluation": True},
+        lm_config={"judge_evaluation": True},
     )
     print(f"resp = {resp.choices[0].message.content} ({time()-t})")
     # Added this
@@ -99,6 +103,5 @@ simple_chat_completion()
 decorated_chat_completion()
 decorated_chat_completion_with_user_eval()
 arena_chat_completion_with_eval()
-
 for _ in range(5):
     arena_chat_completion_with_eval_from_test()

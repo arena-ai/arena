@@ -10,6 +10,14 @@ Following: https://kubernetes.github.io/ingress-nginx/troubleshooting/
 
 `kubectl get pods`
 
+## Inspect K8s objects
+
+`kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443`
+
+## Inspect the Database
+
+`kubectl port-forward statefulsets/sarus-postgresql 5432:5432`
+
 ## Cert Manager
 
 As explained in https://cert-manager.io/docs/installation/helm/

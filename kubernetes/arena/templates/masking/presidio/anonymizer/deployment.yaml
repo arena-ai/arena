@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: presidio-analyser
-        image: "{{.Values.masking.presidio.registry}}/{{.Values.masking.presidio.anonymizer.name }}:{{ default .Chart.AppVersion .Values.docker.tag }}"
+        image: "{{.Values.masking.presidio.registry}}/{{.Values.masking.presidio.anonymizer.image}}:{{.Values.masking.presidio.anonymizer.tag}}"
         imagePullPolicy: {{ default "IfNotPresent" .Values.masking.presidio.analyzer.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.masking.presidio.anonymizer.service.internalPort }}

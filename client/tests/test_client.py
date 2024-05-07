@@ -1,15 +1,19 @@
 import os
+from random import randint
 from dotenv import load_dotenv
 # Load .env
 load_dotenv()
-from arena.client import Client
+from arena.models import Choice, Message
+from arena import Client, LMConfig, ChatCompletionRequest, ChatCompletionResponse, ChatCompletionRequestEventResponse
+
+BASE_URL = "http://localhost/api/v1"
 
 def test_chat():
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
 
     # Connect to arena
-    client = Client(user=user, password=password)
+    client = Client(user=user, password=password, base_url=BASE_URL)
     
     # Set the credentials
     client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
@@ -46,7 +50,7 @@ def test_judge():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
 
     # Connect to arena
-    client = Client(user=user, password=password)
+    client = Client(user=user, password=password, base_url=BASE_URL)
     
     # Set the credentials
     client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
@@ -55,7 +59,7 @@ def test_judge():
     resp = client.chat_completions(model="gpt-3.5-turbo", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
-        ], arena_parameters={
+        ], lm_config={
             "judge_evaluation": True,
         })
     assert(resp.choices[0].message.role == "assistant")
@@ -66,7 +70,7 @@ def test_judge():
     resp = client.chat_completions(model="mistral-small", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
-        ], arena_parameters={
+        ], lm_config={
             "judge_evaluation": True,
         })
     assert(resp.choices[0].message.role == "assistant")
@@ -77,7 +81,7 @@ def test_judge():
     resp = client.chat_completions(model="claude-2.0", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
-        ], max_tokens=500, arena_parameters={
+        ], max_tokens=500, lm_config={
             "judge_evaluation": True,
         })
     assert(resp.choices[0].message.role == "assistant")
@@ -98,7 +102,32 @@ def test_user_eval():
     resp = client.chat_completions(model="gpt-3.5-turbo", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the fastest animal on earth?"},
-        ], arena_parameters={
+        ], lm_config={
             "judge_evaluation": True,
         })
     print(client.evaluation(resp.id, 0.5))
+
+
+def test_instruments():
+    user = os.getenv("FIRST_SUPERUSER")
+    password = os.getenv("FIRST_SUPERUSER_PASSWORD")
+
+    # Connect to arena
+    client = Client(user=user, password=password, base_url=BASE_URL)
+    
+    # Set the credentials
+    client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
+    client.lm_config(LMConfig(judge_evaluation=True))
+
+    req = ChatCompletionRequest(model="gpt-3.5-turbo", messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": f"What are instrumental variables in statistics? ({randint(0, 100)})"},
+        ])
+
+    # Run a query but with instruments
+    event = client.chat_completions_request(**req.model_dump(mode="json", exclude_none=True))
+    print(f"DEBUG REQ = {req}")
+    
+    resp = ChatCompletionResponse(id=f"abcd1234-{randint(0, 10000)}", model="gpt-3.5-turbo", choices=[Choice(index=0, message=Message(role="assistant", content="This is a dummy response"))])
+    client.chat_completions_response(**ChatCompletionRequestEventResponse(request=req, request_event_id=event.id, response=resp).model_dump(mode="json", exclude_none=True))
+

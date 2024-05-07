@@ -1,9 +1,11 @@
 from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel
+from arena.models.settings import LMConfig
+
 
 """All LanguageModels"""
 
-class LanguageModelsApiKeys(BaseModel):
+class LMApiKeys(BaseModel):
     openai_api_key: str
     mistral_api_key: str
     anthropic_api_key: str
@@ -50,11 +52,6 @@ class ResponseFormat(BaseModel):
     type: Literal["text", "json_object"] | None = None
 
 
-class ArenaParameters(BaseModel):
-    pii_filter: bool = False
-    judge_evaluation: bool = False
-
-
 class ChatCompletionRequest(BaseModel):
     """
     Maps to:
@@ -82,10 +79,10 @@ class ChatCompletionRequest(BaseModel):
     top_p: float | None = None
     user: str | None = None
     stream: bool | None = None
-    arena_parameters: ArenaParameters | None = None
+    lm_config: LMConfig | None = None
 
     def to_dict(self) -> Mapping[str, Any]:
-        return self.model_dump(exclude_unset=True, exclude_none=True)
+        return self.model_dump(exclude_none=True)
 
 
 """ChatCompletion"""
@@ -133,7 +130,7 @@ class ChatCompletionResponse(BaseModel):
     object: Literal["chat.completion"] | None = None
     system_fingerprint: str | None = None
     usage: CompletionUsage | None = None
-    arena_parameters: ArenaParameters | None = None
+    lm_config: LMConfig | None = None
 
     @classmethod
     def from_dict(cls, m: Mapping[str, Any]) -> "ChatCompletionResponse":

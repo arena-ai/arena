@@ -73,7 +73,7 @@ def create_event(*, session: Session, event_in: EventCreate, owner_id: int) -> E
 
 
 def delete_event(*, session: Session, event_id: int) -> None:
-    db_event = get_event(session, event_id)
+    db_event = get_event(session=session, event_id=event_id)
     session.delete(db_event)
     session.commit()
 
