@@ -29,7 +29,7 @@ def decorated_chat_completion():
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
     arena = Client(user=user, password=password, base_url=BASE_URL)
-    arena.decorate(OpenAI)
+    arena.decorate(OpenAI, mode='instrument')
     t = time()
     # Everything is unchanged then
     api_key = os.getenv("ARENA_OPENAI_API_KEY")
@@ -98,6 +98,7 @@ def arena_chat_completion_with_eval_from_test():
     # Added this
     arena.evaluation(resp.id, 0.98)
 
+# Small demo
 simple_chat_completion()
 decorated_chat_completion()
 decorated_chat_completion_with_user_eval()
