@@ -48,7 +48,7 @@ backend:
     password: ""
   usersOpenRegistration: false
   smtpHost: "smtp-relay.gmail.com"
-  emailsFromEmail: "arena@sarus.tech"
+  emailsFromEmail: "arena@sarus.app"
   emailsFromName: "Sarus Arena"
 
 
