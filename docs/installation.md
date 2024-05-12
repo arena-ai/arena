@@ -4,12 +4,12 @@ title: Get started using Arena on Kubernetes in 10 minutes
 
 # Deploying Arena on Azure AKS in three simple steps
 
-In this post we will describe each the deployment of Arena on Azure AKS.
+In this short post we will describe the deployment of Arena on Azure AKS.
 The deployment procedure will consist in three main steps:
 
-1. Provisioning the k8s cluster
-2. Setting up the IP, domain name and TLS certificate.
-3. Deploying arena helm chart
+1. Provisioning the k8s cluster and connecting to it.
+2. Setting up the public IP, domain name and TLS certificate.
+3. Deploying `arena` using `helm`.
 
 # First step: provisioning a cluster
 
@@ -35,11 +35,17 @@ Set them to fit your needs. Make sure the region you choose enables the provisio
 
 ## Create a resource group
 
+The *resource group* is where the resources created by the user for the cluster are created.
+
 ```sh
 az group create --name $RESOURCE_GROUP_NAME --location $REGION
 ```
 
+Another group: the *node resource group* is created with the cluster and will contain the resources automatically created for the functioning of the cluster, such as VMs etc.
+
 ## Create the cluster
+
+The cluster can be created with the command below:
 
 ```sh
 az aks create \
@@ -60,9 +66,68 @@ az aks create \
     --node-resource-group $NODE_RESOURCE_GROUP_NAME
 ```
 
+We can add a nodepool in `user` mode. There are two modes for nodepools: `user` and `system` modes. [Pods](https://kubernetes.io/docs/concepts/workloads/pods/) for the system are allocated in priority to nodepools in `system` mode.
+
+```sh
+az aks nodepool add \
+--resource-group $RESOURCE_GROUP_NAME \
+--name userpool \
+--cluster-name $CLUSTER_NAME \
+--mode user \
+--node-count 2 \
+--node-vm-size Standard_D8ds_v5 \
+--enable-cluster-autoscaler \
+--min-count 2 \
+--max-count 5
+```
+
 ## Get the credentials
+
+To connect to the cluster you need to get credentials.
 
 ```sh
 az aks get-credentials --resource-group $RESOURCE_GROUP_NAME --name $CLUSTER_NAME
 ```
 
+Then use `kubectl` to access the cluster:
+
+```sh
+# E.g.
+kubectl get nodes
+```
+
+## Check the cluster
+
+You can check the cluster configuration this way:
+
+```sh
+az aks show --name $CLUSTER_NAME --resource-group $RESOURCE_GROUP_NAME
+```
+
+You can list the nodepools this way:
+
+```sh
+az aks nodepool list --cluster-name $CLUSTER_NAME --resource-group $RESOURCE_GROUP_NAME
+```
+
+# Second step: setting up the public IP, domain name and TLS certificate
+
+## Create a public IP
+
+```sh
+az network public-ip create --name "${CLUSTER_NAME}-ip" \
+    --resource-group $NODE_RESOURCE_GROUP_NAME \
+    --allocation-method Static \
+    --location $REGION
+```
+
+## Set a DNS entry for your domain
+
+In our case, we set the `A` record of `arena.sarus.app` to our newly created IP address.
+
+## Setup autocert
+
+
+
+
+# Third and last step: deployment.
