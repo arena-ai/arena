@@ -28,6 +28,7 @@ export REGION="westeurope"
 export CLUSTER_NAME="arena"
 export SUBSCRIPTION_ID="your id"
 export DNS_LABEL="arena"
+export NODE_RESOURCE_GROUP_NAME="arena_nodes"
 ```
 
 Set them to fit your needs. Make sure the region you choose enables the provisioning of GPUs.
@@ -55,7 +56,8 @@ az aks create \
     --node-vm-size Standard_D8ds_v5 \
     --enable-cluster-autoscaler \
     --min-count 2 \
-    --max-count 5
+    --max-count 5 \
+    --node-resource-group $NODE_RESOURCE_GROUP_NAME
 ```
 
 ## Get the credentials
