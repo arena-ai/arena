@@ -2,36 +2,43 @@
 title: Get started using Arena on Kubernetes in 10 minutes
 ---
 
-# Deploying Arena on Azure AKS in three simple steps
+# Deploying [Arena](https://github.com/arena-ai/arena) on Azure AKS in three simple steps
 
 In this short post we will describe the deployment of Arena on Azure AKS.
 The deployment procedure will consist in three main steps:
 
-1. Provisioning the k8s cluster and connecting to it.
+1. Provisioning the *kubernetes* (k8s) cluster and connecting to it.
 2. Setting up the public IP, domain name and TLS certificate.
-3. Deploying `arena` using `helm`.
+3. Deploying [Arena](https://github.com/arena-ai/arena) using `helm`.
 
 # First step: provisioning a cluster
 
-To provision an AKS cluster on Azure, you'll need an azure account.
+To provision an [AKS cluster on Azure](https://azure.microsoft.com/fr-fr/products/kubernetes-service), you'll need an Azure account. Note that the installation process is relatively similar with other managed k8s such as [GKE](https://cloud.google.com/kubernetes-engine), [EKS](https://aws.amazon.com/eks/) and [the like](https://us.ovhcloud.com/public-cloud/kubernetes/).
 
-You'll also need [Azure command line interface](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) (`az`) and [Kubernetes command line tool](https://kubernetes.io/docs/reference/kubectl/) (`kubectl`)
+You'll also need [Azure command line interface](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) (`az`) and [Kubernetes command line tool](https://kubernetes.io/docs/reference/kubectl/) (`kubectl`).
 Make sure you have them installed.
 
 You can create a cluster [in many ways](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-cli). In this document we will focus on using the CLI.
 
-## Create a few environment variables:
+## Create a few environment variables
+
+You can parametrize the deployment of [Arena](https://github.com/arena-ai/arena) using environment variables:
 ```sh
-export RANDOM_ID="$(openssl rand -hex 3)"
-export RESOURCE_GROUP_NAME="arena"
-export REGION="westeurope"
 export CLUSTER_NAME="arena"
-export SUBSCRIPTION_ID="your id"
-export DNS_LABEL="arena"
+export REGION="westeurope"
+export SUBSCRIPTION_ID="<your_id>"
+export RESOURCE_GROUP_NAME="arena"
 export NODE_RESOURCE_GROUP_NAME="arena_nodes"
+export DOCKER_PASSWORD="<the_token_to_access_the_docker_registry_where_images_are>"
+export POSTGRES_USER="postgres"
+export POSTGRES_PASSWORD="$(openssl rand -base64 12)"
+export REDIS_PASSWORD="$(openssl rand -base64 12)"
+export FIRST_SUPERUSER="admin@sarus.tech"
+export FIRST_SUPERUSER_PASSWORD="$(openssl rand -base64 12)"
+export USERS_OPEN_REGISTRATION=False
 ```
 
-Set them to fit your needs. Make sure the region you choose enables the provisioning of GPUs.
+Set them to fit your needs. Make sure the region you choose enables the provisioning of GPUs if you plan to use AI model fine-tuning features.
 
 ## Create a resource group
 
@@ -45,7 +52,7 @@ Another group: the *node resource group* is created with the cluster and will co
 
 ## Create the cluster
 
-The cluster can be created with the command below:
+The cluster itself can be created with the command below:
 
 ```sh
 az aks create \
@@ -66,7 +73,7 @@ az aks create \
     --node-resource-group $NODE_RESOURCE_GROUP_NAME
 ```
 
-We can add a nodepool in `user` mode. There are two modes for nodepools: `user` and `system` modes. [Pods](https://kubernetes.io/docs/concepts/workloads/pods/) for the system are allocated in priority to nodepools in `system` mode.
+We will add a nodepool in `user` mode. There are two modes for nodepools: `user` and `system` modes. [Pods](https://kubernetes.io/docs/concepts/workloads/pods/) for the system are allocated in priority to nodepools in `system` mode so this `user` pool is mostly for the application pods.
 
 ```sh
 az aks nodepool add \
@@ -83,11 +90,12 @@ az aks nodepool add \
 
 ## Get the credentials
 
-To connect to the cluster you need to get credentials.
+To connect to the cluster you need credentials on your local machine. Run the following command:
 
 ```sh
 az aks get-credentials --resource-group $RESOURCE_GROUP_NAME --name $CLUSTER_NAME
 ```
+It will configure your local `kubectl` command, typically by adding entries in your `~/.kube/config` file.
 
 Then use `kubectl` to access the cluster:
 
@@ -96,7 +104,7 @@ Then use `kubectl` to access the cluster:
 kubectl get nodes
 ```
 
-## Check the cluster
+## Check the cluster configuration
 
 You can check the cluster configuration this way:
 
@@ -109,6 +117,8 @@ You can list the nodepools this way:
 ```sh
 az aks nodepool list --cluster-name $CLUSTER_NAME --resource-group $RESOURCE_GROUP_NAME
 ```
+
+You have now a working cluster ready to run the [Arena](https://github.com/arena-ai/arena) app.
 
 # Second step: setting up the public IP, domain name and TLS certificate
 
@@ -127,25 +137,30 @@ In our case, we set the `A` record of `arena.sarus.app` to our newly created IP 
 
 ## Setup autocert
 
-Clone the `arena` repository on your local machine.
+Clone the [Arena](https://github.com/arena-ai/arena) repository on your local machine.
 
 ```sh
 git clone https://github.com/arena-ai/arena.git
 ```
 
-Change to the `kubernetes` directory:
+Change to the repository directory:
 
 ```sh
-cd arena/kubernetes
+cd arena
 ```
 
 ### Create K8s *Custom Resources Definitions* (CRDs)
+
+[Arena](https://github.com/arena-ai/arena) uses [*cert-manager*](https://cert-manager.io/docs/installation/helm/) to automatically get a [*letsencrypt*](https://letsencrypt.org/) TLS certificate to enable *secure https access*.
+The use of *cert-manager* requires [CRDs](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/).
 
 ```sh
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.crds.yaml
 ```
 
 ### Deploy the app
+
+The [Arena](https://github.com/arena-ai/arena) app can then be deployed:
 
 ```sh
 helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
