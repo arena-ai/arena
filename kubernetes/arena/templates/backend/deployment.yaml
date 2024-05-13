@@ -42,6 +42,10 @@ spec:
         {{- else }}
           value: "http://{{.Values.cluster.host}}"
         {{- end }}
+        - name: DOMAIN
+          value: {{.Values.cluster.host}}
+        - name: ENVIRONMENT
+          value: "production"
         - name: FIRST_SUPERUSER
           value: {{.Values.backend.firstSuperUser.user}}
         - name: FIRST_SUPERUSER_PASSWORD
