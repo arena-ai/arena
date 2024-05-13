@@ -55,7 +55,7 @@ You will need it to log into the app as `admin@sarus.tech` (`FIRST_SUPERUSER`).
 ## Create a resource group
 
 The *resource group* is where the resources created by the user for the cluster are created.
-
+Create it using this command:
 ```sh
 az group create --name $RESOURCE_GROUP_NAME --location $REGION
 ```
