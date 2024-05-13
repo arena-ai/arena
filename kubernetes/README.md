@@ -8,7 +8,10 @@ Following [cert-manager](https://cert-manager.io/docs/installation/helm/#option-
 Then deploy the app:
 
 ```sh
-helm install ${RELEASE_NAME} kubernetes/arena \
+helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+--set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
+--set cluster.host=${CLUSTER_HOST} \
+--set docker.registry=${DOCKER_REGISTRY} \
 --set docker.password=${DOCKER_PASSWORD} \
 --set postgresql.user=${POSTGRES_USER} \
 --set postgresql.password=${POSTGRES_PASSWORD} \
@@ -21,7 +24,10 @@ helm install ${RELEASE_NAME} kubernetes/arena \
 Or if you use a `.env` file:
 
 ```sh
-source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+source .env; 	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+--set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
+--set cluster.host=${CLUSTER_HOST} \
+--set docker.registry=${DOCKER_REGISTRY} \
 --set docker.password=${DOCKER_PASSWORD} \
 --set postgresql.user=${POSTGRES_USER} \
 --set postgresql.password=${POSTGRES_PASSWORD} \

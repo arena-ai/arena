@@ -42,8 +42,12 @@ clean:
 dev:
 	docker compose up -d
 
+# Deploy the helm app
 kubernetes:
 	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+	--set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
+	--set cluster.host=${CLUSTER_HOST} \
+	--set docker.registry=${DOCKER_REGISTRY} \
 	--set docker.password=${DOCKER_PASSWORD} \
 	--set postgresql.user=${POSTGRES_USER} \
 	--set postgresql.password=${POSTGRES_PASSWORD} \
@@ -52,5 +56,11 @@ kubernetes:
 	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
 	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 
+# Deploy the k8s dashboard
+kubernetes-dashboard:
+	helm upgrade --install kubernetes-dashboard kubernetes-dashboard \
+	--repo https://kubernetes.github.io/dashboard/ \
+	--create-namespace --namespace kubernetes-dashboard
 
-.PHONY: all build push version build-backend push-backend build-frontend push-frontend clean dev kubernetes
+
+.PHONY: all build push version build-backend push-backend build-frontend push-frontend clean dev kubernetes kubernetes-dashboard

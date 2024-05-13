@@ -4,7 +4,7 @@ docker:
   name: sarus
   registry: sarus.azurecr.io
   tag: latest
-  username: sarus
+  username: arena
   password: ""
 
 cluster:
@@ -83,7 +83,7 @@ ingress-nginx:
           kubernetes.io/os: linux
     service:
       externalTrafficPolicy: Local
-      loadBalancerIP: "4.176.1.227"
+      loadBalancerIP: ""
 
 cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
   namespace: default

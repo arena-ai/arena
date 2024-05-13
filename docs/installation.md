@@ -127,7 +127,49 @@ In our case, we set the `A` record of `arena.sarus.app` to our newly created IP 
 
 ## Setup autocert
 
+Clone the `arena` repository on your local machine.
 
+```sh
+git clone https://github.com/arena-ai/arena.git
+```
 
+Change to the `kubernetes` directory:
+
+```sh
+cd arena/kubernetes
+```
+
+### Create K8s *Custom Resources Definitions* (CRDs)
+
+```sh
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.crds.yaml
+```
+
+### Deploy the app
+
+```sh
+helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+	--set docker.password=${DOCKER_PASSWORD} \
+	--set postgresql.user=${POSTGRES_USER} \
+	--set postgresql.password=${POSTGRES_PASSWORD} \
+	--set redis.password=${REDIS_PASSWORD} \
+	--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
+	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
+```
+
+### Deploy the kubernetes dashboard
+
+```sh
+helm upgrade --install kubernetes-dashboard kubernetes-dashboard \
+    --repo https://kubernetes.github.io/dashboard/ \
+    --create-namespace --namespace kubernetes-dashboard
+```
+
+You can then log into the dashboard using:
+
+```sh
+kubectl --namespace kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+```
 
 # Third and last step: deployment.
