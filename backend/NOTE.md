@@ -13,4 +13,4 @@ Or if you want to run a specific test: `docker compose exec backend bash /app/sp
 
 ## The backend is pushed to github container registry (ghcr.io)
 
-The backend is pushed to ghcr.io, see in `.github/workflows/publish-backend-docker-image.yml`
+The backend image is built and pushed to ghcr.io, see in `.github/workflows/publish-backend-docker-image.yml`.

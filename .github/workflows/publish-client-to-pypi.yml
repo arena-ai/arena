@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'backend/**'  # Only run workflow if changes in the package directory
+      - 'client/**'  # Only run workflow if changes in the package directory
 
 jobs:
   build-and-publish:
