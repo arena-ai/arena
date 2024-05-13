@@ -11,8 +11,6 @@ Then deploy the app:
 helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
 --set cluster.host=${CLUSTER_HOST} \
---set docker.registry=${DOCKER_REGISTRY} \
---set docker.password=${DOCKER_PASSWORD} \
 --set postgresql.user=${POSTGRES_USER} \
 --set postgresql.password=${POSTGRES_PASSWORD} \
 --set redis.password=${REDIS_PASSWORD} \
@@ -27,8 +25,6 @@ Or if you use a `.env` file:
 source .env; 	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
 --set cluster.host=${CLUSTER_HOST} \
---set docker.registry=${DOCKER_REGISTRY} \
---set docker.password=${DOCKER_PASSWORD} \
 --set postgresql.user=${POSTGRES_USER} \
 --set postgresql.password=${POSTGRES_PASSWORD} \
 --set redis.password=${REDIS_PASSWORD} \
