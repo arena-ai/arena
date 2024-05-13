@@ -44,5 +44,7 @@ spec:
         {{- end }}
         - name: NODE_ENV
           value: production
+      {{ if .Values.docker.requireAuthentication -}}
       imagePullSecrets:
       - name: {{ .Release.Name -}}-docker-registry-secret
+      {{- end }}

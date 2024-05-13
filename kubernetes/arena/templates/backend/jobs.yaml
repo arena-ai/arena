@@ -29,5 +29,7 @@ spec:
         - name: REDIS_SERVER
           value: "{{.Release.Name}}-redis-service.{{.Values.namespace}}.svc.cluster.local"
       restartPolicy: Never
+      {{ if .Values.docker.requireAuthentication -}}
       imagePullSecrets:
       - name: {{ .Release.Name -}}-docker-registry-secret
+      {{- end }}

@@ -3,8 +3,10 @@ namespace: default
 docker:
   registry: ghcr.io/arena-ai
   tag: main
+  requireAuthentication: False
   username: arena
   password: ""
+
 
 cluster:
   provider: AKS

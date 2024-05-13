@@ -48,5 +48,7 @@ spec:
           value: {{.Values.backend.emailsFromEmail}}
         - name: EMAILS_FROM_NAME
           value: {{.Values.backend.emailsFromName}}
+      {{ if .Values.docker.requireAuthentication -}}
       imagePullSecrets:
       - name: {{ .Release.Name -}}-docker-registry-secret
+      {{- end }}

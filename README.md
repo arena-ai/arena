@@ -9,9 +9,11 @@ If you use public AI services such as OpenAI, Anthropic or Mistral, Sarus Arena 
 
 ## Installation
 
-A test instance is hosted by Sarus: [https://arena.sarus.app/].
+A test instance is hosted by Sarus: [arena.sarus.app](https://arena.sarus.app/).
 
 You can deploy your own instance using the provided [helm](https://helm.sh/) [arena chart](https://github.com/arena-ai/arena/tree/main/kubernetes/arena) and following the [deployment instructions](https://github.com/arena-ai/arena/tree/main/kubernetes).
+
+A document describing the installation process is available [there](docs/installation.md).
 
 
 ## Dev environment
@@ -19,4 +21,3 @@ You can deploy your own instance using the provided [helm](https://helm.sh/) [ar
 To start the test environment, run:
 
 `docker compose up`
-
