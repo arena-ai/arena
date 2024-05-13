@@ -29,12 +29,17 @@ export REGION="westeurope"
 export SUBSCRIPTION_ID="<your_id>"
 export RESOURCE_GROUP_NAME="arena"
 export NODE_RESOURCE_GROUP_NAME="arena_nodes"
-export DOCKER_PASSWORD="<the_token_to_access_the_docker_registry_where_images_are>"
+export RELEASE_NAME="sarus"
+export PUBLIC_IP="104.46.33.202"
+export CLUSTER_HOST="arena.sarus.app"
 export POSTGRES_USER="postgres"
 export POSTGRES_PASSWORD="$(openssl rand -base64 12)"
 export REDIS_PASSWORD="$(openssl rand -base64 12)"
 export FIRST_SUPERUSER="admin@sarus.tech"
 export FIRST_SUPERUSER_PASSWORD="$(openssl rand -base64 12)"
+export SMTP_HOST="<smtp server>"
+export SMTP_USER="<smtp user>"
+export SMTP_USER="<smtp password>"
 export USERS_OPEN_REGISTRATION=False
 ```
 
