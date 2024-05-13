@@ -2,12 +2,11 @@ namespace: default
 
 docker:
   registry: ghcr.io/arena-ai
-  tag: main
   requireAuthentication: False
   username: arena
   password: ""
 
-
+# Cluster configuration
 cluster:
   provider: AKS
   ingress: nginx
@@ -19,7 +18,7 @@ cluster:
       name: letsencrypt-prod
       # server: https://acme-staging-v02.api.letsencrypt.org/directory
       server: https://acme-v02.api.letsencrypt.org/directory
-      email: ng@sarus.tech
+      email: arena@sarus.app
       # privateKeySecretRef: letsencrypt-staging
       privateKeySecretRef: letsencrypt-prod
     secretName: letsencrypt-secret
@@ -39,6 +38,7 @@ redis:
 # Backend configuration
 backend:
   image: arena_backend
+  tag: main
   service:
     type: ClusterIP
     externalPort: 80
@@ -48,18 +48,25 @@ backend:
     user: ""
     password: ""
   usersOpenRegistration: false
-  smtpHost: "smtp-relay.gmail.com"
-  emailsFromEmail: "arena@sarus.app"
+  smtp:
+    host: smtp-relay.gmail.com
+    requireAuthentication: False
+    user: arena@sarus.app
+    password: ""
+  emailsFromEmail: arena@sarus.app
   emailsFromName: "Sarus Arena"
 
-
+# Worker configuration
 worker:
   image: arena_backend
+  tag: main
   service:
     type: ClusterIP
 
+# Frontend configuration
 frontend:
   image: arena_frontend
+  tag: main
   service:
     type: ClusterIP
     externalPort: 80

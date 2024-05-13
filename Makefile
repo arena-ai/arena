@@ -52,6 +52,7 @@ kubernetes:
 	--set redis.password=${REDIS_PASSWORD} \
 	--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
 	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+	--set backend.smtp.host=${SMTP_HOST} \
 	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 
 # Deploy the k8s dashboard

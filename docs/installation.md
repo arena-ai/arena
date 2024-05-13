@@ -56,21 +56,21 @@ The cluster itself can be created with the command below:
 
 ```sh
 az aks create \
-    --resource-group $RESOURCE_GROUP_NAME \
-    --name $CLUSTER_NAME \
-    --node-count 2 \
-    --subscription $SUBSCRIPTION_ID \
-    --location $REGION \
-    --tier standard \
-    --kubernetes-version 1.28.5 \
-    --auto-upgrade-channel patch \
-    --node-os-upgrade-channel NodeImage \
-    --nodepool-name agentpool \
-    --node-vm-size Standard_D8ds_v5 \
-    --enable-cluster-autoscaler \
-    --min-count 2 \
-    --max-count 5 \
-    --node-resource-group $NODE_RESOURCE_GROUP_NAME
+--resource-group $RESOURCE_GROUP_NAME \
+--name $CLUSTER_NAME \
+--node-count 2 \
+--subscription $SUBSCRIPTION_ID \
+--location $REGION \
+--tier standard \
+--kubernetes-version 1.28.5 \
+--auto-upgrade-channel patch \
+--node-os-upgrade-channel NodeImage \
+--nodepool-name agentpool \
+--node-vm-size Standard_D8ds_v5 \
+--enable-cluster-autoscaler \
+--min-count 2 \
+--max-count 5 \
+--node-resource-group $NODE_RESOURCE_GROUP_NAME
 ```
 
 We will add a nodepool in `user` mode. There are two modes for nodepools: `user` and `system` modes. [Pods](https://kubernetes.io/docs/concepts/workloads/pods/) for the system are allocated in priority to nodepools in `system` mode so this `user` pool is mostly for the application pods.
@@ -126,9 +126,9 @@ You have now a working cluster ready to run the [Arena](https://github.com/arena
 
 ```sh
 az network public-ip create --name "${CLUSTER_NAME}-ip" \
-    --resource-group $NODE_RESOURCE_GROUP_NAME \
-    --allocation-method Static \
-    --location $REGION
+--resource-group $NODE_RESOURCE_GROUP_NAME \
+--allocation-method Static \
+--location $REGION
 ```
 
 ## Set a DNS entry for your domain
@@ -164,13 +164,17 @@ The [Arena](https://github.com/arena-ai/arena) app can then be deployed:
 
 ```sh
 helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
-	--set docker.password=${DOCKER_PASSWORD} \
-	--set postgresql.user=${POSTGRES_USER} \
-	--set postgresql.password=${POSTGRES_PASSWORD} \
-	--set redis.password=${REDIS_PASSWORD} \
-	--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
-	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
-	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
+--set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
+--set cluster.host=${CLUSTER_HOST} \
+--set postgresql.user=${POSTGRES_USER} \
+--set postgresql.password=${POSTGRES_PASSWORD} \
+--set redis.password=${REDIS_PASSWORD} \
+--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
+--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+--set backend.smtp.host=${SMTP_HOST} \
+--set backend.smtp.user=${SMTP_USER} \
+--set backend.smtp.password="${SMTP_PASSWORD}" \
+--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 ```
 
 ### Deploy the kubernetes dashboard
@@ -187,4 +191,5 @@ You can then log into the dashboard using:
 kubectl --namespace kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
 ```
 
-# Third and last step: deployment.
+# Third and last step: deployment
+

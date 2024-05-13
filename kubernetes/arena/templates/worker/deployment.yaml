@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: worker
-        image: {{.Values.docker.registry}}/{{.Values.worker.image}}
+        image: {{.Values.docker.registry}}/{{.Values.worker.image}}:{{.Values.worker.tag}}
         imagePullPolicy: Always
         command: ["celery"]
         args: ["-A", "app.worker", "worker", "-l", "INFO"]
@@ -43,7 +43,13 @@ spec:
         - name: REDIS_SERVER
           value: "{{.Release.Name}}-redis-service.{{.Values.namespace}}.svc.cluster.local"
         - name: SMTP_HOST
-          value: {{.Values.backend.smtpHost}}
+          value: {{.Values.backend.smtp.host}}
+        {{- if .Values.backend.smtp.requireAuthentication }}
+        - name: SMTP_USER
+          value: {{.Values.backend.smtp.user}}
+        - name: SMTP_PASSWORD
+          value: {{.Values.backend.smtp.password}}
+        {{- end }}
         - name: EMAILS_FROM_EMAIL
           value: {{.Values.backend.emailsFromEmail}}
         - name: EMAILS_FROM_NAME

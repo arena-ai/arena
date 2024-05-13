@@ -16,13 +16,17 @@ helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set redis.password=${REDIS_PASSWORD} \
 --set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
 --set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+--set backend.smtp.host=${SMTP_HOST} \
+--set backend.smtp.requireAuthentication=True \
+--set backend.smtp.user=${SMTP_USER} \
+--set backend.smtp.password="${SMTP_PASSWORD}" \
 --set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 ```
 
 Or if you use a `.env` file:
 
 ```sh
-source .env; 	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
 --set cluster.host=${CLUSTER_HOST} \
 --set postgresql.user=${POSTGRES_USER} \
@@ -30,6 +34,10 @@ source .env; 	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set redis.password=${REDIS_PASSWORD} \
 --set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
 --set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+--set backend.smtp.host=${SMTP_HOST} \
+--set backend.smtp.requireAuthentication=True \
+--set backend.smtp.user=${SMTP_USER} \
+--set backend.smtp.password="${SMTP_PASSWORD}" \
 --set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 ```
 

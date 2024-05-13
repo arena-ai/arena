@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: {{.Release.Name}}-backend-setup
-        image: {{.Values.docker.registry}}/{{.Values.backend.image}}
+        image: {{.Values.docker.registry}}/{{.Values.backend.image}}:{{.Values.backend.tag}}
         imagePullPolicy: Always
         command: ["/bin/bash"]
         args: ["-c", "/app/prestart.sh"]
@@ -20,6 +20,14 @@ spec:
           value: {{.Values.backend.firstSuperUser.user}}
         - name: FIRST_SUPERUSER_PASSWORD
           value: {{.Values.backend.firstSuperUser.password}}
+        - name: SMTP_HOST
+          value: {{.Values.backend.smtp.host}}
+        {{- if .Values.backend.smtp.requireAuthentication }}
+        - name: SMTP_USER
+          value: {{.Values.backend.smtp.user}}
+        - name: SMTP_PASSWORD
+          value: {{.Values.backend.smtp.password}}
+        {{- end }}
         - name: POSTGRES_PASSWORD
           value: {{.Values.postgresql.password}}
         - name: POSTGRES_SERVER

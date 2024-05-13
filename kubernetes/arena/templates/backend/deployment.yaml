@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: {{.Values.docker.registry}}/{{.Values.backend.image}}
+        image: {{.Values.docker.registry}}/{{.Values.backend.image}}:{{.Values.backend.tag}}
         imagePullPolicy: Always
         ports:
         - containerPort: {{.Values.backend.service.internalPort}}
@@ -49,7 +49,13 @@ spec:
         - name: USERS_OPEN_REGISTRATION
           value: {{.Values.backend.usersOpenRegistration | quote}}
         - name: SMTP_HOST
-          value: {{.Values.backend.smtpHost}}
+          value: {{.Values.backend.smtp.host}}
+        {{- if .Values.backend.smtp.requireAuthentication }}
+        - name: SMTP_USER
+          value: {{.Values.backend.smtp.user}}
+        - name: SMTP_PASSWORD
+          value: {{.Values.backend.smtp.password}}
+        {{- end }}
         - name: EMAILS_FROM_EMAIL
           value: {{.Values.backend.emailsFromEmail}}
         - name: EMAILS_FROM_NAME

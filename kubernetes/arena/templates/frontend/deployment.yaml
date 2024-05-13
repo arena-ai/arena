@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: {{.Values.docker.registry}}/{{.Values.frontend.image}}
+        image: {{.Values.docker.registry}}/{{.Values.frontend.image}}:{{.Values.frontend.tag}}
         imagePullPolicy: Always
         ports:
         - containerPort: {{.Values.frontend.service.internalPort}}
