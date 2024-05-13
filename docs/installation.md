@@ -169,6 +169,7 @@ cd arena
 
 The use of *cert-manager* requires [CRDs](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/).
 
+They can be created this way:
 ```sh
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.crds.yaml
 ```
