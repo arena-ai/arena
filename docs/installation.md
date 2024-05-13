@@ -60,7 +60,7 @@ Create it using this command:
 az group create --name $RESOURCE_GROUP_NAME --location $REGION
 ```
 
-Another group: the *node resource group* will be created with the cluster and will contain the resources automatically created for the functioning of the cluster, such as VMs etc.
+Another group: the *node resource group* will be automatically created with the cluster and will contain the resources created by k8s, such as the VMs etc.
 
 ## Create the cluster
 
