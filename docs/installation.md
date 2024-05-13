@@ -208,4 +208,6 @@ You can then log into the dashboard using:
 kubectl --namespace kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
 ```
 
-After 
+After a few seconds, the cluster should be up and running.
+
+We can log into our app at: [https://arena.sarus.app](https://arena.sarus.app). Et voilà!
