@@ -37,9 +37,9 @@ export POSTGRES_PASSWORD="$(openssl rand -base64 12)"
 export REDIS_PASSWORD="$(openssl rand -base64 12)"
 export FIRST_SUPERUSER="admin@sarus.tech"
 export FIRST_SUPERUSER_PASSWORD="$(openssl rand -base64 12)"
-export SMTP_HOST="<smtp server>"
-export SMTP_USER="<smtp user>"
-export SMTP_USER="<smtp password>"
+export SMTP_HOST="<your_smtp_server>"
+export SMTP_USER="<your_smtp_user>"
+export SMTP_USER="<your_smtp_password>"
 export USERS_OPEN_REGISTRATION=False
 ```
 
@@ -53,7 +53,7 @@ The *resource group* is where the resources created by the user for the cluster 
 az group create --name $RESOURCE_GROUP_NAME --location $REGION
 ```
 
-Another group: the *node resource group* is created with the cluster and will contain the resources automatically created for the functioning of the cluster, such as VMs etc.
+Another group: the *node resource group* will be created with the cluster and will contain the resources automatically created for the functioning of the cluster, such as VMs etc.
 
 ## Create the cluster
 
@@ -129,6 +129,8 @@ You have now a working cluster ready to run the [Arena](https://github.com/arena
 
 ## Create a public IP
 
+We create a static public IP for the cluster.
+
 ```sh
 az network public-ip create --name "${CLUSTER_NAME}-ip" \
 --resource-group $NODE_RESOURCE_GROUP_NAME \
@@ -138,11 +140,13 @@ az network public-ip create --name "${CLUSTER_NAME}-ip" \
 
 ## Set a DNS entry for your domain
 
-In our case, we set the `A` record of `arena.sarus.app` to our newly created IP address.
+Associate a domain to this IP. In our case, we set the `A` record of `arena.sarus.app` to our newly created IP address.
 
-## Setup autocert
+## Setup *cert-manager*
 
-Clone the [Arena](https://github.com/arena-ai/arena) repository on your local machine.
+[Arena](https://github.com/arena-ai/arena) uses [*cert-manager*](https://cert-manager.io/docs/installation/helm/) to automatically get a [*letsencrypt*](https://letsencrypt.org/) TLS certificate to enable *secure https access*.
+
+To setup *cert-manager* first clone the [Arena](https://github.com/arena-ai/arena) repository on your local machine.
 
 ```sh
 git clone https://github.com/arena-ai/arena.git
@@ -156,16 +160,15 @@ cd arena
 
 ### Create K8s *Custom Resources Definitions* (CRDs)
 
-[Arena](https://github.com/arena-ai/arena) uses [*cert-manager*](https://cert-manager.io/docs/installation/helm/) to automatically get a [*letsencrypt*](https://letsencrypt.org/) TLS certificate to enable *secure https access*.
 The use of *cert-manager* requires [CRDs](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/).
 
 ```sh
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.crds.yaml
 ```
 
-### Deploy the app
+# Third and last step: deployment
 
-The [Arena](https://github.com/arena-ai/arena) app can then be deployed:
+The [Arena](https://github.com/arena-ai/arena) app can be deployed with:
 
 ```sh
 helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
@@ -183,12 +186,12 @@ helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 ```
 
-### Deploy the kubernetes dashboard
+To ease the cluster administration, it is nice to deploy the kubernetes dashboard
 
 ```sh
 helm upgrade --install kubernetes-dashboard kubernetes-dashboard \
-    --repo https://kubernetes.github.io/dashboard/ \
-    --create-namespace --namespace kubernetes-dashboard
+--repo https://kubernetes.github.io/dashboard/ \
+--create-namespace --namespace kubernetes-dashboard
 ```
 
 You can then log into the dashboard using:
@@ -197,5 +200,4 @@ You can then log into the dashboard using:
 kubectl --namespace kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
 ```
 
-# Third and last step: deployment
-
+After 
