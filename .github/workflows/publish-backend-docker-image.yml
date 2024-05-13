@@ -1,4 +1,4 @@
-name: Publish the backend docker image 🐳
+name: Publish the backend ⚙️ docker image 🐳
 
 on:
   push:

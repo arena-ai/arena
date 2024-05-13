@@ -1,4 +1,4 @@
-name: Publish the frontend docker image 🐳
+name: Publish the frontend 🖥️ docker image 🐳
 
 on:
   push:
