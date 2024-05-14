@@ -18,9 +18,9 @@ import {
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from 'react-query'
 
-import { UserCreate, UsersService } from '../../client'
-import { ApiError } from '../../client/core/ApiError'
-import useCustomToast from '../../hooks/useCustomToast'
+import { UserCreate, UsersService } from '@app/client'
+import { ApiError } from '@app/client/core/ApiError'
+import useCustomToast from '@app/hooks/useCustomToast'
 
 interface AddUserProps {
   isOpen: boolean

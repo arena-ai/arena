@@ -18,9 +18,9 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from 'react-query'
 
-import { ApiError, EventOut, EventsService } from '../../client'
-import EventsSummary from '../../components/Common/EventsSummary'
-import useCustomToast from '../../hooks/useCustomToast'
+import { ApiError, EventOut, EventsService } from '@app/client'
+import EventsSummary from '@app/components/Common/EventsSummary'
+import useCustomToast from '@app/hooks/useCustomToast'
 
 export const Route = createFileRoute('/_layout/events')({
   component: Events,

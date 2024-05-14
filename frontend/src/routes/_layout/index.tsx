@@ -2,7 +2,7 @@ import { Box, Container, Text } from '@chakra-ui/react'
 import { useQueryClient } from 'react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
-import { UserOut } from '../../client'
+import { UserOut } from '@app/client'
 
 export const Route = createFileRoute('/_layout/')({
   component: Dashboard,

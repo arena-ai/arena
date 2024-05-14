@@ -16,9 +16,9 @@ import {
 import { FiLogOut, FiMenu } from 'react-icons/fi'
 import { useQueryClient } from 'react-query'
 
-import Logo from '../../assets/images/logo.svg'
-import { UserOut } from '../../client'
-import useAuth from '../../hooks/useAuth'
+import Logo from '@app/assets/images/logo.svg'
+import { UserOut } from '@app/client'
+import useAuth from '@app/hooks/useAuth'
 import SidebarItems from './SidebarItems'
 
 const Sidebar: React.FC = () => {

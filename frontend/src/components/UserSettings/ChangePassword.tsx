@@ -13,8 +13,8 @@ import {
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { useMutation } from 'react-query'
 
-import { ApiError, UpdatePassword, UsersService } from '../../client'
-import useCustomToast from '../../hooks/useCustomToast'
+import { ApiError, UpdatePassword, UsersService } from '@app/client'
+import useCustomToast from '@app/hooks/useCustomToast'
 
 interface UpdatePasswordForm extends UpdatePassword {
   confirm_password: string

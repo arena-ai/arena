@@ -16,8 +16,8 @@ import {
 import { SubmitHandler, useForm } from 'react-hook-form'
 
 import { useMutation, useQueryClient } from 'react-query'
-import { ApiError, EventOut, EventUpdate, EventsService } from '../../client'
-import useCustomToast from '../../hooks/useCustomToast'
+import { ApiError, EventOut, EventUpdate, EventsService } from '@app/client'
+import useCustomToast from '@app/hooks/useCustomToast'
 
 interface EditEventProps {
   event: EventOut

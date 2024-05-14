@@ -16,10 +16,10 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from 'react-query'
 
-import { ApiError, UserOut, UsersService } from '../../client'
-import ActionsMenu from '../../components/Common/ActionsMenu'
-import Navbar from '../../components/Common/Navbar'
-import useCustomToast from '../../hooks/useCustomToast'
+import { ApiError, UserOut, UsersService } from '@app/client'
+import ActionsMenu from '@app/components/Common/ActionsMenu'
+import Navbar from '@app/components/Common/Navbar'
+import useCustomToast from '@app/hooks/useCustomToast'
 
 export const Route = createFileRoute('/_layout/admin')({
   component: Admin,

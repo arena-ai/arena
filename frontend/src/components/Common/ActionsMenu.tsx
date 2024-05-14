@@ -12,7 +12,7 @@ import { FiEdit, FiTrash } from 'react-icons/fi'
 
 import EditUser from '../Admin/EditUser'
 import Delete from './DeleteAlert'
-import { UserOut } from '../../client'
+import { UserOut } from '@app/client'
 
 interface ActionsMenuProps {
   type: string

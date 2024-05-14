@@ -42,6 +42,7 @@
     "openapi-typescript-codegen": "^0.25.0",
     "prettier": "3.2.5",
     "typescript": "^5.2.2",
-    "vite": "^5.0.12"
+    "vite": "^5.0.12",
+    "vite-tsconfig-paths": "^4.3.2"
   }
 }

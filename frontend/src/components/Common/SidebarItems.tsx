@@ -4,7 +4,7 @@ import { FiActivity, FiHome, FiSettings, FiUsers } from 'react-icons/fi'
 import { Link } from '@tanstack/react-router'
 import { useQueryClient } from 'react-query'
 
-import { UserOut } from '../../client'
+import { UserOut } from '@app/client'
 
 const items = [
   { icon: FiHome, title: 'Dashboard', path: '/' },

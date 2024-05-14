@@ -10,7 +10,7 @@ import {
 import { FaUserAstronaut } from 'react-icons/fa'
 import { FiLogOut, FiUser } from 'react-icons/fi'
 
-import useAuth from '../../hooks/useAuth'
+import useAuth from '@app/hooks/useAuth'
 import { Link } from '@tanstack/react-router'
 
 const UserMenu: React.FC = () => {

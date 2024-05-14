@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+## [0.1.51] - 2024-05-14
+
 ### Added
 
 - Added masking using presidio
@@ -19,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Underline the parent request
   - Wrap lines for the message representation
 - Added open user registration
+- Fixed the logo in dark mode
 
 ## [0.1.38] - 2024-05-02
 

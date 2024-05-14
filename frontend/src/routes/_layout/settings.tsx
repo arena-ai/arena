@@ -10,11 +10,11 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { useQueryClient } from 'react-query'
 
-import { UserOut } from '../../client'
-import Appearance from '../../components/UserSettings/Appearance'
-import ChangePassword from '../../components/UserSettings/ChangePassword'
-import DeleteAccount from '../../components/UserSettings/DeleteAccount'
-import UserInformation from '../../components/UserSettings/UserInformation'
+import { UserOut } from '@app/client'
+import Appearance from '@app/components/UserSettings/Appearance'
+import ChangePassword from '@app/components/UserSettings/ChangePassword'
+import DeleteAccount from '@app/components/UserSettings/DeleteAccount'
+import UserInformation from '@app/components/UserSettings/UserInformation'
 
 const tabsConfig = [
   { title: 'My profile', component: UserInformation },

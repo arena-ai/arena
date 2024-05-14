@@ -15,9 +15,9 @@ import {
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from 'react-query'
 
-import { ApiError, UserOut, UserUpdateMe, UsersService } from '../../client'
-import useAuth from '../../hooks/useAuth'
-import useCustomToast from '../../hooks/useCustomToast'
+import { ApiError, UserOut, UserUpdateMe, UsersService } from '@app/client'
+import useAuth from '@app/hooks/useAuth'
+import useCustomToast from '@app/hooks/useCustomToast'
 
 const UserInformation: React.FC = () => {
   const queryClient = useQueryClient()

@@ -11,8 +11,8 @@ import {
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from 'react-query'
 
-import { UsersService } from '../../client'
-import useCustomToast from '../../hooks/useCustomToast'
+import { UsersService } from '@app/client'
+import useCustomToast from '@app/hooks/useCustomToast'
 
 interface DeleteProps {
   type: string
