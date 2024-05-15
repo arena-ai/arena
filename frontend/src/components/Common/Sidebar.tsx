@@ -28,7 +28,7 @@ const Sidebar: React.FC = () => {
   const textColor = useColorModeValue('ui.dark', 'ui.white')
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
   const logo = useColorModeValue(LogoLight, LogoDark)
-  const currentUser = queryClient.getQueryData<UserOut>('currentUser')
+  const currentUser = queryClient.getQueryData<UserOut>(['currentUser'])
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { logout } = useAuth()
 
