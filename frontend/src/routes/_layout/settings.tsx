@@ -15,9 +15,11 @@ import Appearance from '@app/components/UserSettings/Appearance'
 import ChangePassword from '@app/components/UserSettings/ChangePassword'
 import DeleteAccount from '@app/components/UserSettings/DeleteAccount'
 import UserInformation from '@app/components/UserSettings/UserInformation'
+import { OpenaiApiToken } from '@app/components/UserSettings/LMSettings'
 
 const tabsConfig = [
   { title: 'My profile', component: UserInformation },
+  { title: 'Language Models', component: OpenaiApiToken },
   { title: 'Password', component: ChangePassword },
   { title: 'Appearance', component: Appearance },
   { title: 'Danger zone', component: DeleteAccount },
@@ -31,7 +33,7 @@ function UserSettings() {
   const queryClient = useQueryClient()
   const currentUser = queryClient.getQueryData<UserOut>(['currentUser'])
   const finalTabs = currentUser?.is_superuser
-    ? tabsConfig.slice(0, 3)
+    ? tabsConfig.slice(0, 4)
     : tabsConfig
 
   return (
