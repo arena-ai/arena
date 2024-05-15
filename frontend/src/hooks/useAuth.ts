@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
 import {
@@ -14,13 +14,11 @@ const isLoggedIn = () => {
 
 const useAuth = () => {
   const navigate = useNavigate()
-  const { data: user, isLoading } = useQuery<UserOut | null, Error>(
-    'currentUser',
-    UsersService.readUserMe,
-    {
-      enabled: isLoggedIn(),
-    },
-  )
+  const { data: user, isLoading } = useQuery<UserOut | null, Error>({
+    queryKey: ['currentUser'],
+    queryFn: UsersService.readUserMe,
+    enabled: isLoggedIn(),
+  })
 
   const login = async (data: AccessToken) => {
     const response = await LoginService.loginAccessToken({

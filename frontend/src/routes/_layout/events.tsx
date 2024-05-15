@@ -16,9 +16,10 @@ import {
   Box,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery } from 'react-query'
+import { useMemo } from 'react'
+import { useQuery, useQueries } from '@tanstack/react-query'
 
-import { ApiError, EventOut, EventsService } from '@app/client'
+import { ApiError, EventOut, EventsService, UserOut, UsersService } from '@app/client'
 import EventsSummary from '@app/components/Common/EventsSummary'
 import useCustomToast from '@app/hooks/useCustomToast'
 
@@ -71,7 +72,7 @@ function format_json(content: string) {
 
 // function format_user_id(id: number) {
 //   if (users) {
-//       const user = users.find((user) => user?.id===id);
+//       const user = UsersService.readUserById((user) => user?.id===id);
 //       return user?.full_name || user?.email || `${id}`;
 //   } else {
 //       return `${id}`;
@@ -80,13 +81,42 @@ function format_json(content: string) {
 
 function Events() {
   const showToast = useCustomToast()
+  // Pull events
   const {
     data: events,
     isLoading,
     isError,
     error,
-  } = useQuery('events', () => EventsService.readEvents({limit: 10000}))
+  } = useQuery({
+    queryKey: ['events'],
+    queryFn: () => EventsService.readEvents({limit: 10000}),
+  })
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
+  // Collect owner ids
+  const ownerIds = useMemo(() => {
+    const ownerIds = events ? events!.data.map(event => event.owner_id) : [];
+    return [...new Set(ownerIds)];
+    }, [events]);
+  // Get owners names
+  const {
+    data: owners,
+  } = useQueries({
+      queries: ownerIds.map(ownerId => ({
+        queryKey: ['user', ownerId],
+        queryFn: async (): Promise<[number, UserOut | undefined]> => [ownerId, await UsersService.readUserById({userId: ownerId})],
+      })),
+      combine: (results) => {
+        return {
+          data: results.reduce((map, result) => {
+            const [id, user] = result.data!;
+            map.set(id, user ? (user.full_name || user.email) : "Unknown");
+            return map;
+          }, new Map<number, string>()),
+          pending: results.some((result) => result.isPending),
+        }
+      },
+    });
+  console.log(owners);
 
   if (isError) {
     const errDetail = (error as ApiError).body?.detail
@@ -133,7 +163,7 @@ function Events() {
                         {format_event(event)}
                       </Td>
                       <Td w={32}>{event.parent_id}</Td>
-                      <Td w={32}>{event.owner_id}</Td>
+                      <Td w={32}>{owners.get(event.owner_id) || "Unknown"}</Td>
                     </Tr>
                   ))}
                 </Tbody>

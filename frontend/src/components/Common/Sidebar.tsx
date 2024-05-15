@@ -14,9 +14,10 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import { FiLogOut, FiMenu } from 'react-icons/fi'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 
-import Logo from '@app/assets/images/logo.svg'
+import LogoLight from '@app/assets/images/logo-light.svg'
+import LogoDark from '@app/assets/images/logo-dark.svg'
 import { UserOut } from '@app/client'
 import useAuth from '@app/hooks/useAuth'
 import SidebarItems from './SidebarItems'
@@ -26,6 +27,7 @@ const Sidebar: React.FC = () => {
   const bgColor = useColorModeValue('ui.white', 'ui.dark')
   const textColor = useColorModeValue('ui.dark', 'ui.white')
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
+  const logo = useColorModeValue(LogoLight, LogoDark)
   const currentUser = queryClient.getQueryData<UserOut>('currentUser')
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { logout } = useAuth()
@@ -53,7 +55,7 @@ const Sidebar: React.FC = () => {
           <DrawerBody py={8}>
             <Flex flexDir="column" justify="space-between">
               <Box>
-                <Image src={Logo} alt="logo" p={6} />
+                <Image src={logo} alt="logo" p={6}/>
                 <SidebarItems onClose={onClose} />
                 <Flex
                   as="button"
@@ -94,7 +96,7 @@ const Sidebar: React.FC = () => {
           borderRadius={12}
         >
           <Box>
-            <Image src={Logo} alt="Logo" w="180px" maxW="2xs" p={6} />
+            <Image src={logo} alt="Logo" w="180px" maxW="2xs" p={6} />
             <SidebarItems />
           </Box>
           {currentUser?.email && (

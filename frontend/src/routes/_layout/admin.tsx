@@ -14,7 +14,7 @@ import {
   Tr,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery, useQueryClient } from 'react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { ApiError, UserOut, UsersService } from '@app/client'
 import ActionsMenu from '@app/components/Common/ActionsMenu'

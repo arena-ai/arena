@@ -8,8 +8,8 @@ from arena.models import LMConfig
 # Load .env
 load_dotenv()
 
-# BASE_URL = "http://localhost/api/v1"
-BASE_URL = "https://arena.sarus.app/api/v1"
+BASE_URL = "http://localhost/api/v1"
+# BASE_URL = "https://arena.sarus.app/api/v1"
 
 def simple_chat_completion():
     print("\n[bold red]Simple OpenAI chat completion")
@@ -47,13 +47,13 @@ def decorated_chat_completion_with_user_eval():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
     arena = Client(user=user, password=password, base_url=BASE_URL)
     arena.decorate(OpenAI)
-    # arena.lm_config(lm_config=LMConfig(pii_removal="replace"))
+    arena.lm_config(lm_config=LMConfig(pii_removal="replace"))
     t = time()
     api_key = os.getenv("ARENA_OPENAI_API_KEY")
     client = OpenAI(api_key=api_key)
     resp = client.chat.completions.create(model="gpt-3.5-turbo", messages=[
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "What is the fastest animal on earth?"},
+        {"role": "user", "content": "Hey Oliver, what is the fastest animal on earth?"},
         ],
     )
     print(f"resp = {resp.choices[0].message.content} ({time()-t})")
@@ -73,6 +73,24 @@ def arena_chat_completion_with_eval():
         ],
         max_tokens=100,
         lm_config={"judge_evaluation": True},
+    )
+    print(f"resp = {resp.choices[0].message.content} ({time()-t})")
+    # Added this
+    arena.evaluation(resp.id, 0.98)
+
+def arena_chat_completion_with_pii_substitution():
+    print("\n[bold red]Arena chat completion with user eval")
+    user = os.getenv("FIRST_SUPERUSER")
+    password = os.getenv("FIRST_SUPERUSER_PASSWORD")
+    arena = Client(user=user, password=password, base_url=BASE_URL)
+    arena.anthropic_api_key(os.getenv("ARENA_ANTHROPIC_API_KEY"))
+    t = time()
+    resp = arena.chat_completions(model="claude-2.1", messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "I am John Doe, I'd like to know the fastest animal on earth. Call me on the 800 522 1000 if you know the answer."},
+        ],
+        max_tokens=100,
+        lm_config={"pii_removal": "replace"},
     )
     print(f"resp = {resp.choices[0].message.content} ({time()-t})")
     # Added this

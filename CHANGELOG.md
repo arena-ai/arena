@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
 
+<!-- TODO -->
+- Name users in the interface
+- Open subscriptions can be done with a GET request
+- Added a disclaimer about the API tokens uploaded (they should be short term)
+- Display Config in the UI
+
+### Fixed
+
+<!-- TODO -->
+- Fixed worker access to redis
+- Fixed PII substitution
 
 ## [0.1.51] - 2024-05-14
 

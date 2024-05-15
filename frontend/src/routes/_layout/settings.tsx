@@ -8,7 +8,7 @@ import {
   Tabs,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { UserOut } from '@app/client'
 import Appearance from '@app/components/UserSettings/Appearance'

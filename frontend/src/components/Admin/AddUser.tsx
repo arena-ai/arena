@@ -16,7 +16,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { UserCreate, UsersService } from '@app/client'
 import { ApiError } from '@app/client/core/ApiError'

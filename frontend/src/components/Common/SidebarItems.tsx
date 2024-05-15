@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Flex, Icon, Text, useColorModeValue } from '@chakra-ui/react'
 import { FiActivity, FiHome, FiSettings, FiUsers } from 'react-icons/fi'
 import { Link } from '@tanstack/react-router'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { UserOut } from '@app/client'
 

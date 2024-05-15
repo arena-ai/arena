@@ -9,7 +9,7 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { UsersService } from '@app/client'
 import useCustomToast from '@app/hooks/useCustomToast'

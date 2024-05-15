@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 
 import { ApiError, LoginService, NewPassword } from '../client'
 import { isLoggedIn } from '../hooks/useAuth'
@@ -55,7 +55,8 @@ function ResetPassword() {
     })
   }
 
-  const mutation = useMutation(resetPassword, {
+  const mutation = useMutation({
+    mutationFn: resetPassword,
     onSuccess: () => {
       showToast('Success!', 'Password updated.', 'success')
       reset()

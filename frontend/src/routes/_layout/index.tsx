@@ -1,5 +1,5 @@
 import { Box, Container, Text } from '@chakra-ui/react'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
 import { UserOut } from '@app/client'
