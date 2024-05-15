@@ -38,7 +38,8 @@ const Delete: React.FC<DeleteProps> = ({ type, id, isOpen, onClose }) => {
     }
   }
 
-  const mutation = useMutation(deleteEntity, {
+  const mutation = useMutation({
+    mutationFn: deleteEntity,
     onSuccess: () => {
       showToast(
         'Success',
@@ -55,7 +56,7 @@ const Delete: React.FC<DeleteProps> = ({ type, id, isOpen, onClose }) => {
       )
     },
     onSettled: () => {
-      queryClient.invalidateQueries(type === 'Item' ? 'items' : 'users')
+      queryClient.invalidateQueries({queryKey: [type === 'Item' ? 'items' : 'users']})
     },
   })
 

@@ -28,13 +28,16 @@ export const Route = createFileRoute('/_layout/admin')({
 function Admin() {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
-  const currentUser = queryClient.getQueryData<UserOut>('currentUser')
+  const currentUser = queryClient.getQueryData<UserOut>(['currentUser'])
   const {
     data: users,
     isLoading,
     isError,
     error,
-  } = useQuery('users', () => UsersService.readUsers({}))
+  } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => UsersService.readUsers({}),
+  })
 
   if (isError) {
     const errDetail = (error as ApiError).body?.detail

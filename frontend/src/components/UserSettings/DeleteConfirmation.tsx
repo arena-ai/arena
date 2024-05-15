@@ -28,14 +28,15 @@ const DeleteConfirmation: React.FC<DeleteProps> = ({ isOpen, onClose }) => {
     handleSubmit,
     formState: { isSubmitting },
   } = useForm()
-  const currentUser = queryClient.getQueryData<UserOut>('currentUser')
+  const currentUser = queryClient.getQueryData<UserOut>(['currentUser'])
   const { logout } = useAuth()
 
   const deleteCurrentUser = async (id: number) => {
     await UsersService.deleteUser({ userId: id })
   }
 
-  const mutation = useMutation(deleteCurrentUser, {
+  const mutation = useMutation({
+    mutationFn: deleteCurrentUser,
     onSuccess: () => {
       showToast(
         'Success',
@@ -50,7 +51,7 @@ const DeleteConfirmation: React.FC<DeleteProps> = ({ isOpen, onClose }) => {
       showToast('Something went wrong.', `${errDetail}`, 'error')
     },
     onSettled: () => {
-      queryClient.invalidateQueries('currentUser')
+      queryClient.invalidateQueries({queryKey: ['currentUser']})
     },
   })
 

@@ -51,7 +51,8 @@ const EditUser: React.FC<EditUserProps> = ({ user, isOpen, onClose }) => {
     await UsersService.updateUser({ userId: user.id, requestBody: data })
   }
 
-  const mutation = useMutation(updateUser, {
+  const mutation = useMutation({
+    mutationFn: updateUser,
     onSuccess: () => {
       showToast('Success!', 'User updated successfully.', 'success')
       onClose()
@@ -61,7 +62,7 @@ const EditUser: React.FC<EditUserProps> = ({ user, isOpen, onClose }) => {
       showToast('Something went wrong.', `${errDetail}`, 'error')
     },
     onSettled: () => {
-      queryClient.invalidateQueries('users')
+      queryClient.invalidateQueries({queryKey: ['users']})
     },
   })
 

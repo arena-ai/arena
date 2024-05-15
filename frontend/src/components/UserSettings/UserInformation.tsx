@@ -48,7 +48,8 @@ const UserInformation: React.FC = () => {
     await UsersService.updateUserMe({ requestBody: data })
   }
 
-  const mutation = useMutation(updateInfo, {
+  const mutation = useMutation({
+    mutationFn: updateInfo,
     onSuccess: () => {
       showToast('Success!', 'User updated successfully.', 'success')
     },
@@ -57,8 +58,8 @@ const UserInformation: React.FC = () => {
       showToast('Something went wrong.', `${errDetail}`, 'error')
     },
     onSettled: () => {
-      queryClient.invalidateQueries('users')
-      queryClient.invalidateQueries('currentUser')
+      queryClient.invalidateQueries({queryKey: ['users']})
+      queryClient.invalidateQueries({queryKey: ['currentUser']})
     },
   })
 

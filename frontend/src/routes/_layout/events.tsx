@@ -31,7 +31,7 @@ function format_event(e: EventOut) {
   try {
     if (e.name === "request" || e.name === "modified_request") {
       return format_chat_request(JSON.parse(e.content));
-    } else if (e.name === "response") {
+    } else if (e.name === "response" || e.name === "modified_response") {
       return format_chat_response(JSON.parse(e.content));
     } else if (e.name === "user_evaluation" || e.name === "lm_judge_evaluation") {
       return format_evaluation(JSON.parse(e.content));
@@ -108,8 +108,10 @@ function Events() {
       combine: (results) => {
         return {
           data: results.reduce((map, result) => {
-            const [id, user] = result.data!;
-            map.set(id, user ? (user.full_name || user.email) : "Unknown");
+            if (result.data) {
+              const [id, user] = result.data;
+              map.set(id, user ? (user.full_name || user.email) : "Unknown");
+            }
             return map;
           }, new Map<number, string>()),
           pending: results.some((result) => result.isPending),

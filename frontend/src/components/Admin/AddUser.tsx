@@ -57,7 +57,8 @@ const AddUser: React.FC<AddUserProps> = ({ isOpen, onClose }) => {
     await UsersService.createUser({ requestBody: data })
   }
 
-  const mutation = useMutation(addUser, {
+  const mutation = useMutation({
+    mutationFn: addUser,
     onSuccess: () => {
       showToast('Success!', 'User created successfully.', 'success')
       reset()
@@ -68,7 +69,7 @@ const AddUser: React.FC<AddUserProps> = ({ isOpen, onClose }) => {
       showToast('Something went wrong.', `${errDetail}`, 'error')
     },
     onSettled: () => {
-      queryClient.invalidateQueries('users')
+      queryClient.invalidateQueries({queryKey: ['users']})
     },
   })
 

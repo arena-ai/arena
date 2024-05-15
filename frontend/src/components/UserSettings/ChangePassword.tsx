@@ -38,7 +38,8 @@ const ChangePassword: React.FC = () => {
     await UsersService.updatePasswordMe({ requestBody: data })
   }
 
-  const mutation = useMutation(UpdatePassword, {
+  const mutation = useMutation({
+    mutationFn: UpdatePassword,
     onSuccess: () => {
       showToast('Success!', 'Password updated.', 'success')
       reset()

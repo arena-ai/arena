@@ -45,7 +45,8 @@ const EditEvent: React.FC<EditEventProps> = ({ event: event, isOpen, onClose }) 
     await EventsService.updateEvent({ id: event.id, requestBody: data })
   }
 
-  const mutation = useMutation(updateEvent, {
+  const mutation = useMutation({
+    mutationFn: updateEvent,
     onSuccess: () => {
       showToast('Success!', 'Item updated successfully.', 'success')
       onClose()
@@ -55,7 +56,7 @@ const EditEvent: React.FC<EditEventProps> = ({ event: event, isOpen, onClose }) 
       showToast('Something went wrong.', `${errDetail}`, 'error')
     },
     onSettled: () => {
-      queryClient.invalidateQueries('items')
+      queryClient.invalidateQueries({queryKey: ['items']})
     },
   })
 
