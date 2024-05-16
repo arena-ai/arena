@@ -1,6 +1,6 @@
 from typing import Optional, Literal
 from datetime import datetime
-from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func
+from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func, Column, Integer, ForeignKey
 
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
@@ -144,8 +144,8 @@ class EventUpdate(EventBase):
 class Event(EventBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     timestamp: datetime | None =  Field(default=func.now())
-    owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
-    parent_id: int | None = Field(index=True, foreign_key="event.id")
+    owner_id: int | None = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), default=None, nullable=False))
+    parent_id: int | None = Field(sa_column=Column(Integer, ForeignKey("event.id", ondelete="CASCADE"), index=True))
     owner: User | None = Relationship(back_populates="events")
     parent: Optional["Event"] = Relationship(back_populates="children", sa_relationship_kwargs={"remote_side": lambda: Event.id})
     children: list["Event"] = Relationship(back_populates="parent")
@@ -168,7 +168,7 @@ class EventsOut(SQLModel):
 # Database model, database table inferred from class name
 class EventIdentifier(SQLModel, table=True):
     id: str | None = Field(default=None, primary_key=True)
-    event_id: int | None = Field(default=None, foreign_key="event.id", nullable=False)
+    event_id: int | None = Field(sa_column=Column(Integer, ForeignKey("event.id", ondelete="CASCADE"), default=None, nullable=False))
     event: Event = Relationship(back_populates="identifiers")
 
 
@@ -193,8 +193,8 @@ class EventAttributeCreate(EventAttributeBase):
 class EventAttribute(EventAttributeBase, table=True):
     __table_args__ = (UniqueConstraint("event_id", "attribute_id"), )
     id: int | None = Field(default=None, primary_key=True)
-    event_id: int | None = Field(default=None, foreign_key="event.id", nullable=False)
-    attribute_id: int | None = Field(default=None, foreign_key="attribute.id", nullable=False)
+    event_id: int | None = Field(sa_column=Column(Integer, ForeignKey("event.id", ondelete="CASCADE"), default=None, nullable=False))
+    attribute_id: int | None = Field(sa_column=Column(Integer, ForeignKey("attribute.id", ondelete="CASCADE"), default=None, nullable=False))
     value: str | None = Field(default=None)
     event: Event = Relationship(back_populates="attributes")
     attribute: "Attribute" = Relationship(back_populates="events")

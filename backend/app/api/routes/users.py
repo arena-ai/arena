@@ -2,7 +2,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-from sqlmodel import col, delete, func, select
+from sqlmodel import func, select
 
 from app import crud
 from app.api.deps import (
@@ -22,7 +22,6 @@ from app.models import (
     UsersOut,
     UserUpdate,
     UserUpdateMe,
-    Event,
 )
 from app.utils import generate_new_account_email, send_email
 
@@ -233,9 +232,6 @@ def delete_user(
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-
-    statement = delete(Event).where(col(Event.owner_id) == user_id)
-    session.exec(statement)  # type: ignore
     session.delete(user)
     session.commit()
     return Message(message="User deleted successfully")
