@@ -119,8 +119,8 @@ const LMTextSetting: React.FC<{title: string; setting: SettingCreate['name']}> =
   )
 }
 
-interface LLMConfig {
-  pii_removal: "masking" | "replace" | undefined;
+interface LMConfig {
+  pii_removal: "masking" | "replace" | "undefined" | undefined;
   judge_evaluation: boolean;
 }
 
@@ -133,14 +133,12 @@ const LMConfigSetting: React.FC = () => {
     queryKey: [key],
     queryFn: () => SettingsService.readSetting({ name: key })
   })
-  const currentConfig: LLMConfig = currentSetting ? JSON.parse(currentSetting.content) : {pii_removal: undefined, judge_evaluation: false}
+  const currentConfig: LMConfig = currentSetting ? JSON.parse(currentSetting.content) : {pii_removal: undefined, judge_evaluation: false}
   const {
     register,
     handleSubmit,
-    reset,
-    getValues,
     formState: { isSubmitting, isDirty },
-  } = useForm<LLMConfig>({
+  } = useForm<LMConfig>({
     mode: 'onBlur',
     criteriaMode: 'all',
     defaultValues: currentConfig,
@@ -160,54 +158,62 @@ const LMConfigSetting: React.FC = () => {
       showToast('Something went wrong.', `${errDetail}`, 'error')
     },
     onSettled: () => {
-      queryClient.invalidateQueries({queryKey: ['settings']})
+      queryClient.invalidateQueries({queryKey: [key]})
     },
   })
 
-  const onSubmit: SubmitHandler<SettingCreate> = async (data) => {
-    mutation.mutate(data)
+  const onSubmit: SubmitHandler<LMConfig> = async (data) => {
+    if (data.pii_removal == "undefined") {
+      data.pii_removal = undefined
+    }
+    mutation.mutate({name: key, content: JSON.stringify(data)})
   }
-
-  return (
+  console.log("Bazinga")
+  console.log(currentConfig)
+  console.log(currentConfig?.pii_removal ? currentConfig?.pii_removal : "masking")
+  
+  return (currentSetting ? 
     <Box py={4} maxW={{ sm: 'full', md: '50%' }} as="form" onSubmit={handleSubmit(onSubmit)}>
       <FormControl>
-        <Flex gap={8}>
-          <Box w="30%">
-            <FormLabel color={color} htmlFor="name">
-              PII removal
-            </FormLabel>
-            <Select
-              id="pii_removal"
-              {...register('pii_removal')}
-              size="md"
-            >
-              <option value={undefined}>No</option>
-              <option value="masking">PII removal by masking</option>
-              <option value="replace">PII removal with replacement</option>
-            </Select>
-          </Box>
-          <Box w="40%">
-            <FormLabel color={color} htmlFor="name">
-              LLM as a judge
-            </FormLabel>
-            <Checkbox
-              id="judge_evaluation"
-              {...register('judge_evaluation')}
-              size="md"
-            >Enable LLM-as-a-Judge evaluation</Checkbox>
-          </Box>
-        </Flex>
+        <Box>
+          <FormLabel color={color} htmlFor="name">
+            PII removal
+          </FormLabel>
+          <Select
+            id="pii_removal"
+            {...register('pii_removal')}
+            size="md"
+            defaultValue={currentConfig?.pii_removal ? currentConfig?.pii_removal : "masking"}
+          >
+            <option value="undefined">No</option>
+            <option value="masking">PII removal by masking</option>
+            <option value="replace">PII removal with replacement</option>
+          </Select>
+        </Box>
+        <Box mt={4}>
+          <FormLabel color={color} htmlFor="name">
+            LLM as a judge
+          </FormLabel>
+          <Checkbox
+            id="judge_evaluation"
+            {...register('judge_evaluation')}
+            size="md"
+            defaultChecked={currentConfig.judge_evaluation}
+          >Enable LLM-as-a-Judge evaluation</Checkbox>
+        </Box>
       </FormControl>
       <Flex mt={4} gap={3}>
         <Button
           size="sm"
           variant="primary"
-          isDisabled={false}
+          type='submit'
+          isLoading={isSubmitting}
+          isDisabled={!isDirty}
         >
           Submit
         </Button>
       </Flex>
-    </Box>
+    </Box> : <></>
   )
 }
 
