@@ -19,8 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 <!-- TODO -->
-- Fixed worker access to redis
+- Fixed worker access to redis (after a failure the worker does not restart)
 - Fixed PII substitution
+- Fixed delete cascading as https://github.com/tiangolo/sqlmodel/issues/213#issuecomment-1013425005
 
 ## [0.1.51] - 2024-05-14
 
