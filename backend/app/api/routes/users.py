@@ -1,6 +1,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 from sqlmodel import col, delete, func, select
 
 from app import crud
@@ -143,7 +144,7 @@ def create_user_open(session: SessionDep, user_in: UserCreateOpen) -> Any:
     return user
 
 
-@router.get("/open", response_model=UserOut)
+@router.get("/open", response_class=RedirectResponse)
 def create_user_open_get(session: SessionDep, email: str, password: str, full_name: str | None) -> Any:
     """
     Create new user without the need to be logged in.
@@ -161,7 +162,7 @@ def create_user_open_get(session: SessionDep, email: str, password: str, full_na
         )
     user_create = UserCreate.model_validate(UserCreateOpen(email=email, password=password, full_name=full_name))
     user = crud.create_user(session=session, user_create=user_create)
-    return user
+    return "/"
 
 
 @router.get("/{user_id}", response_model=UserOut)

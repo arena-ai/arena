@@ -190,7 +190,7 @@ const LMConfigSetting: React.FC = () => {
             <option value="replace">PII removal with replacement</option>
           </Select>
         </Box>
-        <Box mt={4}>
+        <Box my={4}>
           <FormLabel color={color} htmlFor="name">
             LLM as a judge
           </FormLabel>
