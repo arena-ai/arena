@@ -183,7 +183,7 @@ const LMConfigSetting: React.FC = () => {
             id="pii_removal"
             {...register('pii_removal')}
             size="md"
-            defaultValue={currentConfig?.pii_removal ? currentConfig?.pii_removal : "masking"}
+            defaultValue={currentConfig.pii_removal ? currentConfig.pii_removal : "masking"}
           >
             <option value="undefined">No</option>
             <option value="masking">PII removal by masking</option>
@@ -213,7 +213,45 @@ const LMConfigSetting: React.FC = () => {
           Submit
         </Button>
       </Flex>
-    </Box> : <></>
+    </Box> : <Box py={4} maxW={{ sm: 'full', md: '50%' }} as="form" onSubmit={handleSubmit(onSubmit)}>
+      <FormControl>
+        <Box>
+          <FormLabel color={color} htmlFor="name">
+            PII removal
+          </FormLabel>
+          <Select
+            id="pii_removal"
+            {...register('pii_removal')}
+            size="md"
+          >
+            <option value="undefined">No</option>
+            <option value="masking">PII removal by masking</option>
+            <option value="replace">PII removal with replacement</option>
+          </Select>
+        </Box>
+        <Box my={4}>
+          <FormLabel color={color} htmlFor="name">
+            LLM as a judge
+          </FormLabel>
+          <Checkbox
+            id="judge_evaluation"
+            {...register('judge_evaluation')}
+            size="md"
+          >Enable LLM-as-a-Judge evaluation</Checkbox>
+        </Box>
+      </FormControl>
+      <Flex mt={4} gap={3}>
+        <Button
+          size="sm"
+          variant="primary"
+          type='submit'
+          isLoading={isSubmitting}
+          isDisabled={!isDirty}
+        >
+          Submit
+        </Button>
+      </Flex>
+    </Box>
   )
 }
 
