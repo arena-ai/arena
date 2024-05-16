@@ -219,7 +219,6 @@ async def chat_completion_request(
 async def chat_completion_response(
     session_dep: SessionDep, current_user: CurrentUser, chat_completion_request_event_response: ChatCompletionRequestEventResponse
 ) -> EventOut:
-    print(f"\nDEBUG chat_completion_request_event_response {chat_completion_request_event_response}\n")
     ses = session()
     usr = user(ses, current_user.id)
     request_event = event(ses, chat_completion_request_event_response.request_event_id)

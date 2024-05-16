@@ -2,8 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $app__lm__models__openai__ChatCompletionResponse = {
-    description: `https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion.py#L40`,
+export const $app__lm__models__chat_completion__ChatCompletionResponse_Input = {
+    description: `Maps to:
+    https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion.py#L40
+    https://github.com/mistralai/client-python/blob/main/src/mistralai/models/chat_completion.py#L86
+    https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message.py#L14`,
     properties: {
         id: {
             type: 'string',
@@ -12,7 +15,7 @@ export const $app__lm__models__openai__ChatCompletionResponse = {
         choices: {
             type: 'array',
             contains: {
-                type: 'Choice_Output',
+                type: 'Choice_Input',
             },
             isRequired: true,
         },
@@ -52,10 +55,10 @@ export const $app__lm__models__openai__ChatCompletionResponse = {
                 type: 'null',
             }],
         },
-        arena_parameters: {
+        lm_config: {
             type: 'any-of',
             contains: [{
-                type: 'ArenaParameters',
+                type: 'LMConfig',
             }, {
                 type: 'null',
             }],

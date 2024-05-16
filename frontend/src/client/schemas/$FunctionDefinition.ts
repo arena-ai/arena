@@ -2,22 +2,26 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $CompletionUsage_Input = {
+export const $FunctionDefinition = {
     properties: {
-        completion_tokens: {
+        name: {
+            type: 'string',
+            isRequired: true,
+        },
+        description: {
             type: 'any-of',
             contains: [{
-                type: 'number',
+                type: 'string',
             }, {
                 type: 'null',
             }],
         },
-        prompt_tokens: {
-            type: 'number',
-            isRequired: true,
-        },
-        total_tokens: {
-            type: 'number',
+        input_schema: {
+            type: 'dictionary',
+            contains: {
+                properties: {
+                },
+            },
             isRequired: true,
         },
     },

@@ -2,11 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $app__lm__models__chat_completion__ChatCompletionResponse_Output = {
-    description: `Maps to:
-    https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion.py#L40
-    https://github.com/mistralai/client-python/blob/main/src/mistralai/models/chat_completion.py#L86
-    https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message.py#L14`,
+export const $app__lm__models__mistral__ChatCompletionResponse_Input = {
+    description: `https://github.com/mistralai/client-python/blob/main/src/mistralai/models/chat_completion.py#L86`,
     properties: {
         id: {
             type: 'string',
@@ -15,7 +12,7 @@ export const $app__lm__models__chat_completion__ChatCompletionResponse_Output = 
         choices: {
             type: 'array',
             contains: {
-                type: 'Choice_Output',
+                type: 'Choice_Input',
             },
             isRequired: true,
         },

@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ChatCompletionRequest = {
+export const $app__lm__models__chat_completion__ChatCompletionRequest = {
     description: `Maps to:
     https://github.com/openai/openai-python/blob/main/src/openai/types/chat/completion_create_params.py#L24
     https://github.com/mistralai/client-python/blob/main/src/mistralai/client.py#L153
@@ -174,10 +174,10 @@ export const $ChatCompletionRequest = {
                 type: 'null',
             }],
         },
-        arena_parameters: {
+        lm_config: {
             type: 'any-of',
             contains: [{
-                type: 'ArenaParameters',
+                type: 'LMConfig',
             }, {
                 type: 'null',
             }],

@@ -3,12 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { app__lm__models__anthropic__ChatCompletionResponse } from '../models/app__lm__models__anthropic__ChatCompletionResponse';
+import type { app__lm__models__chat_completion__ChatCompletionRequest } from '../models/app__lm__models__chat_completion__ChatCompletionRequest';
 import type { app__lm__models__chat_completion__ChatCompletionResponse_Output } from '../models/app__lm__models__chat_completion__ChatCompletionResponse_Output';
-import type { app__lm__models__mistral__ChatCompletionResponse } from '../models/app__lm__models__mistral__ChatCompletionResponse';
-import type { app__lm__models__openai__ChatCompletionResponse } from '../models/app__lm__models__openai__ChatCompletionResponse';
-import type { Body_language_models_chat_completion_chat_completion_response } from '../models/Body_language_models_chat_completion_chat_completion_response';
-import type { ChatCompletionRequest } from '../models/ChatCompletionRequest';
-import type { Event } from '../models/Event';
+import type { app__lm__models__mistral__ChatCompletionResponse_Output } from '../models/app__lm__models__mistral__ChatCompletionResponse_Output';
+import type { app__lm__models__openai__ChatCompletionResponse_Output } from '../models/app__lm__models__openai__ChatCompletionResponse_Output';
+import type { ChatCompletionRequestEventResponse } from '../models/ChatCompletionRequestEventResponse';
+import type { EventOut } from '../models/EventOut';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -19,14 +19,14 @@ export class LanguageModelsChatCompletionService {
     /**
      * Openai Chat Completion
      * OpenAI integration
-     * @returns app__lm__models__openai__ChatCompletionResponse Successful Response
+     * @returns app__lm__models__openai__ChatCompletionResponse_Output Successful Response
      * @throws ApiError
      */
     public static openaiChatCompletion({
         requestBody,
     }: {
         requestBody: Record<string, any>,
-    }): CancelablePromise<app__lm__models__openai__ChatCompletionResponse> {
+    }): CancelablePromise<app__lm__models__openai__ChatCompletionResponse_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/lm/openai/chat/completions',
@@ -41,14 +41,14 @@ export class LanguageModelsChatCompletionService {
     /**
      * Mistral Chat Completion
      * Mistral integration
-     * @returns app__lm__models__mistral__ChatCompletionResponse Successful Response
+     * @returns app__lm__models__mistral__ChatCompletionResponse_Output Successful Response
      * @throws ApiError
      */
     public static mistralChatCompletion({
         requestBody,
     }: {
         requestBody: Record<string, any>,
-    }): CancelablePromise<app__lm__models__mistral__ChatCompletionResponse> {
+    }): CancelablePromise<app__lm__models__mistral__ChatCompletionResponse_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/lm/mistral/v1/chat/completions',
@@ -91,7 +91,7 @@ export class LanguageModelsChatCompletionService {
     public static chatCompletion({
         requestBody,
     }: {
-        requestBody: ChatCompletionRequest,
+        requestBody: app__lm__models__chat_completion__ChatCompletionRequest,
     }): CancelablePromise<app__lm__models__chat_completion__ChatCompletionResponse_Output> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -106,14 +106,14 @@ export class LanguageModelsChatCompletionService {
 
     /**
      * Chat Completion Request
-     * @returns Event Successful Response
+     * @returns EventOut Successful Response
      * @throws ApiError
      */
     public static chatCompletionRequest({
         requestBody,
     }: {
-        requestBody: ChatCompletionRequest,
-    }): CancelablePromise<Event> {
+        requestBody: app__lm__models__chat_completion__ChatCompletionRequest,
+    }): CancelablePromise<EventOut> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/lm/chat/completions/request',
@@ -127,17 +127,17 @@ export class LanguageModelsChatCompletionService {
 
     /**
      * Chat Completion Response
-     * @returns Event Successful Response
+     * @returns EventOut Successful Response
      * @throws ApiError
      */
     public static chatCompletionResponse({
         requestBody,
     }: {
-        requestBody: Body_language_models_chat_completion_chat_completion_response,
-    }): CancelablePromise<Event> {
+        requestBody: ChatCompletionRequestEventResponse,
+    }): CancelablePromise<EventOut> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/lm/chat/completions/response/{request_event_id}',
+            url: '/api/v1/lm/chat/completions/response',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

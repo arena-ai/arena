@@ -94,6 +94,7 @@ class SettingCreate(SettingBase):
         "OPENAI_API_KEY",
         "MISTRAL_API_KEY",
         "ANTHROPIC_API_KEY",
+        "LM_CONFIG",
     ]
     content: str
 

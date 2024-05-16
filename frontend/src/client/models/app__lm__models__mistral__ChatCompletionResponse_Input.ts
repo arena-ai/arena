@@ -4,18 +4,15 @@
 /* eslint-disable */
 
 import type { app__lm__models__chat_completion__CompletionUsage } from './app__lm__models__chat_completion__CompletionUsage';
-import type { Choice_Output } from './Choice_Output';
+import type { Choice_Input } from './Choice_Input';
 import type { LMConfig } from './LMConfig';
 
 /**
- * Maps to:
- * https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion.py#L40
  * https://github.com/mistralai/client-python/blob/main/src/mistralai/models/chat_completion.py#L86
- * https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message.py#L14
  */
-export type app__lm__models__chat_completion__ChatCompletionResponse_Output = {
+export type app__lm__models__mistral__ChatCompletionResponse_Input = {
     id: string;
-    choices: Array<Choice_Output>;
+    choices: Array<Choice_Input>;
     created?: (number | null);
     model: string;
     object?: ('chat.completion' | null);

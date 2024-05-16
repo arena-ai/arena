@@ -3,21 +3,18 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ArenaParameters } from './ArenaParameters';
 import type { ChatCompletionToolParam } from './ChatCompletionToolParam';
+import type { LMConfig } from './LMConfig';
 import type { Message_Input } from './Message_Input';
 import type { ResponseFormat } from './ResponseFormat';
 
 /**
- * Maps to:
  * https://github.com/openai/openai-python/blob/main/src/openai/types/chat/completion_create_params.py#L24
- * https://github.com/mistralai/client-python/blob/main/src/mistralai/client.py#L153
- * https://github.com/mistralai/client-python/blob/main/src/mistralai/models/chat_completion.py
- * https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message_create_params.py#L13
+ * https://platform.openai.com/docs/api-reference/chat
  */
-export type ChatCompletionRequest = {
+export type app__lm__models__openai__ChatCompletionRequest = {
     messages: Array<Message_Input>;
-    model: (string | null);
+    model: (string | 'gpt-4-turbo' | 'gpt-4-turbo-2024-04-09' | 'gpt-4-0125-preview' | 'gpt-4-turbo-preview' | 'gpt-4-1106-preview' | 'gpt-4-vision-preview' | 'gpt-4' | 'gpt-4-0314' | 'gpt-4-0613' | 'gpt-4-32k' | 'gpt-4-32k-0314' | 'gpt-4-32k-0613' | 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-3.5-turbo-0301' | 'gpt-3.5-turbo-0613' | 'gpt-3.5-turbo-1106' | 'gpt-3.5-turbo-0125' | 'gpt-3.5-turbo-16k-0613');
     frequency_penalty?: (number | null);
     logit_bias?: (Record<string, number> | null);
     logprobs?: (boolean | null);
@@ -35,6 +32,6 @@ export type ChatCompletionRequest = {
     top_p?: (number | null);
     user?: (string | null);
     stream?: (boolean | null);
-    arena_parameters?: (ArenaParameters | null);
+    lm_config?: (LMConfig | null);
 };
 

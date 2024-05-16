@@ -3,9 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type CompletionUsage_Input = {
-    completion_tokens?: (number | null);
-    prompt_tokens: number;
-    total_tokens: number;
+export type LMConfig = {
+    pii_removal?: ('masking' | 'replace' | null);
+    judge_evaluation?: boolean;
 };
 

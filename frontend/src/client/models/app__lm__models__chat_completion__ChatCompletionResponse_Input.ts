@@ -3,9 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ArenaParameters } from './ArenaParameters';
+import type { app__lm__models__chat_completion__CompletionUsage } from './app__lm__models__chat_completion__CompletionUsage';
 import type { Choice_Input } from './Choice_Input';
-import type { CompletionUsage_Input } from './CompletionUsage_Input';
+import type { LMConfig } from './LMConfig';
 
 /**
  * Maps to:
@@ -13,14 +13,14 @@ import type { CompletionUsage_Input } from './CompletionUsage_Input';
  * https://github.com/mistralai/client-python/blob/main/src/mistralai/models/chat_completion.py#L86
  * https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message.py#L14
  */
-export type ChatCompletionResponse_Input = {
+export type app__lm__models__chat_completion__ChatCompletionResponse_Input = {
     id: string;
     choices: Array<Choice_Input>;
     created?: (number | null);
     model: string;
     object?: ('chat.completion' | null);
     system_fingerprint?: (string | null);
-    usage?: (CompletionUsage_Input | null);
-    arena_parameters?: (ArenaParameters | null);
+    usage?: (app__lm__models__chat_completion__CompletionUsage | null);
+    lm_config?: (LMConfig | null);
 };
 

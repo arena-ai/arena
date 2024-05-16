@@ -10,10 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Name users in the interface
-<!-- TODO -->
-- Open subscriptions can be done with a GET request
-- Added a disclaimer about the API tokens uploaded (they should be short term)
 - Display Config in the UI
+- Open subscriptions can be done with a GET request
+<!-- TODO -->
+- Added a disclaimer about the API tokens uploaded (they should be short term)
 - Added the possibility to push some ground truth response
 
 ### Fixed

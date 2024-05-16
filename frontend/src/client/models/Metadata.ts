@@ -3,8 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type ArenaParameters = {
-    pii_filter?: boolean;
-    judge_evaluation?: boolean;
+export type Metadata = {
+    user_id: string;
 };
 

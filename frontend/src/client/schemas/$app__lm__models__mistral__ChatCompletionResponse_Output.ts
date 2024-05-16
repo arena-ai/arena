@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $app__lm__models__mistral__ChatCompletionResponse = {
+export const $app__lm__models__mistral__ChatCompletionResponse_Output = {
     description: `https://github.com/mistralai/client-python/blob/main/src/mistralai/models/chat_completion.py#L86`,
     properties: {
         id: {
@@ -52,10 +52,10 @@ export const $app__lm__models__mistral__ChatCompletionResponse = {
                 type: 'null',
             }],
         },
-        arena_parameters: {
+        lm_config: {
             type: 'any-of',
             contains: [{
-                type: 'ArenaParameters',
+                type: 'LMConfig',
             }, {
                 type: 'null',
             }],

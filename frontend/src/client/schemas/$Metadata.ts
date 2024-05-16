@@ -2,13 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ArenaParameters = {
+export const $Metadata = {
     properties: {
-        pii_filter: {
-            type: 'boolean',
-        },
-        judge_evaluation: {
-            type: 'boolean',
+        user_id: {
+            type: 'string',
+            isRequired: true,
         },
     },
 } as const;

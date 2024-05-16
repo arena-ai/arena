@@ -145,6 +145,35 @@ export class UsersService {
     }
 
     /**
+     * Create User Open Get
+     * Create new user without the need to be logged in.
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static createUserOpenGet({
+        email,
+        password,
+        fullName,
+    }: {
+        email: string,
+        password: string,
+        fullName: (string | null),
+    }): CancelablePromise<UserOut> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/users/open',
+            query: {
+                'email': email,
+                'password': password,
+                'full_name': fullName,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Read User By Id
      * Get a specific user by id.
      * @returns UserOut Successful Response
