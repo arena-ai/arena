@@ -8,8 +8,8 @@ from arena.models import LMConfig
 # Load .env
 load_dotenv()
 
-BASE_URL = "http://localhost/api/v1"
-# BASE_URL = "https://arena.sarus.app/api/v1"
+# BASE_URL = "http://localhost/api/v1"
+BASE_URL = "https://arena.sarus.app/api/v1"
 
 def simple_chat_completion():
     print("\n[bold red]Simple OpenAI chat completion")
@@ -98,8 +98,8 @@ def arena_chat_completion_with_pii_substitution():
 
 def arena_chat_completion_with_eval_from_test():
     print("\n[bold red]Arena chat completion with user eval from test")
-    user = "test@sarus.tech"
-    password = "password"
+    user = "nicolas.grislain@gmail.com"
+    password = "test"
     arena = Client(user=user, password=password, base_url=BASE_URL)
     arena.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
     arena.mistral_api_key(os.getenv("ARENA_MISTRAL_API_KEY"))
