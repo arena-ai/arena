@@ -16,12 +16,15 @@ app = Celery(__name__,
             )
 
 
-@app.task
+@app.task(autoretry_for = (Exception,), max_retries = 3, retry_backoff = True)
 def evaluate(computation: Computation):
-    with Session(engine) as session:
-        #  Define the evaluation method
-        async def evaluate_with_context():
-            return await computation.evaluate(session=session)
-        # Run the evaluation
-        result = run(evaluate_with_context)
-    return result
+    try:
+        with Session(engine) as session:
+            #  Define the evaluation method
+            async def evaluate_with_context():
+                return await computation.evaluate(session=session)
+            # Run the evaluation
+            result = run(evaluate_with_context)
+        return result
+    except Exception as e:
+        raise e

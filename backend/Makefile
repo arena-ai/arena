@@ -1,4 +1,5 @@
-IMAGE_NAME=arena_backend
+include ../.env
+IMAGE_NAME=${DOCKER_IMAGE_BACKEND}
 TAG=latest
 REGISTRY=sarus.azurecr.io
 
