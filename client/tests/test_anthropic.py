@@ -23,7 +23,7 @@ def test_instrumented_chat():
     api_key = os.getenv("ARENA_ANTHROPIC_API_KEY")
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
-    arena = Client(user=user, password=password, base_url=BASE_URL)
+    arena = Client(username=user, password=password, base_url=BASE_URL)
     arena.decorate(AnthropicClient, mode="instrument")
 
     client = AnthropicClient(api_key=api_key)

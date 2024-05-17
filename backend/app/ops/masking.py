@@ -24,28 +24,28 @@ class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     fake: Faker = Field(exclude=True, default_factory=lambda: Faker())
 
-    def replace_person(self, person: str) -> str:
-        self.fake.seed_instance(hash(person))
+    def replace_person(self, person: str, salt: str = "") -> str:
+        self.fake.seed_instance(hash(person+salt))
         return self.fake.name()
 
-    def replace_phone_number(self, phone_number: str) -> str:
-        self.fake.seed_instance(hash(phone_number))
+    def replace_phone_number(self, phone_number: str, salt: str = "") -> str:
+        self.fake.seed_instance(hash(phone_number+salt))
         return self.fake.phone_number()
 
-    def replace_address(self, phone_number: str) -> str:
-        self.fake.seed_instance(hash(phone_number))
+    def replace_address(self, address: str, salt: str = "") -> str:
+        self.fake.seed_instance(hash(address+salt))
         return self.fake.address()
 
-    def replace_credit_card(self, phone_number: str) -> str:
-        self.fake.seed_instance(hash(phone_number))
+    def replace_credit_card(self, credit_card: str, salt: str = "") -> str:
+        self.fake.seed_instance(hash(credit_card+salt))
         return self.fake.credit_card_number()
 
-    def replace_email_address(self, phone_number: str) -> str:
-        self.fake.seed_instance(hash(phone_number))
+    def replace_email_address(self, email_address: str, salt: str = "") -> str:
+        self.fake.seed_instance(hash(email_address+salt))
         return self.fake.email()
 
-    def replace_iban_code(self, phone_number: str) -> str:
-        self.fake.seed_instance(hash(phone_number))
+    def replace_iban_code(self, iban_code: str, salt: str = "") -> str:
+        self.fake.seed_instance(hash(iban_code+salt))
         return self.fake.iban()
 
     async def call(self, input: str) -> tuple[str, Mapping[str, str]]:
@@ -69,17 +69,17 @@ class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
         for item in anonymized.items:
             # Compute a replacement value
             if item.entity_type == "PERSON":
-                replacement = self.replace_person(item.text)
+                replacement = self.replace_person(item.text, input)
             elif item.entity_type == "PHONE_NUMBER":
-                replacement = self.replace_person(item.text)
+                replacement = self.replace_person(item.text, input)
             elif item.entity_type == "LOCATION":
-                replacement = self.replace_address(item.text)
+                replacement = self.replace_address(item.text, input)
             elif item.entity_type == "CREDIT_CARD":
-                replacement = self.replace_credit_card(item.text)
+                replacement = self.replace_credit_card(item.text, input)
             elif item.entity_type == "EMAIL_ADDRESS":
-                replacement = self.replace_email_address(item.text)
+                replacement = self.replace_email_address(item.text, input)
             elif item.entity_type == "IBAN_CODE":
-                replacement = self.replace_iban_code(item.text)
+                replacement = self.replace_iban_code(item.text, input)
             else:
                 replacement = item.text
             # keeps track of the replacement

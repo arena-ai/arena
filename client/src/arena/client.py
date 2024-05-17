@@ -12,8 +12,8 @@ import anthropic
 BASE_URL = "https://arena.sarus.app/api/v1"
 
 class Client:
-    def __init__(self, user: str | None = None, password: str | None = None, api_key: str | None = None, base_url: str = BASE_URL):
-        self.user = user
+    def __init__(self, username: str | None = None, password: str | None = None, api_key: str | None = None, base_url: str = BASE_URL):
+        self.username = username
         self.password = password
         self.api_key = api_key
         self.base_url = base_url
@@ -24,7 +24,7 @@ class Client:
     
     def login(self):
         """Used internally to get a connection token from a user and a password"""
-        assert(self.user and self.password)
+        assert(self.username and self.password)
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(
                 url = f"{self.base_url}/login/access-token",
@@ -34,7 +34,7 @@ class Client:
                 },
                 data = {
                     "grant_type": "",
-                    "username": self.user,
+                    "username": self.username,
                     "password": self.password,
                     "scope": "",
                     "client_id": "",
@@ -43,6 +43,35 @@ class Client:
             )
         self.api_key = resp.json()['access_token']
     
+
+    def user(self, email: str, password: str, full_name: str | None = None):
+        """Create a new user"""
+        with httpx.Client(timeout=self.timeout) as client:
+            client.post(
+                url = f"{self.base_url}/users/open",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json={
+                    "email": email,
+                    "password": password,
+                    "full_name": full_name
+                },
+            )
+
+    @staticmethod
+    def user_open(email: str, password: str, full_name: str | None = None,  base_url=BASE_URL):
+        """Create a new user"""
+        with httpx.Client() as client:
+            client.post(
+                url = f"{base_url}/users/open",
+                json={
+                    "email": email,
+                    "password": password,
+                    "full_name": full_name
+                },
+            )
+
 
     def openai_api_key(self, api_key: str):
         """Set the OpenAI API token"""
@@ -106,7 +135,7 @@ class Client:
                 },
                 json={
                     "name": "LM_CONFIG",
-                    "content": lm_config.model_dump(mode="json")
+                    "content": lm_config.model_dump_json()
                 },
             )
 

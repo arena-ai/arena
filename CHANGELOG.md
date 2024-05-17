@@ -9,16 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Name users in the interface
-- Display Config in the UI
-- Open subscriptions can be done with a GET request
 <!-- TODO -->
+- Added FT capability
+- Added small RAG function
 - Added a disclaimer about the API tokens uploaded (they should be short term)
 - Added the possibility to push some ground truth response
 
 ### Fixed
 
-<!-- TODO -->
+
+
+## [0.2.0] - 2024-05-17
+
+### Added
+
+- Name users in the interface
+- Display Config in the UI
+- Open subscriptions can be done with a GET request
+
+### Fixed
+
 - Fixed worker access to redis (after a failure the worker does not restart)
 - Fixed PII substitution
 - Fixed delete cascading as https://github.com/tiangolo/sqlmodel/issues/213#issuecomment-1013425005

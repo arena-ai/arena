@@ -13,7 +13,7 @@ def test_chat():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
 
     # Connect to arena
-    client = Client(user=user, password=password, base_url=BASE_URL)
+    client = Client(username=user, password=password, base_url=BASE_URL)
     
     # Set the credentials
     client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
@@ -50,7 +50,7 @@ def test_judge():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
 
     # Connect to arena
-    client = Client(user=user, password=password, base_url=BASE_URL)
+    client = Client(username=user, password=password, base_url=BASE_URL)
     
     # Set the credentials
     client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
@@ -93,7 +93,7 @@ def test_user_eval():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
 
     # Connect to arena
-    client = Client(user=user, password=password)
+    client = Client(username=user, password=password)
     
     # Set the credentials
     client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
@@ -113,7 +113,7 @@ def test_instruments():
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
 
     # Connect to arena
-    client = Client(user=user, password=password, base_url=BASE_URL)
+    client = Client(username=user, password=password, base_url=BASE_URL)
     
     # Set the credentials
     client.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))

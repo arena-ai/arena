@@ -28,7 +28,7 @@ def decorated_chat_completion():
     # Added this
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
-    arena = Client(user=user, password=password, base_url=BASE_URL)
+    arena = Client(username=user, password=password, base_url=BASE_URL)
     arena.decorate(OpenAI, mode='instrument')
     t = time()
     # Everything is unchanged then
@@ -45,7 +45,7 @@ def decorated_chat_completion_with_user_eval():
     print("\n[bold red]Decorated OpenAI chat completion with eval")
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
-    arena = Client(user=user, password=password, base_url=BASE_URL)
+    arena = Client(username=user, password=password, base_url=BASE_URL)
     arena.decorate(OpenAI)
     arena.lm_config(lm_config=LMConfig(pii_removal="replace"))
     t = time()
@@ -64,7 +64,7 @@ def arena_chat_completion_with_eval():
     print("\n[bold red]Arena chat completion with user eval")
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
-    arena = Client(user=user, password=password, base_url=BASE_URL)
+    arena = Client(username=user, password=password, base_url=BASE_URL)
     arena.anthropic_api_key(os.getenv("ARENA_ANTHROPIC_API_KEY"))
     t = time()
     resp = arena.chat_completions(model="claude-2.1", messages=[
@@ -82,7 +82,7 @@ def arena_chat_completion_with_pii_substitution():
     print("\n[bold red]Arena chat completion with user eval")
     user = os.getenv("FIRST_SUPERUSER")
     password = os.getenv("FIRST_SUPERUSER_PASSWORD")
-    arena = Client(user=user, password=password, base_url=BASE_URL)
+    arena = Client(username=user, password=password, base_url=BASE_URL)
     arena.anthropic_api_key(os.getenv("ARENA_ANTHROPIC_API_KEY"))
     t = time()
     resp = arena.chat_completions(model="claude-2.1", messages=[
@@ -98,9 +98,13 @@ def arena_chat_completion_with_pii_substitution():
 
 def arena_chat_completion_with_eval_from_test():
     print("\n[bold red]Arena chat completion with user eval from test")
-    user = "nicolas.grislain@gmail.com"
-    password = "test"
-    arena = Client(user=user, password=password, base_url=BASE_URL)
+    username = "ng@sarus.tech"
+    password = "password"
+    try:
+        arena = Client(username=username, password=password, base_url=BASE_URL)
+    except:
+        Client.user_open(email=username, password=password, full_name="Test", base_url=BASE_URL)
+        arena = Client(username=username, password=password, base_url=BASE_URL)
     arena.openai_api_key(os.getenv("ARENA_OPENAI_API_KEY"))
     arena.mistral_api_key(os.getenv("ARENA_MISTRAL_API_KEY"))
     arena.lm_config(lm_config=LMConfig(judge_evaluation=True, pii_removal="replace"))
