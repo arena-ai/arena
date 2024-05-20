@@ -36,7 +36,7 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
         const yScale = d3.scaleLinear()
             .domain([0, d3.max(stackedData, d => d3.max(d, d => d[1]))!])
             .nice()
-            .range([height, 0]);
+            .range([0, height]);
 
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
             .domain(models);
@@ -58,8 +58,8 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
             .data(d => d)
             .enter().append('rect')
             .attr('x', d => xScale(d.data[0]))
-            .attr('y', d => yScale(d[1]))
-            .attr('height', d => yScale(d[0]) - yScale(d[1]))
+            .attr('y', d => yScale(d[0]))
+            .attr('height', d => yScale(d[1]) - yScale(d[0]))
             .attr('width', xScale.bandwidth());
 
         // Add the X Axis

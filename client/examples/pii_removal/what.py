@@ -20,7 +20,8 @@ class Generator:
         self.fake = Faker()
 
     def model(self) -> str:
-        return random.choice(openai.MODELS+mistral.MODELS+anthropic.MODELS)
+        # return random.choice(openai.MODELS+mistral.MODELS+anthropic.MODELS)
+        return random.choice(["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo", "mistral-small", "claude-2.1"])
     
     def chat_completion_request(self) -> dict[str, Any]:
         name = self.fake.name_female()
@@ -57,7 +58,7 @@ print("\n[bold blue]Activate masking")
 arena.lm_config(lm_config=LMConfig(pii_removal="masking", judge_evaluation=True))
 
 print("\n[bold blue]Run experiments with masking")
-for i in range(5):
+for i in range(20):
     t = time()
     print(i)
     req = generator.chat_completion_request()
@@ -69,7 +70,7 @@ print("\n[bold blue]Activate replacement")
 arena.lm_config(lm_config=LMConfig(pii_removal="replace", judge_evaluation=True))
 
 print("\n[bold blue]Run experiments with replacement")
-for i in range(5):
+for i in range(20):
     t = time()
     print(i)
     req = generator.chat_completion_request()
