@@ -70,15 +70,6 @@ function format_json(content: string) {
     </Box>
 }
 
-// function format_user_id(id: number) {
-//   if (users) {
-//       const user = UsersService.readUserById((user) => user?.id===id);
-//       return user?.full_name || user?.email || `${id}`;
-//   } else {
-//       return `${id}`;
-//   }
-// }
-
 function Events() {
   const showToast = useCustomToast()
   // Pull events
@@ -118,7 +109,6 @@ function Events() {
         }
       },
     });
-  console.log(owners);
 
   if (isError) {
     const errDetail = (error as ApiError).body?.detail
