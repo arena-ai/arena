@@ -5,13 +5,7 @@ from pydantic import BaseModel
 from app.lm import models
 from app.lm.models import Function, FunctionDefinition, ChatCompletionToolParam, Message, ResponseFormat, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage
 
-MODELS = (
-    "gpt-4o",
-    "gpt-4-turbo",
-    "gpt-4",
-    "gpt-3.5-turbo",
-    "gpt-3.5-turbo-16k",
-    )
+MODELS = ("gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo", "gpt-3.5-turbo-16k")
 
 class ChatCompletionRequest(models.ChatCompletionRequest):
     """
