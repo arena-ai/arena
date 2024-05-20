@@ -45,19 +45,20 @@ class Generator:
         
     def facts(self, n_max: int=5) -> str:
         participants = self.participants()
-        return [self.fact(random.sample(participants, random.randint(1, len(participants)))) for _ in range(random.randint(1, n_max))]
+        return ([self.fact(random.sample(participants, random.randint(1, len(participants)))) for _ in range(random.randint(1, n_max))], participants)
     
-    def chat_completion_request(self) -> dict[str, Any]:
-        facts = '\n '.join(self.facts())
-        return ChatCompletionRequest(
+    def chat_completion_request(self) -> (dict[str, Any], dict[str, Any]):
+        facts, participants = self.facts()
+        facts = '\n '.join(facts)
+        return (ChatCompletionRequest(
             model=self.model(),
             messages=[
                 Message(role='system', content='You are a helpful assistant.'),
-                Message(role='user', content=f'In the following story:\n"{facts}"\nCan you tell how many people are involved?'),
+                Message(role='user', content=f'In the following story:\n"{facts}"\nCan you tell how many people are involved? Just give the number as an int.'),
             ],
             temperature=0.8,
             max_tokens=1000,
-        ).model_dump(mode='json', exclude_none=True)
+        ).model_dump(mode='json', exclude_none=True), {"participants": participants})
 
 
 generator = Generator()
@@ -85,10 +86,13 @@ print("\n[bold blue]Run experiments with masking")
 for i in range(5):
     t = time()
     print(i)
-    req = generator.chat_completion_request()
+    req, ctx = generator.chat_completion_request()
     print(f"request = {req}")
     resp = arena.chat_completions(**req)
     print(f"resp = {resp.choices[0].message.content} ({time()-t})")
+    score = 1 if (str(len(ctx["participants"])) in resp.choices[0].message.content) else 0
+    arena.evaluation(resp.id, score)
+    print(f"score = {score}")
 
 print("\n[bold blue]Activate replacement")
 arena.lm_config(lm_config=LMConfig(pii_removal="replace", judge_evaluation=True))
@@ -97,7 +101,10 @@ print("\n[bold blue]Run experiments with replacement")
 for i in range(5):
     t = time()
     print(i)
-    req = generator.chat_completion_request()
+    req, ctx = generator.chat_completion_request()
     print(f"request = {req}")
     resp = arena.chat_completions(**req)
     print(f"resp = {resp.choices[0].message.content} ({time()-t})")
+    score = 1 if (str(len(ctx["participants"])) in resp.choices[0].message.content) else 0
+    arena.evaluation(resp.id, score)
+    print(f"score = {score}")
