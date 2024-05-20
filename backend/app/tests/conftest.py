@@ -75,8 +75,8 @@ def chat_input_gen():
                     "content": "Who is Victor Hugo? Where does he live?"
                 }
             ],
-            "temperature": 1.0,
-            "max_tokens": 1000
+            "temperature": 1.2,
+            "max_tokens": 1000,
         }
     return chat_input
 
@@ -93,7 +93,7 @@ def chat_completion_create_openai() -> openai.ChatCompletionRequest:
         "top_p": 0.9,
         "frequency_penalty": 0.5,
         "presence_penalty": 0.5,
-        "n": 3
+        "n": 3,
     })
 
 @pytest.fixture

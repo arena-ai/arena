@@ -9,7 +9,7 @@ from app.lm.models import Function, FunctionDefinition, ChatCompletionToolParam,
 models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion
 """
 
-MODELS = ("mistral-large-2402", "mistral-large-latest", "mistral-medium", "mistral-medium-2312", "mistral-medium-latest", "mistral-small", "mistral-small-2312", "mistral-small-2402", "mistral-small-latest", "mistral-tiny", "mistral-tiny-2312", "open-mistral-7b", "open-mixtral-8x7b")
+MODELS = ("mistral-large-latest", "mistral-medium", "mistral-medium-latest", "mistral-small", "mistral-small-latest", "mistral-tiny", "open-mistral-7b", "open-mixtral-8x7b")
 
 class ChatCompletionRequest(BaseModel):
     """
@@ -38,6 +38,7 @@ class ChatCompletionRequest(BaseModel):
             del ccc["seed"]
         if "lm_config" in ccc:
             del ccc["lm_config"]
+        ccc["temperature"] = min(1.0, max(0.0, ccc["temperature"]))
         return ChatCompletionRequest.model_validate(ccc)
 
     def to_dict(self) -> Mapping[str, Any]:

@@ -73,7 +73,7 @@ def test_all_openai_models(
         response = client.post(
             f"{settings.API_V1_STR}/lm/openai/chat/completions",
             headers=superuser_token_headers,
-            json=chat_input_gen("gpt-3.5-turbo"),
+            json=chat_input_gen(model),
         )
         assert response.status_code == 200
         content = response.json()
@@ -142,10 +142,12 @@ def test_all_mistral_models(
     )
     for model in mistral.MODELS:
         print(model)
+        ccc = ChatCompletionRequest.model_validate(chat_input_gen(model))
+        ccc = mistral.ChatCompletionRequest.from_chat_completion_request(ccc)
         response = client.post(
             f"{settings.API_V1_STR}/lm/mistral/v1/chat/completions",
             headers=superuser_token_headers,
-            json=chat_input_gen(model),
+            json=ccc.to_dict(),
         )
         assert response.status_code == 200
         content = response.json()
@@ -200,7 +202,7 @@ def test_anthropic(
     content = response.json()
 
 
-@pytest.mark.skip(reason="Too costly")
+# @pytest.mark.skip(reason="Too costly")
 def test_all_anthropic_models(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session, chat_input_gen
 ) -> None:

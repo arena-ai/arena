@@ -8,6 +8,9 @@ from arena.models import Function, ChatCompletionToolParam, Message, ResponseFor
 ChatCompletionCreate -> anthropic MessageCreateParams -> anthropic Message -> ChatCompletion
 """
 
+MODELS = ("claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-2.1", "claude-2.0", "claude-instant-1.2")
+
+
 class Metadata(BaseModel):
     user_id: str
 
@@ -26,7 +29,7 @@ class ChatCompletionRequest(BaseModel):
     """
     max_tokens: int = 1
     messages: Sequence[Message]
-    model: str | Literal["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-2.1", "claude-2.0", "claude-instant-1.2"]
+    model: str | Literal[*MODELS]
     metadata: Metadata | None = None
     stop_sequences: Sequence[str] | None = None
     system: str | None = None

@@ -8,7 +8,7 @@ from rich import print
 from dotenv import load_dotenv
 from openai import OpenAI
 from arena.client import Client
-from arena.models import LMConfig, ChatCompletionRequest, Message
+from arena.models import LMConfig, ChatCompletionRequest, Message, openai, mistral, anthropic
 # Load .env
 load_dotenv()
 
@@ -20,13 +20,7 @@ class Generator:
         self.fake = Faker()
 
     def model(self) -> str:
-        return random.choice([
-            "gpt-4-turbo",
-            "gpt-4",
-            "gpt-3.5-turbo",
-            "mistral-large-latest", "mistral-medium", "mistral-medium-latest", "mistral-small", "mistral-small-latest", "mistral-tiny",
-            "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-2.1", "claude-2.0",
-        ])
+        return random.choice(openai.MODELS+mistral.MODELS+anthropic.MODELS)
 
     def participants(self, n_max: int=7) -> list[str]:
         return [self.fake.name() for _ in range(random.randint(1, n_max))]
@@ -62,6 +56,7 @@ class Generator:
                 Message(role='user', content=f'In the following story:\n"{facts}"\nCan you tell how many people are involved?'),
             ],
             temperature=1.2,
+            max_tokens=1000,
         ).model_dump(mode='json', exclude_none=True)
 
 

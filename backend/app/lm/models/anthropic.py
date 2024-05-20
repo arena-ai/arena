@@ -57,6 +57,7 @@ class ChatCompletionRequest(BaseModel):
             ccc["system"] = system[0]
         if "lm_config" in ccc:
             del ccc["lm_config"]
+        ccc["temperature"] = min(1.0, max(0.0, ccc["temperature"]))
         ccc["messages"] = messages
         return ChatCompletionRequest.model_validate(ccc)
 
