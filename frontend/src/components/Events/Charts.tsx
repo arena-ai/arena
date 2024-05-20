@@ -27,55 +27,17 @@ function hour(timestamp: string): string {
     return hourKey
 }
 
-// Increment a counter for each hour-model pair
-function hourModelIncr(counts: { [model: string]: { [hour: string]: number } }, modelKey: string, hourKey: string, value: number): { [model: string]: { [hour: string]: number } } {
-    if (!counts[""]) {
-        counts[""] = {}
-    }
-    if (!counts[modelKey]) {
-        counts[modelKey] = {}
-    }
-    if (!counts[""][""]) {
-        counts[""][""] = 0
-    }
-    if (!counts[""][hourKey]) {
-        counts[""][hourKey] = 0
-    }
-    if (!counts[modelKey][""]) {
-        counts[modelKey][""] = 0
-    }
-    if (!counts[modelKey][hourKey]) {
-        counts[modelKey][hourKey] = 0
-    }
-    counts[""][""]+=value
-    counts[""][hourKey]+=value
-    counts[modelKey][""]+=value
-    counts[modelKey][hourKey]+=value
-    return counts
-}
-
 // Compute the volume for each hour-model pair
-function volume(data: EventOut[]): { [model: string]: { [hour: string]: number } } {
-    const counts = data.reduce<{ [hour: string]: { [model: string]: number } }>((counts, event) => {
+function volumes(data: EventOut[]): {model: string; hour: string; value: number }[] {
+    const result = data.reduce<{model: string; hour: string; value: number }[]>((result, event) => {
         if (event.name === "request") {
             const hourKey = hour(event.timestamp)
             const content = JSON.parse(event.content)
             const modelKey = content.content ? (content.content.model ? content.content.model : "model") : "other"
-            hourModelIncr(counts, modelKey, hourKey, 1)
+            result.push({model: modelKey, hour: hourKey, value: 1})
         }
-        return counts
-    }, {})
-    return counts
-}
-
-// Format the data for the graph
-function hourModelVolumes(data: EventOut[]): {model: string; hour: string; value: number}[][] {
-    const dataVolume = volume(data)
-    const models = Object.keys(dataVolume).filter(k => k !== '').sort()
-    const hours = Object.keys(dataVolume['']).filter(k => k !== '').sort()
-    const result = models.map(model => hours.map(hour => {
-        return {model: model, hour: hour, value: (hour in dataVolume[model]) ? dataVolume[model][hour] : 0}
-    }))
+        return result
+    }, [])
     return result
 }
 
@@ -110,7 +72,7 @@ function Charts() {
                 events && (
                     <>
                         <Heading>Activity</Heading>
-                        <Card mt={4} bgColor={secBgColor}>
+                        <Card mt={4}>
                             <CardHeader>
                                 <Heading size='md'>Volume</Heading>
                             </CardHeader>
@@ -129,7 +91,7 @@ function Charts() {
                                 </Stack>
                             </CardBody>
                         </Card>
-                        <Card mt={4} bgColor={secBgColor}>
+                        <Card mt={4}>
                             <CardHeader>
                                 <Heading size='md'>Score</Heading>
                             </CardHeader>
@@ -145,7 +107,7 @@ function Charts() {
                                     </Box>
                                     <Box>
                                         {
-                                            events ? <StackChart data={hourModelVolumes(events.data)}/> : <Spinner/>
+                                            events ? <StackChart data={volumes(events.data)}/> : <Spinner/>
                                         }
                                     </Box>
                                 </Stack>
