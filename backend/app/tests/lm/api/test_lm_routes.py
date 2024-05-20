@@ -200,7 +200,7 @@ def test_anthropic(
     content = response.json()
 
 
-# @pytest.mark.skip(reason="Too costly")
+@pytest.mark.skip(reason="Too costly")
 def test_all_anthropic_models(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session, chat_input_gen
 ) -> None:
