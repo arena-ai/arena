@@ -2,10 +2,12 @@ import os
 from time import sleep
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
+from rich import print
+import pytest
 
 from app.models import Event
 from app.core.config import settings
-from app.lm.models import anthropic, ChatCompletionRequest, LMConfig
+from app.lm.models import openai, mistral, anthropic, ChatCompletionRequest, LMConfig
 
 from openai import OpenAI
 from mistralai.client import MistralClient
@@ -53,6 +55,29 @@ def test_openai(
     assert response.status_code == 200
     content = response.json()
     assert len(content["choices"]) == 1
+
+
+@pytest.mark.skip(reason="too costly")
+def test_all_openai_models(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session, chat_input_gen
+) -> None:
+    """Test arena openai"""
+    # Setup a token
+    client.post(
+        f"{settings.API_V1_STR}/settings",
+        headers=superuser_token_headers,
+        json={"name": "OPENAI_API_KEY", "content": os.getenv("ARENA_OPENAI_API_KEY")},
+    )
+    for model in openai.MODELS:
+        print(model)
+        response = client.post(
+            f"{settings.API_V1_STR}/lm/openai/chat/completions",
+            headers=superuser_token_headers,
+            json=chat_input_gen("gpt-3.5-turbo"),
+        )
+        assert response.status_code == 200
+        content = response.json()
+        print(content)
 
 
 
@@ -105,6 +130,27 @@ def test_mistral(
     content = response.json()
 
 
+@pytest.mark.skip(reason="Too costly")
+def test_all_mistral_models(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session, chat_input_gen
+) -> None:
+    # Setup a token
+    client.post(
+        f"{settings.API_V1_STR}/settings",
+        headers=superuser_token_headers,
+        json={"name": "MISTRAL_API_KEY", "content": os.getenv("ARENA_MISTRAL_API_KEY")},
+    )
+    for model in mistral.MODELS:
+        print(model)
+        response = client.post(
+            f"{settings.API_V1_STR}/lm/mistral/v1/chat/completions",
+            headers=superuser_token_headers,
+            json=chat_input_gen(model),
+        )
+        assert response.status_code == 200
+        content = response.json()
+        print(content)
+
 
 def test_anthropic_client(chat_input_gen) -> None:
     """Test the native anthropic client"""
@@ -152,6 +198,30 @@ def test_anthropic(
     )
     assert response.status_code == 200
     content = response.json()
+
+
+# @pytest.mark.skip(reason="Too costly")
+def test_all_anthropic_models(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session, chat_input_gen
+) -> None:
+    # Setup a token
+    client.post(
+        f"{settings.API_V1_STR}/settings",
+        headers=superuser_token_headers,
+        json={"name": "ANTHROPIC_API_KEY", "content": os.getenv("ARENA_ANTHROPIC_API_KEY")},
+    )
+    for model in anthropic.MODELS:
+        print(model)
+        ccc = ChatCompletionRequest.model_validate(chat_input_gen(model))
+        ccc = anthropic.ChatCompletionRequest.from_chat_completion_request(ccc)
+        response = client.post(
+            f"{settings.API_V1_STR}/lm/anthropic/v1/messages",
+            headers = superuser_token_headers,
+            json = ccc.to_dict(),
+        )
+        assert response.status_code == 200
+        content = response.json()
+        print(content)
 
 
 def test_language_models(

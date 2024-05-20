@@ -16,27 +16,7 @@ from app.lm.models import LMApiKeys, ChatCompletionResponse, ChatCompletionReque
 class OpenAI(Service[openai.ChatCompletionRequest, openai.ChatCompletionResponse]):
     api_key: str = ""
     url: str = "https://api.openai.com/v1"
-    models: tuple[str] = (
-        "gpt-4-turbo",
-        "gpt-4-turbo-2024-04-09",
-        "gpt-4-0125-preview",
-        "gpt-4-turbo-preview",
-        "gpt-4-1106-preview",
-        "gpt-4-vision-preview",
-        "gpt-4",
-        "gpt-4-0314",
-        "gpt-4-0613",
-        "gpt-4-32k",
-        "gpt-4-32k-0314",
-        "gpt-4-32k-0613",
-        "gpt-3.5-turbo",
-        "gpt-3.5-turbo-16k",
-        "gpt-3.5-turbo-0301",
-        "gpt-3.5-turbo-0613",
-        "gpt-3.5-turbo-1106",
-        "gpt-3.5-turbo-0125",
-        "gpt-3.5-turbo-16k-0613",
-        )
+    models: tuple[str] = openai.MODELS
     
     @cached_property
     def headers(self) -> Mapping[str, str]:
@@ -71,7 +51,7 @@ class OpenAI(Service[openai.ChatCompletionRequest, openai.ChatCompletionResponse
 class Mistral(Service[mistral.ChatCompletionRequest, mistral.ChatCompletionResponse]):
     api_key: str = ""
     url: str = "https://api.mistral.ai"
-    models: tuple[str] = ("mistral-embed", "mistral-large-2402", "mistral-large-latest", "mistral-medium", "mistral-medium-2312", "mistral-medium-latest", "mistral-small", "mistral-small-2312", "mistral-small-2402", "mistral-small-latest", "mistral-tiny", "mistral-tiny-2312", "open-mistral-7b", "open-mixtral-8x7b")
+    models: tuple[str] = mistral.MODELS
 
     @cached_property
     def headers(self) -> Mapping[str, str]:
@@ -106,7 +86,7 @@ class Mistral(Service[mistral.ChatCompletionRequest, mistral.ChatCompletionRespo
 class Anthropic(Service[anthropic.ChatCompletionRequest, anthropic.ChatCompletionResponse]):
     api_key: str = ""
     url: str = "https://api.anthropic.com"
-    models: tuple[str] = ("claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-2.1", "claude-2.0", "claude-instant-1.2")
+    models: tuple[str] = anthropic.MODELS
 
     @cached_property
     def headers(self) -> Mapping[str, str]:
