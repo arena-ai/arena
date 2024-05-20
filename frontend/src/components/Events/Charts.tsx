@@ -99,10 +99,6 @@ function Charts() {
         console.warn('Something went wrong.', `${errDetail}`, 'error')
     }
 
-    if (events) {
-        console.log(hourModelVolumes(events.data))
-    }
-
     return (
         <>
             {isLoading ? (
@@ -118,7 +114,6 @@ function Charts() {
                             <CardHeader>
                                 <Heading size='md'>Volume</Heading>
                             </CardHeader>
-
                             <CardBody>
                                 <Stack divider={<StackDivider />} spacing='4'>
                                     <Box>
@@ -138,15 +133,14 @@ function Charts() {
                             <CardHeader>
                                 <Heading size='md'>Score</Heading>
                             </CardHeader>
-
                             <CardBody>
                                 <Stack divider={<StackDivider />} spacing='4'>
                                     <Box>
                                         <Heading size='xs' textTransform='uppercase'>
-                                        Summary
+                                            Summary
                                         </Heading>
                                         <Text pt='2' fontSize='sm'>
-                                        View a summary of all your clients over the last month.
+                                            View a summary of all your clients over the last month.
                                         </Text>
                                     </Box>
                                     <Box>
