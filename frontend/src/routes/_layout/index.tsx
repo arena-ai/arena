@@ -4,7 +4,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import Charts from '@app/components/Events/Charts'
 
 import { UserOut } from '@app/client'
-import { Component } from 'react'
 
 export const Route = createFileRoute('/_layout/')({
   component: Dashboard,

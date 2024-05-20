@@ -12,9 +12,8 @@ import {
     Stack,
 } from '@chakra-ui/react'
 import { useQuery } from '@tanstack/react-query'
-import { useRef, useEffect } from 'react'
-
 import { ApiError, EventOut, EventsService } from '@app/client'
+import StackChart from '@app/components/Common/StackChart'
 
 function hour(timestamp: string): string {
     const date = new Date(timestamp)
@@ -29,59 +28,60 @@ function hour(timestamp: string): string {
 }
 
 // Increment a counter for each hour-model pair
-function hourModelIncr(counts: { [hour: string]: { [model: string]: number } }, hourKey: string, modelKey: string, value: number): { [hour: string]: { [model: string]: number } } {
+function hourModelIncr(counts: { [model: string]: { [hour: string]: number } }, modelKey: string, hourKey: string, value: number): { [model: string]: { [hour: string]: number } } {
     if (!counts[""]) {
         counts[""] = {}
     }
-    if (!counts[hourKey]) {
-        counts[hourKey] = {}
+    if (!counts[modelKey]) {
+        counts[modelKey] = {}
     }
     if (!counts[""][""]) {
         counts[""][""] = 0
     }
-    if (!counts[""][modelKey]) {
-        counts[""][modelKey] = 0
+    if (!counts[""][hourKey]) {
+        counts[""][hourKey] = 0
     }
-    if (!counts[hourKey][""]) {
-        counts[hourKey][""] = 0
+    if (!counts[modelKey][""]) {
+        counts[modelKey][""] = 0
     }
-    if (!counts[hourKey][modelKey]) {
-        counts[hourKey][modelKey] = 0
+    if (!counts[modelKey][hourKey]) {
+        counts[modelKey][hourKey] = 0
     }
     counts[""][""]+=value
-    counts[""][modelKey]+=value
-    counts[hourKey][""]+=value
-    counts[hourKey][modelKey]+=value
+    counts[""][hourKey]+=value
+    counts[modelKey][""]+=value
+    counts[modelKey][hourKey]+=value
     return counts
 }
 
 // Compute the volume for each hour-model pair
-function volume(data: EventOut[]): { [hour: string]: { [model: string]: number } } {
+function volume(data: EventOut[]): { [model: string]: { [hour: string]: number } } {
     const counts = data.reduce<{ [hour: string]: { [model: string]: number } }>((counts, event) => {
         if (event.name === "request") {
             const hourKey = hour(event.timestamp)
             const content = JSON.parse(event.content)
             const modelKey = content.content ? (content.content.model ? content.content.model : "model") : "other"
-            hourModelIncr(counts, hourKey, modelKey, 1)
+            hourModelIncr(counts, modelKey, hourKey, 1)
         }
         return counts
     }, {})
     return counts
 }
 
-function hourModelVolumes(data: EventOut[]): {hour: string; model: string; value: number}[][] {
+// Format the data for the graph
+function hourModelVolumes(data: EventOut[]): {model: string; hour: string; value: number}[][] {
     const dataVolume = volume(data)
-    const hours = Object.keys(dataVolume).filter(k => k !== '').sort()
-    const models = Object.keys(dataVolume['']).filter(k => k !== '').sort()
+    const models = Object.keys(dataVolume).filter(k => k !== '').sort()
+    const hours = Object.keys(dataVolume['']).filter(k => k !== '').sort()
     const result = models.map(model => hours.map(hour => {
-        return {hour: hour, model: model, value: (model in dataVolume[hour]) ? dataVolume[hour][model] : 0}
+        return {model: model, hour: hour, value: (hour in dataVolume[model]) ? dataVolume[model][hour] : 0}
     }))
     return result
 }
 
+// function
+
 function Charts() {
-    //refs
-    const volumeSvg = useRef();
     // Pull events
     const {
         data: events,
@@ -102,6 +102,7 @@ function Charts() {
     if (events) {
         console.log(hourModelVolumes(events.data))
     }
+
     return (
         <>
             {isLoading ? (
@@ -149,7 +150,9 @@ function Charts() {
                                         </Text>
                                     </Box>
                                     <Box>
-                                        <svg ref={volumeSvg}/>
+                                        {
+                                            events ? <StackChart data={hourModelVolumes(events.data)}/> : <Spinner/>
+                                        }
                                     </Box>
                                 </Stack>
                             </CardBody>
