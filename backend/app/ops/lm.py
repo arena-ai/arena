@@ -61,8 +61,8 @@ class Judge(Op[tuple[LMApiKeys, ChatCompletionRequest, ChatCompletionResponse], 
     """Implements a simple LLM-as-a-judge as in https://arxiv.org/pdf/2306.05685.pdf
     """
     name: str = "judge"
-    reference_model: str = "gpt-4-turbo"
-    judge_model: str = "gpt-4-turbo"
+    reference_model: str = "gpt-4o"
+    judge_model: str = "gpt-4o"
     
     @staticmethod
     def find_float(text: str) -> float:
@@ -76,6 +76,7 @@ class Judge(Op[tuple[LMApiKeys, ChatCompletionRequest, ChatCompletionResponse], 
         service = slm.LanguageModels(api_keys=api_keys)
         reference_request = request.model_copy()
         reference_request.model = self.reference_model
+        reference_request.temperature = 0
         reference_response = await service.chat_completion(reference_request)
         judge_request = ChatCompletionRequest(
             model=self.judge_model,

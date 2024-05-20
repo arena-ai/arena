@@ -55,7 +55,7 @@ class Generator:
                 Message(role='system', content='You are a helpful assistant.'),
                 Message(role='user', content=f'In the following story:\n"{facts}"\nCan you tell how many people are involved?'),
             ],
-            temperature=1.2,
+            temperature=0.8,
             max_tokens=1000,
         ).model_dump(mode='json', exclude_none=True)
 
@@ -82,7 +82,7 @@ print("\n[bold blue]Activate masking")
 arena.lm_config(lm_config=LMConfig(pii_removal="masking", judge_evaluation=True))
 
 print("\n[bold blue]Run experiments with masking")
-for i in range(50):
+for i in range(5):
     t = time()
     print(i)
     req = generator.chat_completion_request()
@@ -94,7 +94,7 @@ print("\n[bold blue]Activate replacement")
 arena.lm_config(lm_config=LMConfig(pii_removal="replace", judge_evaluation=True))
 
 print("\n[bold blue]Run experiments with replacement")
-for i in range(50):
+for i in range(5):
     t = time()
     print(i)
     req = generator.chat_completion_request()

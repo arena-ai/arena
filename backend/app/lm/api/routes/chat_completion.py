@@ -64,7 +64,6 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         # Do the masking
         if config.pii_removal:# TODO an IF op could be added to build conditional delayed computations if needed
             from rich import print
-            print(f"DEBUG CONFIG = {config}")
             if config.pii_removal == "masking":
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
@@ -88,7 +87,7 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response = await tup(arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response).evaluate(session=self.session)
         # post-process the (request, response) pair
         if config.judge_evaluation:
-            judge_score = judge(language_models_api_keys(ses, usr), self.chat_completion_request, chat_completion_response)
+            judge_score = judge(language_models_api_keys(ses, usr), lm_request.content, chat_completion_response)
             judge_score_event = log_lm_judge_evaluation(ses, usr, event(ses, arena_request_event.id), judge_score)
             evaluate.delay(judge_score.then(judge_score_event))
         return chat_completion_response
@@ -102,11 +101,11 @@ class OpenAIHandler(ChatCompletionHandler[oai.ChatCompletionRequest, oai.ChatCom
         return Request(
             method="POST",
             url="/openai/chat/completions",
-            content=self.chat_completion_request
+            content=self.chat_completion_request.model_copy(deep=True)
         )
     
     def lm_request(self) -> Computation[Request[oai.ChatCompletionRequest]]:
-        return openai_request(self.chat_completion_request.model_copy())
+        return openai_request(self.chat_completion_request.model_copy(deep=True))
 
     def lm_response(self, ses: Computation[Session], usr: Computation[UserOut], request: Request[oai.ChatCompletionRequest]) -> Computation[Response[oai.ChatCompletionResponse]]:
         return openai(openai_api_key(ses, usr), request.content)
@@ -129,11 +128,11 @@ class MistralHandler(ChatCompletionHandler[mis.ChatCompletionRequest, mis.ChatCo
         return Request(
             method="POST",
             url="/mistral/v1/chat/completions",
-            content=self.chat_completion_request
+            content=self.chat_completion_request.model_copy(deep=True)
         )
     
     def lm_request(self) -> Computation[Request[mis.ChatCompletionRequest]]:
-        return mistral_request(self.chat_completion_request.model_copy())
+        return mistral_request(self.chat_completion_request.model_copy(deep=True))
 
     def lm_response(self, ses: Computation[Session], usr: Computation[UserOut], request: Request[mis.ChatCompletionRequest]) -> Computation[Response[mis.ChatCompletionResponse]]:
         return mistral(mistral_api_key(ses, usr), request.content)
@@ -156,11 +155,11 @@ class AnthropicHandler(ChatCompletionHandler[ant.ChatCompletionRequest, ant.Chat
         return Request(
             method="POST",
             url="/anthropic/v1/messages",
-            content=self.chat_completion_request
+            content=self.chat_completion_request.model_copy(deep=True)
         )
     
     def lm_request(self) -> Computation[Request[ant.ChatCompletionRequest]]:
-        return anthropic_request(self.chat_completion_request.model_copy())
+        return anthropic_request(self.chat_completion_request.model_copy(deep=True))
 
     def lm_response(self, ses: Computation[Session], usr: Computation[UserOut], request: Request[ant.ChatCompletionRequest]) -> Computation[Response[ant.ChatCompletionResponse]]:
         return anthropic(anthropic_api_key(ses, usr), request.content)
@@ -183,14 +182,14 @@ class ArenaHandler(ChatCompletionHandler[ChatCompletionRequest, ChatCompletionRe
         return Request(
             method="POST",
             url="/chat/completions",
-            content=self.chat_completion_request
+            content=self.chat_completion_request.model_copy(deep=True)
         )
 
     def config(self, ses: Computation[Session], usr: Computation[UserOut]) -> Computation[LMConfig]:
         return lm_config(ses, usr, override=self.chat_completion_request.lm_config)
     
     def lm_request(self) -> Computation[Request[ChatCompletionRequest]]:
-        return chat_request(self.chat_completion_request.model_copy())
+        return chat_request(self.chat_completion_request.model_copy(deep=True))
 
     def lm_response(self, ses: Computation[Session], usr: Computation[UserOut], request: Request[ChatCompletionRequest]) -> Computation[Response[ChatCompletionResponse]]:
         return chat(language_models_api_keys(ses, usr), request.content)
