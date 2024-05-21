@@ -1,6 +1,14 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 
+const colors = new Map([
+    ["gpt-4o", "Red 300"],
+    ["gpt-4-turbo", "Red 400"],
+    ["gpt-4", "Red 500"],
+    ["gpt-3.5-turbo", "Red 600"],
+    ["gpt-3.5-turbo-16k", "Red 700"]
+])
+
 const StackChart: React.FC<{ data: { model: string; hour: string; value: number }[] }> = ({ data }) => {
     const svgRef = useRef<SVGSVGElement | null>(null)
 
@@ -17,7 +25,7 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
         // Prepare the data for stacking
         const stackedData = d3.stack()
             .keys(models)
-            .value(([, group], key) => group.get(key))
+            .value(([, group], key) => group.get(key) || 0)
             (reducedData);
 
         console.log(stackedData)
@@ -36,7 +44,7 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
         const yScale = d3.scaleLinear()
             .domain([0, d3.max(stackedData, d => d3.max(d, d => d[1]))!])
             .nice()
-            .range([0, height]);
+            .range([height, 0]);
 
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
             .domain(models);
@@ -58,9 +66,13 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
             .data(d => d)
             .enter().append('rect')
             .attr('x', d => xScale(d.data[0]))
-            .attr('y', d => yScale(d[0]))
-            .attr('height', d => yScale(d[1]) - yScale(d[0]))
-            .attr('width', xScale.bandwidth());
+            .attr('y', d => yScale(d[1]))
+            .attr('height', d => yScale(d[0]) - yScale(d[1]))
+            .attr('width', xScale.bandwidth())
+            .attr("fill", d => {
+                console.log(d.data[1].keys())
+                return colors[d.data[1][0]] || "Blue"
+            });
 
         // Add the X Axis
         svg.append('g')
