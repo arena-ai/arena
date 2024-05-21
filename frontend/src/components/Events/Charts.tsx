@@ -3,7 +3,6 @@ import {
     Heading,
     Spinner,
     Text,
-    useColorModeValue,
     Box,
     Card,
     CardHeader,
@@ -54,7 +53,6 @@ function Charts() {
         queryKey: ['events'],
         queryFn: () => EventsService.readEvents({ limit: 10000 }),
     })
-    const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
 
     if (isError) {
         const errDetail = (error as ApiError).body?.detail
