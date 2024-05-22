@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useTheme } from '@chakra-ui/react'
+import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import * as d3 from 'd3'
 
 
 const StackChart: React.FC<{ data: { model: string; hour: string; value: number }[] }> = ({ data }) => {
     const [width, setWidth] = useState(window.innerWidth);
     const svgRef = useRef<SVGSVGElement | null>(null)
+    const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
     const theme = useTheme()
     const colors = new Map([
         ["gpt-4o", theme.colors.teal[200]],
@@ -91,7 +92,7 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
             .attr("class", "tooltip")
             .style("position", "absolute")
             .style("visibility", "hidden")
-            .style("background", "#fff")
+            .style("background", secBgColor)
             .style("border", "1px solid #ccc")
             .style("padding", "5px")
             .style("border-radius", "3px")

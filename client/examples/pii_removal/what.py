@@ -21,7 +21,7 @@ class Generator:
 
     def model(self) -> str:
         # return random.choice(openai.MODELS+mistral.MODELS+anthropic.MODELS)
-        return random.choice(["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo", "mistral-small", "claude-2.1"])
+        return random.choice(["gpt-4o", "gpt-3.5-turbo", "mistral-small", "claude-2.1"])
     
     def chat_completion_request(self) -> dict[str, Any]:
         name = self.fake.name_female()
