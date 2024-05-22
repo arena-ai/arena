@@ -206,7 +206,7 @@ def delete_event_attribute(session: SessionDep, current_user: CurrentUser, id: i
 
 @router.get("/download/{format}")
 def download_events(
-    session: SessionDep, current_user: CurrentUser, format: Literal["arrow", "csv"], skip: int = 0, limit: int = 1000000
+    session: SessionDep, current_user: CurrentUser, format: Literal["parquet", "csv"], skip: int = 0, limit: int = 1000000
 ) -> Any:
     """
     Retrieve Events.
@@ -246,7 +246,7 @@ def download_events(
     # Write table to a parquet format in memory
     buf = pa.BufferOutputStream()
     match format:
-        case "arrow":
+        case "parquet":
             pq.write_table(table, buf)
         case "csv":
             pc.write_csv(table, buf)
