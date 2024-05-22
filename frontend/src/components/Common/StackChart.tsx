@@ -83,24 +83,41 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
         svg.attr('height', height + margin.top + margin.bottom)
             .append('g')
             .attr('transform', `translate(${margin.left},${margin.top})`);
+        
+        // Create a tooltip div
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("position", "absolute")
+            .style("visibility", "hidden")
+            .style("background", "#fff")
+            .style("border", "1px solid #ccc")
+            .style("padding", "5px")
+            .style("border-radius", "3px")
+            .style("box-shadow", "0 0 5px rgba(0,0,0,0.1)");
 
         // Add the stacked bars
-        svg.selectAll('g')
+        svg.selectAll('g.model')
             .data(stackedData)
             .enter().append('g')
             .attr("fill", d => colors.get(d.key))
+            .on("mouseover", function (event, d) {
+                tooltip.style("visibility", "visible")
+                    .html(`<b>model</b>: ${d.key}`);
+            })
+            .on("mousemove", function (event) {
+                tooltip.style("top", (event.pageY - 10) + "px")
+                    .style("left", (event.pageX + 10) + "px");
+            })
+            .on("mouseout", function () {
+                tooltip.style("visibility", "hidden");
+            })
             .selectAll('rect')
             .data(d => d)
             .enter().append('rect')
             .attr('x', d => xScale(d.data[0]))
-            // .attr('y', d => yScale(d[1]))
-            .attr('y', d => {
-
-                return yScale(d[1])
-            })
+            .attr('y', d => yScale(d[1]))
             .attr('height', d => yScale(d[0]) - yScale(d[1]))
             .attr('width', xScale.bandwidth())
-            
 
         // Add the X Axis
         svg.append('g')
