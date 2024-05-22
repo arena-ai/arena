@@ -5,3 +5,4 @@ from pydantic import BaseModel
 class LMConfig(BaseModel):
     pii_removal: Literal["masking", "replace"] | None = None
     judge_evaluation: bool = False
+    judge_with_pii: bool = False

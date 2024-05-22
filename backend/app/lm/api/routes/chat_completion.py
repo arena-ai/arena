@@ -87,7 +87,11 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response = await tup(arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response).evaluate(session=self.session)
         # post-process the (request, response) pair
         if config.judge_evaluation:
-            judge_score = judge(language_models_api_keys(ses, usr), lm_request.content, chat_completion_response)
+            judge_score = judge(
+                language_models_api_keys(ses, usr),
+                arena_request.content if config.judge_with_pii else lm_request.content,
+                chat_completion_response
+                )
             judge_score_event = log_lm_judge_evaluation(ses, usr, event(ses, arena_request_event.id), judge_score)
             evaluate.delay(judge_score.then(judge_score_event))
         return chat_completion_response
