@@ -6,7 +6,7 @@ import * as d3 from 'd3'
 const StackChart: React.FC<{ data: { model: string; hour: string; value: number }[] }> = ({ data }) => {
     const [width, setWidth] = useState(window.innerWidth);
     const svgRef = useRef<SVGSVGElement | null>(null)
-    const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
+    const secBgColor = useColorModeValue('white', 'black')
     const theme = useTheme()
     const colors = new Map([
         ["gpt-4o", theme.colors.teal[200]],
