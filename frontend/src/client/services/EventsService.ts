@@ -338,7 +338,7 @@ export class EventsService {
     /**
      * Download Events
      * Retrieve Events.
-     * @returns any Successful Response
+     * @returns string Successful Response
      * @throws ApiError
      */
     public static downloadEvents({
@@ -349,7 +349,7 @@ export class EventsService {
         format: 'parquet' | 'csv',
         skip?: number,
         limit?: number,
-    }): CancelablePromise<any> {
+    }): CancelablePromise<string> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/events/download/{format}',
