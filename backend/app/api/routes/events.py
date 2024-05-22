@@ -1,10 +1,12 @@
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, Response
 from sqlmodel import func, select, desc
+from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import coalesce
 import pyarrow as pa
 import pyarrow.parquet as pq
+import pyarrow.csv as pc
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
@@ -20,7 +22,6 @@ def read_events(
     """
     Retrieve Events.
     """
-
     if current_user.is_superuser:
         statement = select(func.count()).select_from(Event)
         count = session.exec(statement).one()
@@ -203,37 +204,55 @@ def delete_event_attribute(session: SessionDep, current_user: CurrentUser, id: i
     return Message(message="Event attribute deleted successfully")
 
 
-@router.get("/download")
+@router.get("/download/{format}")
 def download_events(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 1000000
+    session: SessionDep, current_user: CurrentUser, format: Literal["arrow", "csv", "json"], skip: int = 0, limit: int = 1000000
 ) -> Any:
     """
     Retrieve Events.
     """
-
-    # Pull all events
     if current_user.is_superuser:
-        statement = select(Event).order_by(desc(coalesce(Event.parent_id, Event.id)), Event.id).offset(skip).limit(limit)
-        events = session.exec(statement).all()
+        request = select(Event).where(Event.name == "request").offset(skip).limit(limit).cte()
     else:
-        statement = (
-            select(Event)
-            .where(Event.owner_id == current_user.id)
-            .order_by(desc(coalesce(Event.parent_id, Event.id)), Event.id)
-            .offset(skip)
-            .limit(limit)
-        )
-        events = session.exec(statement).all()
-    
-    # arrange them in a Table
-    table = pa.Table.from_pylist([event.model_dump() for event in events])
-
-    # write table to a parquet format in memory
+        request = select(Event).where(Event.name == "request").where(Event.owner_id == current_user.id).offset(skip).limit(limit).cte()
+    modified_request = select(Event).where(Event.name == "modified_request").cte()
+    response = select(Event).where(Event.name == "response").cte()
+    user_evaluation = select(Event).where(Event.name == "user_evaluation").cte()
+    lm_judge_evaluation = select(Event).where(Event.name == "lm_judge_evaluation").cte()
+    lm_config = select(Event).where(Event.name == "lm_config").cte()
+    statement = (
+        select(
+            request.c.id,
+            request.c.timestamp,
+            request.c.owner_id,
+            request.c.content.label("request"),
+            modified_request.c.content.label("modified_request"),
+            response.c.content.label("response"),
+            user_evaluation.c.content.label("user_evaluation"),
+            lm_judge_evaluation.c.content.label("lm_judge_evaluation"),
+            lm_config.c.content.label("lm_config"),
+            )
+        .outerjoin(modified_request, request.c.id == modified_request.c.parent_id)
+        .outerjoin(response, request.c.id == response.c.parent_id)
+        .outerjoin(user_evaluation, request.c.id == user_evaluation.c.parent_id)
+        .outerjoin(lm_judge_evaluation, request.c.id == lm_judge_evaluation.c.parent_id)
+        .outerjoin(lm_config, request.c.id == lm_config.c.parent_id)
+    )
+    # Execute the query
+    result = session.exec(statement)
+    events = result.all()
+    # Arrange them in a Table
+    table = pa.Table.from_pylist([dict(zip(result.keys(), event)) for event in events])
+    # Write table to a parquet format in memory
     buf = pa.BufferOutputStream()
-    pq.write_table(table, buf)
-
-    # get the buffer value
+    match format:
+        case "arrow":
+            pq.write_table(table, buf)
+        case "csv":
+            pc.write_csv(table, buf)
+        case "json":
+            pc.write_csv(table, buf)
+    # Get the buffer value
     buf = buf.getvalue().to_pybytes()
-
-    # return parquet file as a response
+    # Return a file as the response
     return Response(content=buf, media_type='application/octet-stream')

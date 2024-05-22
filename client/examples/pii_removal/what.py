@@ -12,8 +12,8 @@ from arena.models import LMConfig, ChatCompletionRequest, Message, openai, mistr
 # Load .env
 load_dotenv()
 
-BASE_URL = "https://arena.sarus.app/api/v1"
-# BASE_URL = "http://localhost/api/v1"
+# BASE_URL = "https://arena.sarus.app/api/v1"
+BASE_URL = "http://localhost/api/v1"
 
 class Generator:
     def __init__(self) -> None:
