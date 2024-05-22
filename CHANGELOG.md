@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-<!-- TODO -->
 - Visualize activity
+<!-- TODO -->
 - Visualize scores
 - Added FT capability
 - Added small RAG function

@@ -1,4 +1,10 @@
 ![Arena Logo](art/arena-logo.png)
+
+[![Arena Frontend](https://github.com/arena-ai/arena/actions/workflows/publish-frontend-docker-image.yml/badge.svg)](https://github.com/arena-ai/arena/actions)
+[![Arena Backend](https://github.com/arena-ai/arena/actions/workflows/publish-backend-docker-image.yml/badge.svg)](https://github.com/arena-ai/arena/actions)
+[![Python Client](https://github.com/arena-ai/arena/actions/workflows/publish-client-to-pypi.yml/badge.svg)](https://github.com/arena-ai/arena/actions)
+![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/sarus_tech)
+
 # Sarus Arena Framework
 
 If you use public AI services such as OpenAI, Anthropic or Mistral, Sarus Arena is an agent you can easily deploy in your infrastructure to do:
