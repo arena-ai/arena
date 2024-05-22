@@ -12,8 +12,8 @@ from arena.models import LMConfig, ChatCompletionRequest, Message, openai, mistr
 # Load .env
 load_dotenv()
 
-# BASE_URL = "https://arena.sarus.app/api/v1"
-BASE_URL = "http://localhost/api/v1"
+BASE_URL = "https://arena.sarus.app/api/v1"
+# BASE_URL = "http://localhost/api/v1"
 
 class Generator:
     def __init__(self) -> None:
@@ -55,7 +55,7 @@ arena.api_keys(
     )
 
 print("\n[bold blue]Activate masking")
-arena.lm_config(lm_config=LMConfig(pii_removal="masking", judge_evaluation=True))
+arena.lm_config(lm_config=LMConfig(pii_removal="masking", judge_evaluation=True, judge_with_pii=True))
 
 print("\n[bold blue]Run experiments with masking")
 for i in range(20):

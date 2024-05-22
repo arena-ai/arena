@@ -63,7 +63,6 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         lm_request_event = arena_request_event
         # Do the masking
         if config.pii_removal:# TODO an IF op could be added to build conditional delayed computations if needed
-            from rich import print
             if config.pii_removal == "masking":
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
