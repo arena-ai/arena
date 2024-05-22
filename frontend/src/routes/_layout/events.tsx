@@ -14,14 +14,16 @@ import {
   Code,
   useColorModeValue,
   Box,
+  ButtonGroup,
+  Spacer,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { useQuery, useQueries } from '@tanstack/react-query'
 
 import { ApiError, EventOut, EventsService, UserOut, UsersService } from '@app/client'
-import EventsSummary from '@app/components/Common/EventsSummary'
 import useCustomToast from '@app/hooks/useCustomToast'
+import DownloadButton from '@app/components/Events/DownloadButton'
 
 export const Route = createFileRoute('/_layout/events')({
   component: Events,
@@ -38,7 +40,7 @@ function format_event(e: EventOut) {
     } else {
       return format_json(e.content || 'N/A');
     }
-  } catch(error) {
+  } catch (error) {
     return format_json(e.content || 'N/A');
   }
 }
@@ -47,15 +49,15 @@ function format_chat_request(content: { content: { model: string; messages: Arra
   return <Box>
     <b>model</b>: {content.content.model}
     {content.content.messages.map((message: { role: string; content: string }, index: number) => <Text key={index}>
-    <b>{message.role}</b>: {message.content}
-  </Text>)}</Box>;
+      <b>{message.role}</b>: {message.content}
+    </Text>)}</Box>;
 }
 
-function format_chat_response(content: { content: { choices: Array<{ message: { role: string; content: string }}> } }) {
+function format_chat_response(content: { content: { choices: Array<{ message: { role: string; content: string } }> } }) {
   return <Box>
     {content.content.choices.map((choice, index: number) => <Text key={index}>
-    <b>{choice.message.role}</b>: {choice.message.content}
-  </Text>)}</Box>;
+      <b>{choice.message.role}</b>: {choice.message.content}
+    </Text>)}</Box>;
 }
 
 function format_evaluation(content: { type: string, value: number }) {
@@ -66,8 +68,8 @@ function format_evaluation(content: { type: string, value: number }) {
 
 function format_json(content: string) {
   return <Box>
-      <Code>{content}</Code>
-    </Box>
+    <Code>{content}</Code>
+  </Box>
 }
 
 function Events() {
@@ -80,35 +82,35 @@ function Events() {
     error,
   } = useQuery({
     queryKey: ['events'],
-    queryFn: () => EventsService.readEvents({limit: 10000}),
+    queryFn: () => EventsService.readEvents({ limit: 10000 }),
   })
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
   // Collect owner ids
   const ownerIds = useMemo(() => {
     const ownerIds = events ? events!.data.map(event => event.owner_id) : [];
     return [...new Set(ownerIds)];
-    }, [events]);
+  }, [events]);
   // Get owners names
   const {
     data: owners,
   } = useQueries({
-      queries: ownerIds.map(ownerId => ({
-        queryKey: ['user', ownerId],
-        queryFn: async (): Promise<[number, UserOut | undefined]> => [ownerId, await UsersService.readUserById({userId: ownerId})],
-      })),
-      combine: (results) => {
-        return {
-          data: results.reduce((map, result) => {
-            if (result.data) {
-              const [id, user] = result.data;
-              map.set(id, user ? (user.full_name || user.email) : "Unknown");
-            }
-            return map;
-          }, new Map<number, string>()),
-          pending: results.some((result) => result.isPending),
-        }
-      },
-    });
+    queries: ownerIds.map(ownerId => ({
+      queryKey: ['user', ownerId],
+      queryFn: async (): Promise<[number, UserOut | undefined]> => [ownerId, await UsersService.readUserById({ userId: ownerId })],
+    })),
+    combine: (results) => {
+      return {
+        data: results.reduce((map, result) => {
+          if (result.data) {
+            const [id, user] = result.data;
+            map.set(id, user ? (user.full_name || user.email) : "Unknown");
+          }
+          return map;
+        }, new Map<number, string>()),
+        pending: results.some((result) => result.isPending),
+      }
+    },
+  });
 
   if (isError) {
     const errDetail = (error as ApiError).body?.detail
@@ -132,7 +134,16 @@ function Events() {
             >
               Events
             </Heading>
-            <EventsSummary/>
+            <Flex py={8} gap={4} minWidth='max-content' alignItems='center'>
+              <Box p='2'>
+                <Heading size='sm'>Events</Heading>
+              </Box>
+              <Spacer />
+              <ButtonGroup gap='2'>
+              <DownloadButton format='parquet' />
+              <DownloadButton format='csv' />
+              </ButtonGroup>
+            </Flex>
             <TableContainer>
               <Table size={{ base: 'sm', md: 'md' }} whiteSpace="normal">
                 <Thead>

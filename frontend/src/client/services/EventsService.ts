@@ -346,7 +346,7 @@ export class EventsService {
         skip,
         limit = 1000000,
     }: {
-        format: 'arrow' | 'csv',
+        format: 'parquet' | 'csv',
         skip?: number,
         limit?: number,
     }): CancelablePromise<any> {
