@@ -15,5 +15,8 @@ export const $LMConfig = {
         judge_evaluation: {
             type: 'boolean',
         },
+        judge_with_pii: {
+            type: 'boolean',
+        },
     },
 } as const;

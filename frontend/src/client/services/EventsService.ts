@@ -335,4 +335,35 @@ export class EventsService {
         });
     }
 
+    /**
+     * Download Events
+     * Retrieve Events.
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static downloadEvents({
+        format,
+        skip,
+        limit = 1000000,
+    }: {
+        format: 'arrow' | 'csv',
+        skip?: number,
+        limit?: number,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/events/download/{format}',
+            path: {
+                'format': format,
+            },
+            query: {
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }

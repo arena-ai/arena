@@ -147,7 +147,7 @@ export class UsersService {
     /**
      * Create User Open Get
      * Create new user without the need to be logged in.
-     * @returns UserOut Successful Response
+     * @returns void
      * @throws ApiError
      */
     public static createUserOpenGet({
@@ -158,7 +158,7 @@ export class UsersService {
         email: string,
         password: string,
         fullName: (string | null),
-    }): CancelablePromise<UserOut> {
+    }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/users/open',
@@ -168,6 +168,7 @@ export class UsersService {
                 'full_name': fullName,
             },
             errors: {
+                307: `Successful Response`,
                 422: `Validation Error`,
             },
         });

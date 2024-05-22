@@ -9,6 +9,6 @@ export type Event = {
     parent_id: (number | null);
     id?: (number | null);
     timestamp?: (string | null);
-    owner_id?: (number | null);
+    owner_id: (number | null);
 };
 

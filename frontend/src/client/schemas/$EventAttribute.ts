@@ -11,6 +11,7 @@ export const $EventAttribute = {
             }, {
                 type: 'null',
             }],
+            isRequired: true,
         },
         attribute_id: {
             type: 'any-of',
@@ -19,6 +20,7 @@ export const $EventAttribute = {
             }, {
                 type: 'null',
             }],
+            isRequired: true,
         },
         value: {
             type: 'any-of',

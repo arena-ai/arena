@@ -6,5 +6,6 @@
 export type LMConfig = {
     pii_removal?: ('masking' | 'replace' | null);
     judge_evaluation?: boolean;
+    judge_with_pii?: boolean;
 };
 

@@ -5,6 +5,6 @@
 
 export type EventIdentifier = {
     id?: (string | null);
-    event_id?: (number | null);
+    event_id: (number | null);
 };
 

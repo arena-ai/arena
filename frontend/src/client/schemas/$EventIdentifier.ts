@@ -19,6 +19,7 @@ export const $EventIdentifier = {
             }, {
                 type: 'null',
             }],
+            isRequired: true,
         },
     },
 } as const;

@@ -45,6 +45,7 @@ export const $Event = {
             }, {
                 type: 'null',
             }],
+            isRequired: true,
         },
     },
 } as const;

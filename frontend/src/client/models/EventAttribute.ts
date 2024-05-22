@@ -4,8 +4,8 @@
 /* eslint-disable */
 
 export type EventAttribute = {
-    event_id?: (number | null);
-    attribute_id?: (number | null);
+    event_id: (number | null);
+    attribute_id: (number | null);
     value?: (string | null);
     id?: (number | null);
 };
