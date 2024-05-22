@@ -78,29 +78,9 @@ function Charts() {
                                 <Stack divider={<StackDivider />} spacing='4'>
                                     <Box>
                                         <Heading size='xs' textTransform='uppercase'>
-                                            Number of events by model
+                                            Number of events for each model
                                         </Heading>
                                         <Text pt='2' fontSize='sm'>
-                                            View a summary of all your clients over the last month.
-                                        </Text>
-                                    </Box>
-                                    <Box>
-                                    </Box>
-                                </Stack>
-                            </CardBody>
-                        </Card>
-                        <Card mt={4}>
-                            <CardHeader>
-                                <Heading size='md'>Score</Heading>
-                            </CardHeader>
-                            <CardBody>
-                                <Stack divider={<StackDivider />} spacing='4'>
-                                    <Box>
-                                        <Heading size='xs' textTransform='uppercase'>
-                                            Summary
-                                        </Heading>
-                                        <Text pt='2' fontSize='sm'>
-                                            View a summary of all your clients over the last month.
                                         </Text>
                                     </Box>
                                     <Box>
