@@ -56,7 +56,9 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
         // Prepare the data for stacking
         const stackedData = d3.stack()
             .keys(models)
+            // @ts-expect-error: @types/d3 is not complete
             .value(([, group], key) => group.get(key) || 0)
+            // @ts-expect-error: @types/d3 is not complete
             (reducedData);
 
         // Get the SVG container
@@ -65,7 +67,7 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
 
         // Set dimensions and margins
         const margin = { top: 20, right: 30, bottom: 30, left: 40 };
-        const width = svg!.node().getBoundingClientRect().width - margin.left - margin.right;
+        const width = svg!.node()!.getBoundingClientRect().width - margin.left - margin.right;
         const height = 600 - margin.top - margin.bottom;
 
         // Create scales
@@ -100,7 +102,7 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
             .data(stackedData)
             .enter().append('g')
             .attr("fill", d => colors.get(d.key))
-            .on("mouseover", function (event, d) {
+            .on("mouseover", function (_, d) {
                 tooltip.style("visibility", "visible")
                     .html(`<b>model</b>: ${d.key}`);
             })
@@ -114,6 +116,7 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
             .selectAll('rect')
             .data(d => d)
             .enter().append('rect')
+            // @ts-expect-error: @types/d3 is not complete
             .attr('x', d => xScale(d.data[0]))
             .attr('y', d => yScale(d[1]))
             .attr('height', d => yScale(d[0]) - yScale(d[1]))
