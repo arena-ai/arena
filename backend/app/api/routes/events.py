@@ -206,7 +206,7 @@ def delete_event_attribute(session: SessionDep, current_user: CurrentUser, id: i
 
 @router.get("/download/{format}")
 def download_events(
-    session: SessionDep, current_user: CurrentUser, format: Literal["arrow", "csv", "json"], skip: int = 0, limit: int = 1000000
+    session: SessionDep, current_user: CurrentUser, format: Literal["arrow", "csv"], skip: int = 0, limit: int = 1000000
 ) -> Any:
     """
     Retrieve Events.
@@ -249,8 +249,6 @@ def download_events(
         case "arrow":
             pq.write_table(table, buf)
         case "csv":
-            pc.write_csv(table, buf)
-        case "json":
             pc.write_csv(table, buf)
     # Get the buffer value
     buf = buf.getvalue().to_pybytes()
