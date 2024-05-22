@@ -6,7 +6,7 @@ from sqlmodel import Session
 from app.ops import Op
 import app.crud as crud
 from app.models import EventCreate, EventOut, User, EventIdentifier
-from app.lm.models import Score
+from app.lm.models import Score, LMConfig
 from app.services import Request, Response
 
 
@@ -53,3 +53,8 @@ class LogUserEvaluation(LogEvent[Score]):
     name: str = "user_evaluation"
 
 log_user_evaluation = LogUserEvaluation()
+
+class LogLMConfig(LogEvent[LMConfig]):
+    name: str = "lm_config"
+
+log_lm_config = LogLMConfig()

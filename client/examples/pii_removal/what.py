@@ -55,7 +55,7 @@ arena.api_keys(
     )
 
 print("\n[bold blue]Activate masking")
-arena.lm_config(lm_config=LMConfig(pii_removal="masking", judge_evaluation=True, judge_with_pii=True))
+arena.lm_config(lm_config=LMConfig(pii_removal="masking", judge_evaluation=True, judge_with_pii=False))
 
 print("\n[bold blue]Run experiments with masking")
 for i in range(20):
