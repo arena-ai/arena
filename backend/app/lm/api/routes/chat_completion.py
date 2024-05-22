@@ -14,7 +14,7 @@ import app.lm.models.anthropic as ant
 from app.services import Request, Response
 from app.ops import cst, tup, Computation
 from app.ops.settings import openai_api_key, mistral_api_key, anthropic_api_key, language_models_api_keys, lm_config
-from app.ops.events import log_request, LogRequest, log_response, create_event_identifier, log_lm_judge_evaluation
+from app.ops.events import log_request, LogRequest, log_response, create_event_identifier, log_lm_judge_evaluation, log_lm_config
 from app.ops.lm import openai, openai_request, mistral, mistral_request, anthropic, anthropic_request, chat, chat_request, judge
 from app.ops.masking import masking, replace_masking
 from app.ops.session import session, user, event
@@ -54,10 +54,12 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
     async def process_request(self) -> Resp:
         ses = session()
         usr = user(ses, self.user.id)
-        # We need the config now
-        config = await self.config(ses, usr).evaluate(session=self.session)
+        # Arena request
         arena_request = self.arena_request()
         arena_request_event = log_request(ses, usr, None, arena_request)
+        # We need the config now
+        config = await self.config(ses, usr).evaluate(session=self.session)
+        config_event = log_lm_config(ses, usr, arena_request_event, config)
         # Build the request
         lm_request = await self.lm_request().evaluate(session=self.session)
         lm_request_event = arena_request_event
@@ -83,7 +85,7 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         chat_completion_response = lm_response.content
         event_identifier = create_event_identifier(ses, usr, arena_request_event, chat_completion_response.id)
         # Evaluate before post-processing
-        arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response = await tup(arena_request_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response).evaluate(session=self.session)
+        arena_request_event, config_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response = await tup(arena_request_event, config_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response).evaluate(session=self.session)
         # post-process the (request, response) pair
         if config.judge_evaluation:
             judge_score = judge(
@@ -227,11 +229,12 @@ async def chat_completion_response(
     usr = user(ses, current_user.id)
     request_event = event(ses, chat_completion_request_event_response.request_event_id)
     config = await lm_config(ses, usr).evaluate(session=session_dep)
+    config_event = log_lm_config(ses, usr, request_event, config)
     lm_response = Response(status_code=200, headers={}, content=chat_completion_request_event_response.response)
     lm_response_event = log_response(ses, usr, request_event, lm_response)
     event_identifier = create_event_identifier(ses, usr, request_event, chat_completion_request_event_response.response.id)
     # Evaluate before post-processing
-    lm_response_event, event_identifier = await tup(lm_response_event, event_identifier).evaluate(session=session_dep)
+    config_event, lm_response_event, event_identifier = await tup(config_event, lm_response_event, event_identifier).evaluate(session=session_dep)
     # post-process the (request, response) pair
     if config.judge_evaluation:
         judge_score = judge(language_models_api_keys(ses, usr), chat_completion_request_event_response.request, chat_completion_request_event_response.response)

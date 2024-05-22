@@ -1,8 +1,10 @@
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from sqlmodel import func, select, desc
 from sqlalchemy.sql.functions import coalesce
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
@@ -199,3 +201,39 @@ def delete_event_attribute(session: SessionDep, current_user: CurrentUser, id: i
     session.delete(event_attribute)
     session.commit()
     return Message(message="Event attribute deleted successfully")
+
+
+@router.get("/download")
+def download_events(
+    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 1000000
+) -> Any:
+    """
+    Retrieve Events.
+    """
+
+    # Pull all events
+    if current_user.is_superuser:
+        statement = select(Event).order_by(desc(coalesce(Event.parent_id, Event.id)), Event.id).offset(skip).limit(limit)
+        events = session.exec(statement).all()
+    else:
+        statement = (
+            select(Event)
+            .where(Event.owner_id == current_user.id)
+            .order_by(desc(coalesce(Event.parent_id, Event.id)), Event.id)
+            .offset(skip)
+            .limit(limit)
+        )
+        events = session.exec(statement).all()
+    
+    # arrange them in a Table
+    table = pa.Table.from_pylist([event.model_dump() for event in events])
+
+    # write table to a parquet format in memory
+    buf = pa.BufferOutputStream()
+    pq.write_table(table, buf)
+
+    # get the buffer value
+    buf = buf.getvalue().to_pybytes()
+
+    # return parquet file as a response
+    return Response(content=buf, media_type='application/octet-stream')
