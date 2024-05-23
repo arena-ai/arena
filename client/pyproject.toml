@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "arena-client"
-version = "0.3.1"
+version = "0.3.2"
 description = "A client to use arena AI"
 authors = ["Nicolas Grislain <ng@sarus.tech>"]
 license = "Apache-2"

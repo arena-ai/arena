@@ -12,7 +12,7 @@ class ChatCompletionRequest(models.ChatCompletionRequest):
     https://github.com/openai/openai-python/blob/main/src/openai/types/chat/completion_create_params.py#L24
     https://platform.openai.com/docs/api-reference/chat
     """
-    model: str | Literal[*MODELS]
+    model: str | Literal["gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo", "gpt-3.5-turbo-16k"]
 
     @classmethod
     def from_chat_completion_request(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":

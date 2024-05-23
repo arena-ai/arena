@@ -20,7 +20,7 @@ class ChatCompletionRequest(BaseModel):
     https://docs.mistral.ai/api/#operation/createChatCompletion
     """
     messages: Sequence[Message]
-    model: str | Literal[*MODELS]
+    model: str | Literal["mistral-large-latest", "mistral-medium", "mistral-medium-latest", "mistral-small", "mistral-small-latest", "mistral-tiny", "open-mistral-7b", "open-mixtral-8x7b"]
     max_tokens: int | None = None
     response_format: ResponseFormat | None = None
     safe_prompt: bool | None = None

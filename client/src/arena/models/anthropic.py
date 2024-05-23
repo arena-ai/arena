@@ -29,7 +29,7 @@ class ChatCompletionRequest(BaseModel):
     """
     max_tokens: int = 1
     messages: Sequence[Message]
-    model: str | Literal[*MODELS]
+    model: str | Literal["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-2.1", "claude-2.0", "claude-instant-1.2"]
     metadata: Metadata | None = None
     stop_sequences: Sequence[str] | None = None
     system: str | None = None
