@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "arena-client"
-version = "0.3.0"
+version = "0.3.1"
 description = "A client to use arena AI"
 authors = ["Nicolas Grislain <ng@sarus.tech>"]
 license = "Apache-2"
@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{from = "src", include = "arena"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 httpx = "^0.25"
 openai = "^1.23"
 anthropic = "^0.21"
@@ -30,7 +30,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [
