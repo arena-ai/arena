@@ -1,6 +1,7 @@
 from typing import Any, Generic, TypeVar, TypeVarTuple, Sequence
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from time import time
 from asyncio import TaskGroup, Task
 from anyio import run
 from pydantic import BaseModel, ConfigDict, Field, computed_field, SerializeAsAny
@@ -26,6 +27,9 @@ class Op(BaseModel, ABC, Generic[*As, B]):
     def __call__(self, *args: Any) -> 'Computation[B]':
         """Compose Ops into Computations"""
         return Computation(op=self, args=[Computation.from_any(arg) for arg in args])
+    
+    def __str__(self) -> str:
+        return self.opname
 
 
 class Const(Op[tuple[()], B], Generic[B]):
@@ -35,6 +39,9 @@ class Const(Op[tuple[()], B], Generic[B]):
     async def call(self) -> B:
         return self.value
 
+    def __str__(self) -> str:
+        return f"{self.opname} ({str(self.value) if len(str(self.value)) < 16 else str(self.value)[:16]+'...'})"
+
 
 class Getattr(Op[A, B], Generic[A, B]):
     """A getattr op"""
@@ -42,6 +49,9 @@ class Getattr(Op[A, B], Generic[A, B]):
 
     async def call(self, a: A) -> B:
         return a.__getattribute__(self.attr)
+
+    def __str__(self) -> str:
+        return f"{self.opname} ({self.attr})"
 
 
 class Getitem(Op[*As, B], Generic[*As, B]):
@@ -58,6 +68,9 @@ class Call(Op[*As, B], Generic[*As, B]):
 
     async def call(self, a: A) -> B:
         return a.__call__(*self.args)
+    
+    def __str__(self) -> str:
+        return f"{self.opname}"
 
 
 class Then(Op[tuple[A, B], B], Generic[A, B]):
@@ -111,9 +124,16 @@ class Computation(BaseModel, Generic[B]):
     async def evaluate(self, **context: Any) -> B:
         """Execute the ops and clears all"""
         self.contexts(**context)
-        async with TaskGroup() as task_group:
-            self.tasks(task_group)
-        result = await self.task
+        try:
+            async with TaskGroup() as task_group:
+                self.tasks(task_group)
+            result = await self.task
+        except Exception:
+            from app.ops.dot import dot
+            name = f"/tmp/dump_{time()}.dot"
+            with open(name, "w+") as f:
+                f.write(dot(self).to_string())
+            raise RuntimeError(f'The computation failed. A dump is written there {name}')
         self.clear()
         return result
     

@@ -8,8 +8,12 @@ import arena.models.anthropic as ant
 import openai
 import mistralai
 import anthropic
+import pyarrow as pa
+import pyarrow.parquet as pq
+
 
 BASE_URL = "https://arena.sarus.app/api/v1"
+
 
 class Client:
     def __init__(self, username: str | None = None, password: str | None = None, api_key: str | None = None, base_url: str = BASE_URL):
@@ -204,6 +208,80 @@ class Client:
         else:
             raise RuntimeError(resp)
     
+
+    def event(self, name: str, content: str, parent_id: int | None = None, native_identifier: str | None = None) -> int:
+        """Create an event"""
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(
+                url = f"{self.base_url}/events/",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json={
+                    "name": name,
+                    "content": content,
+                    "parent_id": parent_id
+                },
+            )
+        if resp.status_code == 200:
+            if native_identifier:
+                self.identifier(resp.json()["id"], native_identifier)
+            return resp.json()["id"]
+        else:
+            raise RuntimeError(resp)
+    
+
+    def identifier(self, event_id: int, native_identifier: str) -> int:
+        """Create an event"""
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.post(
+                url = f"{self.base_url}/events/identifier",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                json={
+                    "id": native_identifier,
+                    "event_id": event_id
+                },
+            )
+        if resp.status_code == 200:
+            return resp.json()["id"]
+        else:
+            raise RuntimeError(resp)
+
+
+    def events(self) -> list[EventOut]:
+        """download all events as an arrow file"""
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(
+                url = f"{self.base_url}/events/?skip=0&limit=1000000",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+            )
+        if resp.status_code == 200:
+            return [EventOut.model_validate(event) for event in resp.json()["data"]]
+        else:
+            raise RuntimeError(resp)
+
+
+    def download_events(self) -> pa.Table:
+        """download all events as an arrow file"""
+        with httpx.Client(timeout=self.timeout) as client:
+            resp = client.get(
+                url = f"{self.base_url}/events/download/parquet",
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+            )
+        if resp.status_code == 200:
+            buffer = pa.py_buffer(resp.content)
+            input_stream = pa.input_stream(buffer)
+            table = pq.read_table(input_stream)
+            return table
+        else:
+            raise RuntimeError(resp)
+
 
     def decorate(self, client: Type, mode: Literal['proxy', 'instrument'] = 'proxy'):
         """Decorate the client"""

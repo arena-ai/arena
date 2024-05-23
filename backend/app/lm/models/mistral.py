@@ -32,13 +32,16 @@ class ChatCompletionRequest(BaseModel):
 
     @classmethod
     def from_chat_completion_request(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
-        ccc = ccc.model_dump()
+        ccc = ccc.model_dump(exclude_none=True)
         if "seed" in ccc:
             ccc["random_seed"] = ccc["seed"]
             del ccc["seed"]
         if "lm_config" in ccc:
             del ccc["lm_config"]
-        ccc["temperature"] = min(1.0, max(0.0, ccc["temperature"]))
+        if "temperature" in ccc:
+            ccc["temperature"] = min(1.0, max(0.0, ccc["temperature"]))
+        else:
+            ccc["temperature"] = 1.0
         return ChatCompletionRequest.model_validate(ccc)
 
     def to_dict(self) -> Mapping[str, Any]:

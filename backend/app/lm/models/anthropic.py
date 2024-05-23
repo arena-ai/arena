@@ -42,10 +42,10 @@ class ChatCompletionRequest(BaseModel):
     def from_chat_completion_request(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
         messages: Sequence[Message] = [msg.model_dump() for msg in ccc.messages if not msg.role == "system"]
         system: Sequence[str] = [msg.content for msg in ccc.messages if msg.role == "system"]
-        ccc = ccc.model_dump()
-        if "max_tokens" in ccc:
-            ccc["max_tokens"] = ccc["max_tokens"] or 1
-        if "user" in ccc and ccc["user"] is not None:
+        ccc = ccc.model_dump(exclude_none=True)
+        if "max_tokens" not in ccc:
+            ccc["max_tokens"] = 100
+        if "user" in ccc:
             ccc["metadata"] = {"user_id": ccc["user"]}
             del ccc["user"]
         if "stop" in ccc:   
@@ -57,7 +57,10 @@ class ChatCompletionRequest(BaseModel):
             ccc["system"] = system[0]
         if "lm_config" in ccc:
             del ccc["lm_config"]
-        ccc["temperature"] = min(1.0, max(0.0, ccc["temperature"]))
+        if "temperature" in ccc:
+            ccc["temperature"] = min(1.0, max(0.0, ccc["temperature"]))
+        else:
+            ccc["temperature"] = 1.0
         ccc["messages"] = messages
         return ChatCompletionRequest.model_validate(ccc)
 

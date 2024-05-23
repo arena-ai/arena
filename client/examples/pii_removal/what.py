@@ -12,8 +12,8 @@ from arena.models import LMConfig, ChatCompletionRequest, Message, openai, mistr
 # Load .env
 load_dotenv()
 
-BASE_URL = "https://arena.sarus.app/api/v1"
-# BASE_URL = "http://localhost/api/v1"
+# BASE_URL = "https://arena.sarus.app/api/v1"
+BASE_URL = "http://localhost/api/v1"
 
 class Generator:
     def __init__(self) -> None:
@@ -55,10 +55,10 @@ arena.api_keys(
     )
 
 print("\n[bold blue]Activate masking")
-arena.lm_config(lm_config=LMConfig(pii_removal="masking", judge_evaluation=True, judge_with_pii=False))
+arena.lm_config(lm_config=LMConfig(pii_removal=None, judge_evaluation=True, judge_with_pii=False))
 
 print("\n[bold blue]Run experiments with masking")
-for i in range(20):
+for i in range(2):
     t = time()
     print(i)
     req = generator.chat_completion_request()
@@ -70,7 +70,7 @@ print("\n[bold blue]Activate replacement")
 arena.lm_config(lm_config=LMConfig(pii_removal="replace", judge_evaluation=True))
 
 print("\n[bold blue]Run experiments with replacement")
-for i in range(20):
+for i in range(2):
     t = time()
     print(i)
     req = generator.chat_completion_request()
