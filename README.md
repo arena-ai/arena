@@ -30,3 +30,4 @@ A document describing the installation process is available [there](docs/install
 To start the test environment, run:
 
 `docker compose up`
+

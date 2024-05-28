@@ -8,27 +8,28 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
     const svgRef = useRef<SVGSVGElement | null>(null)
     const secBgColor = useColorModeValue('white', 'black')
     const theme = useTheme()
-    const colors = new Map([
-        ["gpt-4o", theme.colors.teal[200]],
-        ["gpt-4-turbo", theme.colors.teal[300]],
-        ["gpt-4", theme.colors.teal[400]],
-        ["gpt-3.5-turbo", theme.colors.teal[500]],
-        ["gpt-3.5-turbo-16k", theme.colors.teal[600]],
-        ["mistral-large-latest", theme.colors.green[100]],
-        ["mistral-medium", theme.colors.green[200]],
-        ["mistral-medium-latest", theme.colors.green[300]],
-        ["mistral-small", theme.colors.green[400]],
-        ["mistral-small-latest", theme.colors.green[500]],
-        ["mistral-tiny", theme.colors.green[600]],
-        ["open-mistral-7b", theme.colors.gray[200]],
-        ["open-mixtral-8x7b", theme.colors.gray[300]],
-        ["claude-3-opus-20240229", theme.colors.cyan[200]],
-        ["claude-3-sonnet-20240229", theme.colors.cyan[300]],
-        ["claude-3-haiku-20240307", theme.colors.cyan[400]],
-        ["claude-2.1", theme.colors.cyan[500]],
-        ["claude-2.0", theme.colors.cyan[600]],
-        ["claude-instant-1.2", theme.colors.cyan[700]],
-    ])
+    const colors = function (model: string) {
+        // OpenAI
+        if (model.includes("gpt-4o")) return theme.colors.teal[200]
+        if (model.includes("gpt-4-turbo")) return theme.colors.teal[300]
+        if (model.includes("gpt-4")) return theme.colors.teal[400]
+        if (model.includes("gpt-3.5")) return theme.colors.teal[500]
+        if (model.includes("gpt")) return theme.colors.teal[600]
+        // Mistral
+        if (model.includes("mistral-large")) return theme.colors.green[200]
+        if (model.includes("mistral-medium")) return theme.colors.green[300]
+        if (model.includes("mistral-small")) return theme.colors.green[400]
+        if (model.includes("mixtral")) return theme.colors.green[500]
+        if (model.includes("mistral")) return theme.colors.green[600]
+        // Anthropic
+        if (model.includes("claude-3-opus")) return theme.colors.cyan[200]
+        if (model.includes("claude-3-sonnet")) return theme.colors.cyan[300]
+        if (model.includes("claude-3-haiku")) return theme.colors.cyan[400]
+        if (model.includes("claude-2")) return theme.colors.cyan[500]
+        if (model.includes("claude")) return theme.colors.cyan[600]
+        // Else
+        return theme.colors.gray[400]
+    }
 
     // Track window resize
     useEffect(() => {
@@ -102,7 +103,7 @@ const StackChart: React.FC<{ data: { model: string; hour: string; value: number 
         svg.selectAll('g.model')
             .data(stackedData)
             .enter().append('g')
-            .attr("fill", d => colors.get(d.key))
+            .attr("fill", d => colors(d.key))
             .on("mouseover", function (_, d) {
                 tooltip.style("visibility", "visible")
                     .html(`<b>model</b>: ${d.key}`);
