@@ -6,6 +6,16 @@ Start with `docker compose up -d`
 
 # Open source vector stores
 
+## Qdrant ⭐️
+
+https://qdrant.tech/
+[Git repo](https://github.com/qdrant/qdrant)
+[Helm chart](https://artifacthub.io/packages/helm/qdrant/qdrant)
+
+Implemented in Rust
+Used by OpenAi or dust
+https://qdrant.tech/documentation/overview/qdrant-alternatives/
+
 ## Milvus
 
 https://milvus.io/
@@ -13,17 +23,6 @@ https://milvus.io/
 [Helm chart](https://artifacthub.io/packages/helm/milvus/milvus)
 
 Implemented in Go and C++
-
-## Qdrant
-
-https://qdrant.tech/
-[Git repo](https://github.com/qdrant/qdrant)
-[Helm chart](https://artifacthub.io/packages/helm/qdrant/qdrant)
-
-Implemented in Rust
-Used by OpenAi
-https://qdrant.tech/documentation/overview/qdrant-alternatives/
-
 
 ## Weaviate
 
