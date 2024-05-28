@@ -30,10 +30,14 @@ function hour(timestamp: string): string {
 function volumes(data: EventOut[]): {model: string; hour: string; value: number }[] {
     const result = data.reduce<{model: string; hour: string; value: number }[]>((result, event) => {
         if (event.name === "request") {
-            const hourKey = hour(event.timestamp)
-            const content = JSON.parse(event.content)
-            const modelKey = content.content ? (content.content.model ? content.content.model : "model") : "other"
-            result.push({model: modelKey, hour: hourKey, value: 1})
+            try {
+                const hourKey = hour(event.timestamp)
+                const content = JSON.parse(event.content)
+                const modelKey = content.content ? (content.content.model ? content.content.model : "model") : "other"
+                result.push({model: modelKey, hour: hourKey, value: 1})
+            } catch (error) {
+                console.log(`Malformed request (${error})`)
+            }
         }
         return result
     }, [])

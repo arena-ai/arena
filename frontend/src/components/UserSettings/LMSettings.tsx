@@ -133,7 +133,12 @@ const LMConfigSetting: React.FC = () => {
         queryKey: [key],
         queryFn: () => SettingsService.readSetting({ name: key })
     })
-    const currentConfig: LMConfig = currentSetting ? JSON.parse(currentSetting.content) : { pii_removal: undefined, judge_evaluation: false }
+    let currentConfig: LMConfig
+    try {
+        currentConfig = currentSetting ? JSON.parse(currentSetting.content) : { pii_removal: undefined, judge_evaluation: false }
+    } catch(error) {
+        currentConfig = { pii_removal: undefined, judge_evaluation: false }
+    }
     const {
         register,
         handleSubmit,
