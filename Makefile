@@ -61,15 +61,18 @@ kubernetes:
 # Deploy the helm app
 kubernetes-staging:
 	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
-	--set ingress-nginx.controller.service.loadBalancerIP=${STAGING_PUBLIC_IP} \
 	--set cluster.host=${STAGING_CLUSTER_HOST} \
 	--set postgresql.user=${POSTGRES_USER} \
 	--set postgresql.password=${POSTGRES_PASSWORD} \
 	--set redis.password=${REDIS_PASSWORD} \
 	--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
 	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
-	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
-	
+	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION} \
+	--set cluster.provider=EKS \
+	--set cluster.tls.enabled=False \
+	--set cluster.tls.issuer.name=letsencrypt-staging \
+	--set cluster.tls.issuer.privateKeySecretRef=letsencrypt-staging
+
 
 # Deploy the k8s dashboard
 kubernetes-dashboard:

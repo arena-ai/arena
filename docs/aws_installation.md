@@ -100,3 +100,9 @@ eksctl create iamserviceaccount \
 ## Check the cluster configuration
 
 You have now a working cluster ready to run the [Arena](https://github.com/arena-ai/arena) app
+
+## Connect to Kubernetes Dashboard
+
+```sh
+aws eks get-token --cluster-name $CLUSTER_NAME --region $REGION
+```
