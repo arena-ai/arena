@@ -58,6 +58,19 @@ kubernetes:
 	--set backend.smtp.password="${SMTP_PASSWORD}" \
 	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
 
+# Deploy the helm app
+kubernetes-staging:
+	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+	--set ingress-nginx.controller.service.loadBalancerIP=${STAGING_PUBLIC_IP} \
+	--set cluster.host=${STAGING_CLUSTER_HOST} \
+	--set postgresql.user=${POSTGRES_USER} \
+	--set postgresql.password=${POSTGRES_PASSWORD} \
+	--set redis.password=${REDIS_PASSWORD} \
+	--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
+	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
+	
+
 # Deploy the k8s dashboard
 kubernetes-dashboard:
 	helm upgrade --install kubernetes-dashboard kubernetes-dashboard \
