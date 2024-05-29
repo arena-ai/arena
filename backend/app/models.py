@@ -104,7 +104,7 @@ class Setting(SettingBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     timestamp: datetime | None =  Field(default=func.now())
     owner_id: int | None = Field(default=None, foreign_key="user.id")
-    owner: User | None = Relationship(back_populates="settings", sa_relationship_kwargs={"cascade": "all, delete"})
+    owner: User | None = Relationship(back_populates="settings")
 
 
 # Properties to return via API, id is always required
@@ -146,8 +146,8 @@ class Event(EventBase, table=True):
     timestamp: datetime | None =  Field(default=func.now())
     owner_id: int | None = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), default=None))
     parent_id: int | None = Field(sa_column=Column(Integer, ForeignKey("event.id", ondelete="CASCADE"), index=True))
-    owner: User | None = Relationship(back_populates="events", sa_relationship_kwargs={"cascade": "all, delete"})
-    parent: Optional["Event"] = Relationship(back_populates="children", sa_relationship_kwargs={"remote_side": lambda: Event.id, "cascade": "all, delete"})
+    owner: User | None = Relationship(back_populates="events")
+    parent: Optional["Event"] = Relationship(back_populates="children", sa_relationship_kwargs={"remote_side": lambda: Event.id})
     children: list["Event"] = Relationship(back_populates="parent", sa_relationship_kwargs={"cascade": "all, delete"})
     identifiers: list["EventIdentifier"] = Relationship(back_populates="event", sa_relationship_kwargs={"cascade": "all, delete"})
     attributes: list["EventAttribute"] = Relationship(back_populates="event", sa_relationship_kwargs={"cascade": "all, delete"})
@@ -169,7 +169,7 @@ class EventsOut(SQLModel):
 class EventIdentifier(SQLModel, table=True):
     id: str | None = Field(default=None, primary_key=True)
     event_id: int | None = Field(sa_column=Column(Integer, ForeignKey("event.id", ondelete="CASCADE"), default=None))
-    event: Event = Relationship(back_populates="identifiers", sa_relationship_kwargs={"cascade": "all, delete"})
+    event: Event = Relationship(back_populates="identifiers")
 
 
 class EventIdentifierOut(SQLModel):
@@ -196,8 +196,8 @@ class EventAttribute(EventAttributeBase, table=True):
     event_id: int | None = Field(sa_column=Column(Integer, ForeignKey("event.id", ondelete="CASCADE"), default=None))
     attribute_id: int | None = Field(sa_column=Column(Integer, ForeignKey("attribute.id", ondelete="CASCADE"), default=None))
     value: str | None = Field(default=None)
-    event: Event = Relationship(back_populates="attributes", sa_relationship_kwargs={"cascade": "all, delete"})
-    attribute: "Attribute" = Relationship(back_populates="events", sa_relationship_kwargs={"cascade": "all, delete"})
+    event: Event = Relationship(back_populates="attributes")
+    attribute: "Attribute" = Relationship(back_populates="events")
 
 
 # Database model, database table inferred from class name
