@@ -30,6 +30,7 @@ with open("few_shots.jsonl", "w") as f:
     for series in dataset["train"]:
         f.write(json.dumps([round(1000*x)/1000 for x in series["target"][:100]])+"\n")
 ```
+
 We then build a prompt with 10 examples:
 ```python
 prompt = {"model": "gpt-4-turbo", "temperature": 0.8, "max_tokens": 4096, "messages": [
@@ -39,4 +40,82 @@ You output the rows without more comment."""},
 ]}
 ```
 We submit this prompt and get 10 generated series.
-Unfortunately, although not exactly equal, the generated series are almost identical to the ones we 
+Unfortunately, although not exactly equal, the generated series are almost identical to the ones we input.
+
+After several unsuccessful attempts, some where the output format was not respected, some with shorter than expected series, some with totally random values, and because the length of the context forces me to select only a few example to teach GPT-4 to generate new examples, I realize few-shot learning may not be fit for the task.
+
+It's time to get back to the good old gradient descent, I will test [OpenAI fine-tuning API](https://platform.openai.com/docs/guides/fine-tuning).
+
+# Fine-Tuning GPT-3.5-turbo into a Specialized Time-Series Generator
+
+Based on the same dataset ([hourly electricity consumption](https://huggingface.co/datasets/LeoTungAnh/electricity_hourly)), we generate a training split and a validation split suitable for the fine-tuning API.
+
+```python
+from typing import Any
+import json
+
+SYSTEM_PROMPT = "Given a meter ID, you return a series of hourly consumptions given as a json string."
+
+def format(series: Any) -> str:
+    return json.dumps({"messages": [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": json.dumps({"item_id": series["item_id"]})},
+        {"role": "assistant", "content": json.dumps({"consumption": [round(1000*x)/1000 for x in series["target"][:100]]})}
+    ]})+"\n"
+
+with open(TRAIN_PATH, "w") as f:
+    for series in dataset["train"]:
+        f.write(format(series))
+
+with open(TEST_PATH, "w") as f:
+    for series in dataset["test"]:
+        f.write(format(series))
+```
+
+We upload the files and launch the fine-tuning job.
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+with open(TRAIN_PATH, "rb") as f:
+  train_file = client.files.create(file=f, purpose="fine-tune")
+
+with open(TEST_PATH, "rb") as f:
+  test_file = client.files.create(file=f, purpose="fine-tune")
+
+fine_tuning_job = client.fine_tuning.jobs.create(
+  training_file=train_file.id,
+  hyperparameters={"batch_size": 2, "learning_rate_multiplier":2, "n_epochs": 10},
+  validation_file=test_file.id,
+  suffix="arena",
+  model="gpt-3.5-turbo"
+)
+
+```
+
+We can then generate new series:
+
+```python
+def format_query(item_id: int) -> Any:
+    return {"model": model, "temperature": 1.1, "messages": [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": json.dumps({"item_id": f"MT_{item_id}"})},
+    ]}
+
+completion = client.chat.completions.create(**format_query(10))
+
+print(completion.choices[0].message)
+```
+
+## We can check that the generated series are all rather different from the series from the training set
+
+By comparing each generated series to its closest element in the training dataset (closest in the $l^2$-norm sense), we show that all the generated series are original (rather far from their closest element in the training set).
+
+## Nevertheless the generated data mimics most of the statistics of the training dataset
+
+By computing basic statistics (mean, median, some percentiles) and some cross-correlations we show the generated series have a distribution relatively close to that of the original data.
+
+
+# Conclusion 
