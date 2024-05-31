@@ -127,4 +127,29 @@ By computing basic statistics (mean, median, some percentiles) and some cross-co
 ![percentiles](/images/percentiles.png "Percentiles are close").
 ![cross corr](/images/cross_corr.png "Cross correlations are close").
 
-# Conclusion 
+# Conclusion
+
+## Fine-tuning based synthetic data seem to show good statistical properties
+
+Although this assertion would require much more investigations, it seems from the first quick descriptive statistics we computed that the synthetic data we generated represent quite faithfully the original distribution of data.
+
+To go further we should compare how some typical downstream tasks (regressions, classifications, clustering) behave on both synthetic and original data to confirm this.
+
+## You can play with fine-tuning and few shot learning yourself
+
+The notebooks are available on github.
+* The [fine-tuning experiment here](https://github.com/arena-ai/arena/blob/main/experiments/finetuning/openai_ft_time_series.ipynb)
+* And the [few shot learning there](https://github.com/arena-ai/arena/blob/main/experiments/finetuning/openai_few_shot_time_series.ipynb)
+
+Feel free to improve on this work and let us know what you found.
+
+## Our synthetic data does not contain any of the original confidential datapoints, but you need differential privacy for serious applications
+
+We show by a quick similarity analysis that generated samples are all different from those in the original dataset.
+This is rather reassuring and gives some confidence in the fact privacy is relatively preserved.
+
+Nevertheless, there is no formal guarantees privacy is actually protected.
+There are actually countless examples of reidentification attacks in the academic literature.
+
+For very sensitive data you should rely on formal guarantees of privacy such as [Differential Privacy](https://www.microsoft.com/en-us/research/blog/the-crossroads-of-innovation-and-privacy-private-synthetic-data-for-generative-ai/).
+[Sarus Technologies](https://www.sarus.tech/) provides a [service for LLM fine-tuning with differential privacy](https://www.sarus.tech/product/sarusllm).
