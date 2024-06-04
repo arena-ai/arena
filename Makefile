@@ -69,9 +69,9 @@ kubernetes-staging:
 	--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
 	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION} \
 	--set cluster.provider=EKS \
-	--set cluster.tls.enabled=False \
-	--set cluster.tls.issuer.name=letsencrypt-staging \
-	--set cluster.tls.issuer.privateKeySecretRef=letsencrypt-staging
+	--set cluster.tls.enabled=True \
+	# --set cluster.tls.issuer.name=letsencrypt-staging \
+	# --set cluster.tls.issuer.privateKeySecretRef=letsencrypt-staging
 
 
 # Deploy the k8s dashboard

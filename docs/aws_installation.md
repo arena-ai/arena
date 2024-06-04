@@ -13,7 +13,7 @@ Make sure you have them installed.
 
 You can parametrize the deployment of [Arena](https://github.com/arena-ai/arena) using environment variables:
 ```sh
-export CLUSTER_NAME="arena-dev"
+export CLUSTER_NAME="arena-staging"
 export REGION="eu-north-1"
 export NODE_GROUP_NAME="arena-nodes"
 export RELEASE_NAME="sarus"
@@ -74,8 +74,8 @@ See [documentation](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-
 
 ```sh
 OIDC_ID=$(aws eks describe-cluster --name $CLUSTER_NAME  --region $REGION --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
-eksctl utils associate-iam-oidc-provider --cluster $CLUSTER_NAME --approve --region $REGION
 aws iam list-open-id-connect-providers | grep $OIDC_ID | cut -d "/" -f4
+eksctl utils associate-iam-oidc-provider --cluster $CLUSTER_NAME --approve --region $REGION
 ```
 
 ## Install EBS CSI driver
@@ -84,17 +84,42 @@ See [documentation](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.htm
 
 To provision storage, Kubernetes uses [CSI](https://kubernetes.io/docs/concepts/storage/volumes/#csi)
 
+[Associate service account role](https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html)
+
 Create Amazon EBS CSI driver IAM role:
 ```sh
+export IAM_ROLE_NAME=$(echo "$CLUSTER_NAME" | awk -F '-' '{for(i=1; i<=NF; i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1' OFS="")EBSCSIDriverRole
 eksctl create iamserviceaccount \
-  --region $REGION \
   --name "${CLUSTER_NAME}-ebs-csi-controller-sa" \
   --namespace kube-system \
   --cluster $CLUSTER_NAME \
-  --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
-  --approve \
+  --role-name $IAM_ROLE_NAME \
   --role-only \
-  --role-name "${CLUSTER_NAME}-AmazonEKS_EBS_CSI_DriverRole"
+  --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
+  --approve
+```
+
+### Confirm that the role and service account are configured correctly.
+
+Confirm that the IAM role's trust policy is configured correctly.
+
+```sh
+aws iam get-role --role-name $IAM_ROLE_NAME --query Role.AssumeRolePolicyDocument
+```
+
+Confirm that the policy that you attached to your role in a previous step is attached to the role.
+
+```sh
+aws iam list-attached-role-policies --role-name $IAM_ROLE_NAME --query "AttachedPolicies[0].PolicyArn" --output text
+```
+
+### Add the EBS CSI add-on
+
+```sh
+eksctl create addon --name aws-ebs-csi-driver \
+  --cluster $CLUSTER_NAME \
+  --region $REGION \
+  --service-account-role-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):role/${IAM_ROLE_NAME} --force
 ```
 
 ## Check the cluster configuration
