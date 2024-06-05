@@ -1,18 +1,18 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
   name: {{.Release.Name}}-storageclass
-{{- if eq .Values.cluster.provider AKS -}}
+{{- if eq .Values.cluster.provider "AKS"}}
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
-{{- else if eq .Values.cluster.provider EKS -}}
+{{- else if eq .Values.cluster.provider "EKS"}}
 provisioner: ebs.csi.aws.com
 parameters:
   type: gp2
   fsType: ext4
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
-{{- else if eq .Values.cluster.provider GKE -}}
+{{- else if eq .Values.cluster.provider "GKE"}}
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
-{{- else -}}
-{{- end -}}
+{{- else}}
+{{- end}}
