@@ -122,7 +122,7 @@ spec:
           volumeMounts:
             - name: dshm
               mountPath: /dev/shm
-            - name: data
+            - name: postgresql-data
               mountPath: "/var/lib/postgresql/data"
       volumes:
         - name: dshm

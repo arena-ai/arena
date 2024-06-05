@@ -1,5 +1,5 @@
 ---
-title: Install Arena on AWS
+title: Provisioning an AWS-EKS cluster
 ---
 
 # Deploying [Arena](https://github.com/arena-ai/arena) on AWS EKS
@@ -16,18 +16,6 @@ You can parametrize the deployment of [Arena](https://github.com/arena-ai/arena)
 export CLUSTER_NAME="arena-staging"
 export REGION="eu-north-1"
 export NODE_GROUP_NAME="arena-nodes"
-export RELEASE_NAME="sarus"
-# export PUBLIC_IP="104.46.33.202"
-export CLUSTER_HOST="arena-staging.sarus.app"
-export POSTGRES_USER="postgres"
-export POSTGRES_PASSWORD="$(openssl rand -base64 12)"
-export REDIS_PASSWORD="$(openssl rand -base64 12)"
-export FIRST_SUPERUSER="admin@sarus.tech"
-export FIRST_SUPERUSER_PASSWORD="$(openssl rand -base64 12)"
-export SMTP_HOST="<your_smtp_server>"
-export SMTP_USER="<your_smtp_user>"
-export SMTP_USER="<your_smtp_password>"
-export USERS_OPEN_REGISTRATION=False
 ```
 
 Set them to fit your needs. Make sure the region you choose enables the provisioning of GPUs if you plan to use AI model fine-tuning features.
@@ -133,6 +121,16 @@ aws eks describe-addon --cluster-name $CLUSTER_NAME --addon-name aws-ebs-csi-dri
 You have now a working cluster ready to run the [Arena](https://github.com/arena-ai/arena) app
 
 ## Connect to Kubernetes Dashboard
+
+Run:
+
+```sh
+kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+```
+
+Then connect to [the web interface](https://localhost:8443/).
+
+Use this command to get the token required to login:
 
 ```sh
 aws eks get-token --cluster-name $CLUSTER_NAME --region $REGION

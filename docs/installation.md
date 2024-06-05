@@ -11,7 +11,7 @@ The deployment procedure will consist in three main steps:
 2. Setting up the public IP, domain name and TLS certificate.
 3. Deploying [Arena](https://github.com/arena-ai/arena) using `helm`.
 
-# First step: provisioning a cluster
+## First step: provisioning a cluster
 
 To provision an [AKS cluster on Azure](https://azure.microsoft.com/fr-fr/products/kubernetes-service), you'll need an Azure account. Note that the installation process is relatively similar with other managed k8s such as [GKE](https://cloud.google.com/kubernetes-engine), [EKS](https://aws.amazon.com/eks/) and [the like](https://us.ovhcloud.com/public-cloud/kubernetes/).
 
@@ -20,7 +20,7 @@ Make sure you have them installed.
 
 You can create a cluster [in many ways](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-cli). In this document we will focus on using the CLI.
 
-## Create a few environment variables
+### Create a few environment variables
 
 You can parametrize the deployment of [Arena](https://github.com/arena-ai/arena) using environment variables:
 ```sh
@@ -52,7 +52,7 @@ echo $FIRST_SUPERUSER_PASSWORD
 
 You will need it to log into the app as `admin@sarus.tech` (`FIRST_SUPERUSER`).
 
-## Create a resource group
+### Create a resource group
 
 The *resource group* is where the resources created by the user for the cluster are created.
 Create it using this command:
@@ -62,7 +62,7 @@ az group create --name $RESOURCE_GROUP_NAME --location $REGION
 
 Another group: the *node resource group* will be automatically created with the cluster and will contain the resources created by k8s, such as the VMs etc.
 
-## Create the cluster
+### Create the cluster
 
 The cluster itself can be created with the command below:
 
@@ -100,7 +100,7 @@ az aks nodepool add \
 --max-count 5
 ```
 
-## Get the credentials
+### Get the credentials
 
 To connect to the cluster you need credentials on your local machine. Run the following command:
 
@@ -116,7 +116,7 @@ Then use `kubectl` to access the cluster:
 kubectl get nodes
 ```
 
-## Check the cluster configuration
+### Check the cluster configuration
 
 You can check the cluster configuration this way:
 
@@ -132,9 +132,9 @@ az aks nodepool list --cluster-name $CLUSTER_NAME --resource-group $RESOURCE_GRO
 
 You have now a working cluster ready to run the [Arena](https://github.com/arena-ai/arena) app.
 
-# Second step: setting up the public IP, domain name and TLS certificate
+## Second step: setting up the public IP, domain name and TLS certificate
 
-## Create a public IP
+### Create a public IP
 
 We create a static public IP for the cluster.
 
@@ -145,11 +145,11 @@ az network public-ip create --name "${CLUSTER_NAME}-ip" \
 --location $REGION
 ```
 
-## Set a DNS entry for your domain
+### Set a DNS entry for your domain
 
 Associate a domain to this IP. In our case, we set the `A` record of `arena.sarus.app` to our newly created IP address.
 
-## Setup *cert-manager*
+### Setup *cert-manager*
 
 [Arena](https://github.com/arena-ai/arena) uses [*cert-manager*](https://cert-manager.io/docs/installation/helm/) to automatically get a [*letsencrypt*](https://letsencrypt.org/) TLS certificate to enable *secure https access*.
 
@@ -165,7 +165,7 @@ Change to the repository directory:
 cd arena
 ```
 
-### Create K8s *Custom Resources Definitions* (CRDs)
+#### Create K8s *Custom Resources Definitions* (CRDs)
 
 The use of *cert-manager* requires [CRDs](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/).
 
@@ -174,7 +174,7 @@ They can be created this way:
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.crds.yaml
 ```
 
-# Third and last step: deployment
+## Third and last step: deployment
 
 The [Arena](https://github.com/arena-ai/arena) app can be deployed with:
 
