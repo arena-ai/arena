@@ -136,6 +136,7 @@ spec:
       spec:
         accessModes:
           - "ReadWriteOnce"
+        storageClassName: {{.Release.Name}}-storageclass
         resources:
           requests:
             storage: "10Gi"

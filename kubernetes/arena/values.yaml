@@ -8,19 +8,17 @@ docker:
 
 # Cluster configuration
 cluster:
-  provider: AKS
+  provider: AKS # AKS | EKS | GKE
   ingress: nginx
   host: arena.sarus.app
   tls:
     enabled: true
     issuer:
-      # name: letsencrypt-staging
-      name: letsencrypt-prod
+      name: letsencrypt-prod # letsencrypt-staging | letsencrypt-prod
       # server: https://acme-staging-v02.api.letsencrypt.org/directory
       server: https://acme-v02.api.letsencrypt.org/directory
       email: arena@sarus.app
-      # privateKeySecretRef: letsencrypt-staging
-      privateKeySecretRef: letsencrypt-prod
+      privateKeySecretRef: letsencrypt-prod # letsencrypt-staging | letsencrypt-prod
     secretName: letsencrypt-secret
 
 # PostgreSQL configuration

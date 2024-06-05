@@ -131,53 +131,6 @@ aws eks describe-addon --cluster-name $CLUSTER_NAME --addon-name aws-ebs-csi-dri
 Then:
 To use the AWS EBS CSI (Container Storage Interface) Driver in Amazon EKS (Elastic Kubernetes Service) for provisioning persistent volumes (PVs), you need to follow these steps:
 
-
-### Step 1: Prerequisites
-1. **EKS Cluster**: Make sure you have an EKS cluster up and running.
-2. **IAM Role for service account**: Create a Kubernetes service account with IAM roles necessary for the EBS CSI driver.
-3. **kubectl**: Install and configure `kubectl` to interact with your EKS cluster.
-
-### Step 2: Install the AWS EBS CSI Driver Add-on
-AWS offers a managed add-on for the EBS CSI driver, which simplifies the installation and management process.
-
-1. **Install the Add-on via AWS CLI:**
-
-   ```sh
-   aws eks create-addon --cluster-name <cluster-name> --addon-name aws-ebs-csi-driver --service-account-role-arn <iam-role-arn>
-   ```
-
-   Replace `<cluster-name>` with your EKS cluster name and `<iam-role-arn>` with the ARN of the IAM role you created for the EKS service account.
-
-2. **Verify Installation:**
-
-   You can verify that the EBS CSI driver has been installed by checking the add-ons in your cluster:
-
-   ```sh
-   aws eks describe-addon --cluster-name <cluster-name> --addon-name aws-ebs-csi-driver
-   ```
-
-### Step 3: Create a Storage Class
-Create a Kubernetes StorageClass that leverages the EBS CSI driver. Here's an example YAML file (`storage-class.yaml`):
-
-```yaml
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: ebs-sc
-provisioner: ebs.csi.aws.com
-parameters:
-  type: gp2
-  fsType: ext4
-reclaimPolicy: Delete
-volumeBindingMode: WaitForFirstConsumer
-```
-
-Apply the StorageClass configuration:
-
-```sh
-kubectl apply -f storage-class.yaml
-```
-
 ### Step 4: Create a Persistent Volume Claim (PVC)
 Create a PVC that will request storage from the StorageClass. Here's an example YAML file (`pvc.yaml`):
 
