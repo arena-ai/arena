@@ -152,7 +152,7 @@ spec:
       spec:
         accessModes:
           - "ReadWriteOnce"
-        storageClassName: {{.Release.Name}}-storageclass
+        storageClassName: arena-storageclass
         resources:
           requests:
             storage: "8Gi"

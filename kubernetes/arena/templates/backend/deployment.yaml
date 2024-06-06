@@ -82,5 +82,5 @@ spec:
           value: {{.Values.masking.presidio.anonymizer.service.externalPort | quote}}
       {{ if .Values.docker.requireAuthentication -}}
       imagePullSecrets:
-      - name: {{ .Release.Name -}}-docker-registry-secret
+      - name: arena-docker-registry-secret
       {{- end }}

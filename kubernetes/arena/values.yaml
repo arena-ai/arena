@@ -15,8 +15,7 @@ cluster:
     enabled: true
     issuer:
       name: letsencrypt-prod # letsencrypt-staging | letsencrypt-prod
-      # server: https://acme-staging-v02.api.letsencrypt.org/directory
-      server: https://acme-v02.api.letsencrypt.org/directory
+      server: https://acme-v02.api.letsencrypt.org/directory # https://acme-staging-v02.api.letsencrypt.org/directory | https://acme-v02.api.letsencrypt.org/directory
       email: arena@sarus.app
       privateKeySecretRef: letsencrypt-prod # letsencrypt-staging | letsencrypt-prod
     secretName: letsencrypt-secret
@@ -94,7 +93,7 @@ ingress-nginx:
 cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
   namespace: default
 
-# This is a bit legacy but let's keep it
+# Presidio
 masking:
   presidio:
     registry: mcr.microsoft.com
@@ -136,3 +135,12 @@ masking:
         externalPort: 80
         internalPort: 5001
         name: http
+
+# Qdrant
+qdrant:
+  persistence:
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
+    annotations: {}
+    storageVolumeName: qdrant-data
+    storageClassName: arena-storageclass

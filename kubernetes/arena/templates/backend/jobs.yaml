@@ -43,5 +43,5 @@ spec:
       restartPolicy: Never
       {{ if .Values.docker.requireAuthentication -}}
       imagePullSecrets:
-      - name: {{ .Release.Name -}}-docker-registry-secret
+      - name: arena-docker-registry-secret
       {{- end }}
