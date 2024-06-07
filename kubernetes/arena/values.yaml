@@ -143,12 +143,25 @@ qdrant:
     size: 10Gi
     annotations: {}
     storageVolumeName: qdrant-data
-    storageClassName: arena-storageclass
+    # storageClassName: arena-storageclass
 
 # Milvus
 milvus:
+  minio:
+    persistence:
+      # storageClass: arena-storageclass
+      size: 50Gi
+  etcd:
+    persistence:
+      # storageClass: arena-storageclass
+      size: 5Gi
   pulsar:
     bookkeeper:
+      volumes:
+        journal:
+          size: 50Gi
+        ledgers:
+          size: 100Gi
       pdb:
         usePolicy: false
     zookeeper:
@@ -160,4 +173,8 @@ milvus:
     broker:
       pdb:
         usePolicy: false
-  
+  # Kafka not enabled
+  kafka:
+    persistence:
+      # storageClass: arena-storageclass
+      size: 50Gi

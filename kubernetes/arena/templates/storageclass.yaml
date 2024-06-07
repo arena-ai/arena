@@ -6,6 +6,8 @@ metadata:
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
 {{- else if eq .Values.cluster.provider "EKS"}}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
 provisioner: ebs.csi.aws.com
 parameters:
   type: gp2

@@ -44,7 +44,7 @@ eksctl create nodegroup \
   --name $NODE_GROUP_NAME \
   --node-ami-family Ubuntu2204 \
   --node-type m5.xlarge \
-  --nodes 2 \
+  --nodes 3 \
   --nodes-min 2 \
   --nodes-max 5
 ```
