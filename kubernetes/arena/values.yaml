@@ -144,3 +144,20 @@ qdrant:
     annotations: {}
     storageVolumeName: qdrant-data
     storageClassName: arena-storageclass
+
+# Milvus
+milvus:
+  pulsar:
+    bookkeeper:
+      pdb:
+        usePolicy: false
+    zookeeper:
+      pdb:
+        usePolicy: false
+    proxy:
+      pdb:
+        usePolicy: false
+    broker:
+      pdb:
+        usePolicy: false
+  

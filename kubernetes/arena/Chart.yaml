@@ -35,7 +35,12 @@ dependencies:
     repository: https://charts.jetstack.io
     alias: cert-manager
     condition: cert-manager.enabled
-  # Qdrant
-  - name: qdrant
-    version: "0.9.0"
-    repository: "https://qdrant.github.io/qdrant-helm"
+  # # Qdrant
+  # - name: qdrant
+  #   version: "0.9.0"
+  #   repository: "https://qdrant.github.io/qdrant-helm"
+  # Milvus
+  - name: milvus
+    version: "2.4.4"
+    repository: https://zilliztech.github.io/milvus-helm/
+    alias: milvus
