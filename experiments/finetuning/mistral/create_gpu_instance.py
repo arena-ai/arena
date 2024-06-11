@@ -1,6 +1,10 @@
 import os
 import logging
+import time
+import json
 import boto3
+
+logging.basicConfig(level=logging.INFO)
 
 class Infra:
     def __init__(self, name: str = 'arena', region: str = 'eu-north-1', instance_type='g5.2xlarge', image='ami-03dc624a6bfdafc83'):
@@ -48,7 +52,14 @@ class Infra:
         # Create the instance
         try:
             instances = self.client.run_instances(**instance_params)
-            print('Created instance:', instances['Instances'][0]['InstanceId'])
+            instance = instances['Instances'][0]
+            logging.info(f"Created instance: {instance['InstanceId']}")
+            while 'PublicIpAddress' not in instance:
+                logging.info('Instance:', instance)
+                time.sleep(1)
+                instances = self.client.describe_instances(InstanceIds=[instance['InstanceId']])
+                instance = instances['Reservations'][0]['Instances'][0]
+            return instance
         except Exception as e:
             logging.error(e)
 
@@ -58,4 +69,6 @@ if __name__ == '__main__':
     infra = Infra()
     infra.public_key('~/.ssh/id_rsa.pub')
     instance = infra.gpu_instance()
-    print(instance)
+    with open('instance.json', 'w') as file:
+        json.dump(instance, file, indent=2, sort_keys=True, default=str)
+    print(f"{instance['PublicDnsName']} ({instance['PublicIpAddress']})")

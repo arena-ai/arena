@@ -1,0 +1,141 @@
+{
+  "AmiLaunchIndex": 0,
+  "Architecture": "x86_64",
+  "BlockDeviceMappings": [
+    {
+      "DeviceName": "/dev/sda1",
+      "Ebs": {
+        "AttachTime": "2024-06-11 08:35:58+00:00",
+        "DeleteOnTermination": true,
+        "Status": "attaching",
+        "VolumeId": "vol-047fd1e8c6a63278f"
+      }
+    }
+  ],
+  "BootMode": "uefi-preferred",
+  "CapacityReservationSpecification": {
+    "CapacityReservationPreference": "open"
+  },
+  "ClientToken": "7b372587-66cb-4514-9528-b70083b39620",
+  "CpuOptions": {
+    "CoreCount": 4,
+    "ThreadsPerCore": 2
+  },
+  "CurrentInstanceBootMode": "uefi",
+  "EbsOptimized": false,
+  "EnaSupport": true,
+  "EnclaveOptions": {
+    "Enabled": false
+  },
+  "HibernationOptions": {
+    "Configured": false
+  },
+  "Hypervisor": "xen",
+  "ImageId": "ami-03dc624a6bfdafc83",
+  "InstanceId": "i-06ec0d7c005d2158e",
+  "InstanceType": "g5.2xlarge",
+  "KeyName": "arena-key-pair",
+  "LaunchTime": "2024-06-11 08:35:57+00:00",
+  "MaintenanceOptions": {
+    "AutoRecovery": "default"
+  },
+  "MetadataOptions": {
+    "HttpEndpoint": "enabled",
+    "HttpProtocolIpv6": "disabled",
+    "HttpPutResponseHopLimit": 1,
+    "HttpTokens": "optional",
+    "InstanceMetadataTags": "disabled",
+    "State": "pending"
+  },
+  "Monitoring": {
+    "State": "disabled"
+  },
+  "NetworkInterfaces": [
+    {
+      "Association": {
+        "IpOwnerId": "amazon",
+        "PublicDnsName": "ec2-13-50-238-110.eu-north-1.compute.amazonaws.com",
+        "PublicIp": "13.50.238.110"
+      },
+      "Attachment": {
+        "AttachTime": "2024-06-11 08:35:57+00:00",
+        "AttachmentId": "eni-attach-0338da9618083b33d",
+        "DeleteOnTermination": true,
+        "DeviceIndex": 0,
+        "NetworkCardIndex": 0,
+        "Status": "attaching"
+      },
+      "Description": "",
+      "Groups": [
+        {
+          "GroupId": "sg-00332038cbbc3b904",
+          "GroupName": "default"
+        }
+      ],
+      "InterfaceType": "interface",
+      "Ipv6Addresses": [],
+      "MacAddress": "0e:23:63:28:6e:8b",
+      "NetworkInterfaceId": "eni-0faebda341907277a",
+      "OwnerId": "554786579371",
+      "PrivateDnsName": "ip-172-31-13-175.eu-north-1.compute.internal",
+      "PrivateIpAddress": "172.31.13.175",
+      "PrivateIpAddresses": [
+        {
+          "Association": {
+            "IpOwnerId": "amazon",
+            "PublicDnsName": "ec2-13-50-238-110.eu-north-1.compute.amazonaws.com",
+            "PublicIp": "13.50.238.110"
+          },
+          "Primary": true,
+          "PrivateDnsName": "ip-172-31-13-175.eu-north-1.compute.internal",
+          "PrivateIpAddress": "172.31.13.175"
+        }
+      ],
+      "SourceDestCheck": true,
+      "Status": "in-use",
+      "SubnetId": "subnet-0e9c8477043a0fbff",
+      "VpcId": "vpc-092e5b1130bf5f010"
+    }
+  ],
+  "Placement": {
+    "AvailabilityZone": "eu-north-1c",
+    "GroupName": "",
+    "Tenancy": "default"
+  },
+  "PlatformDetails": "Linux/UNIX",
+  "PrivateDnsName": "ip-172-31-13-175.eu-north-1.compute.internal",
+  "PrivateDnsNameOptions": {
+    "EnableResourceNameDnsAAAARecord": false,
+    "EnableResourceNameDnsARecord": false,
+    "HostnameType": "ip-name"
+  },
+  "PrivateIpAddress": "172.31.13.175",
+  "ProductCodes": [],
+  "PublicDnsName": "ec2-13-50-238-110.eu-north-1.compute.amazonaws.com",
+  "PublicIpAddress": "13.50.238.110",
+  "RootDeviceName": "/dev/sda1",
+  "RootDeviceType": "ebs",
+  "SecurityGroups": [
+    {
+      "GroupId": "sg-00332038cbbc3b904",
+      "GroupName": "default"
+    }
+  ],
+  "SourceDestCheck": true,
+  "State": {
+    "Code": 0,
+    "Name": "pending"
+  },
+  "StateTransitionReason": "",
+  "SubnetId": "subnet-0e9c8477043a0fbff",
+  "Tags": [
+    {
+      "Key": "Name",
+      "Value": "arena-gpu-instance"
+    }
+  ],
+  "UsageOperation": "RunInstances",
+  "UsageOperationUpdateTime": "2024-06-11 08:35:57+00:00",
+  "VirtualizationType": "hvm",
+  "VpcId": "vpc-092e5b1130bf5f010"
+}
