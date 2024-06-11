@@ -5,10 +5,10 @@
     {
       "DeviceName": "/dev/sda1",
       "Ebs": {
-        "AttachTime": "2024-06-11 13:39:04+00:00",
+        "AttachTime": "2024-06-11 15:35:50+00:00",
         "DeleteOnTermination": true,
         "Status": "attaching",
-        "VolumeId": "vol-0de53b040e3408e1f"
+        "VolumeId": "vol-0d9159126c6527233"
       }
     }
   ],
@@ -16,7 +16,7 @@
   "CapacityReservationSpecification": {
     "CapacityReservationPreference": "open"
   },
-  "ClientToken": "a40f78f4-4f39-420c-b8a2-3bb809c2bac2",
+  "ClientToken": "c4735ac2-0d4f-48b9-8528-4eb6a43341bc",
   "CpuOptions": {
     "CoreCount": 4,
     "ThreadsPerCore": 2
@@ -32,10 +32,10 @@
   },
   "Hypervisor": "xen",
   "ImageId": "ami-0d47c2063be189fce",
-  "InstanceId": "i-02e1d0d06b602c3d5",
+  "InstanceId": "i-0b5a903bb2d742609",
   "InstanceType": "g5.2xlarge",
   "KeyName": "arena-key-pair",
-  "LaunchTime": "2024-06-11 13:39:03+00:00",
+  "LaunchTime": "2024-06-11 15:35:50+00:00",
   "MaintenanceOptions": {
     "AutoRecovery": "default"
   },
@@ -54,12 +54,12 @@
     {
       "Association": {
         "IpOwnerId": "amazon",
-        "PublicDnsName": "ec2-13-53-200-76.eu-north-1.compute.amazonaws.com",
-        "PublicIp": "13.53.200.76"
+        "PublicDnsName": "ec2-16-171-176-1.eu-north-1.compute.amazonaws.com",
+        "PublicIp": "16.171.176.1"
       },
       "Attachment": {
-        "AttachTime": "2024-06-11 13:39:03+00:00",
-        "AttachmentId": "eni-attach-0ef0ce6693ae4b5a9",
+        "AttachTime": "2024-06-11 15:35:50+00:00",
+        "AttachmentId": "eni-attach-0d9d6e2fa462c0e36",
         "DeleteOnTermination": true,
         "DeviceIndex": 0,
         "NetworkCardIndex": 0,
@@ -68,27 +68,27 @@
       "Description": "",
       "Groups": [
         {
-          "GroupId": "sg-00332038cbbc3b904",
-          "GroupName": "default"
+          "GroupId": "sg-092a5b20bca1359d0",
+          "GroupName": "arena-security-group"
         }
       ],
       "InterfaceType": "interface",
       "Ipv6Addresses": [],
-      "MacAddress": "0a:e0:fd:df:68:ff",
-      "NetworkInterfaceId": "eni-008be840abb1b254a",
+      "MacAddress": "0a:39:3d:9b:a5:8d",
+      "NetworkInterfaceId": "eni-0fb8c9c53e8476060",
       "OwnerId": "554786579371",
-      "PrivateDnsName": "ip-172-31-32-161.eu-north-1.compute.internal",
-      "PrivateIpAddress": "172.31.32.161",
+      "PrivateDnsName": "ip-172-31-40-176.eu-north-1.compute.internal",
+      "PrivateIpAddress": "172.31.40.176",
       "PrivateIpAddresses": [
         {
           "Association": {
             "IpOwnerId": "amazon",
-            "PublicDnsName": "ec2-13-53-200-76.eu-north-1.compute.amazonaws.com",
-            "PublicIp": "13.53.200.76"
+            "PublicDnsName": "ec2-16-171-176-1.eu-north-1.compute.amazonaws.com",
+            "PublicIp": "16.171.176.1"
           },
           "Primary": true,
-          "PrivateDnsName": "ip-172-31-32-161.eu-north-1.compute.internal",
-          "PrivateIpAddress": "172.31.32.161"
+          "PrivateDnsName": "ip-172-31-40-176.eu-north-1.compute.internal",
+          "PrivateIpAddress": "172.31.40.176"
         }
       ],
       "SourceDestCheck": true,
@@ -103,22 +103,22 @@
     "Tenancy": "default"
   },
   "PlatformDetails": "Linux/UNIX",
-  "PrivateDnsName": "ip-172-31-32-161.eu-north-1.compute.internal",
+  "PrivateDnsName": "ip-172-31-40-176.eu-north-1.compute.internal",
   "PrivateDnsNameOptions": {
     "EnableResourceNameDnsAAAARecord": false,
     "EnableResourceNameDnsARecord": false,
     "HostnameType": "ip-name"
   },
-  "PrivateIpAddress": "172.31.32.161",
+  "PrivateIpAddress": "172.31.40.176",
   "ProductCodes": [],
-  "PublicDnsName": "ec2-13-53-200-76.eu-north-1.compute.amazonaws.com",
-  "PublicIpAddress": "13.53.200.76",
+  "PublicDnsName": "ec2-16-171-176-1.eu-north-1.compute.amazonaws.com",
+  "PublicIpAddress": "16.171.176.1",
   "RootDeviceName": "/dev/sda1",
   "RootDeviceType": "ebs",
   "SecurityGroups": [
     {
-      "GroupId": "sg-00332038cbbc3b904",
-      "GroupName": "default"
+      "GroupId": "sg-092a5b20bca1359d0",
+      "GroupName": "arena-security-group"
     }
   ],
   "SourceDestCheck": true,
@@ -130,16 +130,16 @@
   "SubnetId": "subnet-009ed9ec12ba775df",
   "Tags": [
     {
-      "Key": "Name",
-      "Value": "arena-arena-gpu-instance"
-    },
-    {
       "Key": "App",
       "Value": "arena"
+    },
+    {
+      "Key": "Name",
+      "Value": "arena-arena-gpu-instance"
     }
   ],
   "UsageOperation": "RunInstances",
-  "UsageOperationUpdateTime": "2024-06-11 13:39:03+00:00",
+  "UsageOperationUpdateTime": "2024-06-11 15:35:50+00:00",
   "VirtualizationType": "hvm",
   "VpcId": "vpc-092e5b1130bf5f010"
 }

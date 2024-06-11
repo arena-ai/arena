@@ -17,8 +17,12 @@ class Infra:
         self.image = image
         self.client = boto3.client('ec2', region_name=self.region)
         self.tags = lambda name: [{'Key': 'App', 'Value': 'arena'}, {'Key': 'Name', 'Value': f'arena-{name}'}]
+        self.security_group()
+        self.authorize_ssh()
+        self.public_key('~/.ssh/aws.pub')
     
     def security_group(self):
+        """Create a Security Group if not exist"""
         try:
             security_group = self.client.create_security_group(
                 Description = 'The security group for Arena GPU tests',
@@ -32,6 +36,27 @@ class Infra:
         except Exception as e:
             security_groups = self.client.describe_security_groups(GroupNames=[self.security_group_name])
             self.security_group_id = security_groups['SecurityGroups'][0]['GroupId']
+            logging.warning(e)
+    
+    def authorize_ssh(self):
+        """Authorize SSH access"""
+        try:
+            response = self.client.authorize_security_group_ingress(
+                GroupId=self.security_group_id,
+                IpPermissions=[
+                    {
+                        'IpProtocol': 'tcp',
+                        'FromPort': 22,
+                        'ToPort': 22,
+                        'IpRanges': [{
+                            'CidrIp': '0.0.0.0/0',  # Allows access from anywhere
+                            'Description': 'Allow SSH from anywhere'
+                        }]
+                    }
+                ]
+            )
+            logging.info(f"Ingress Successfully Set: {response}")
+        except Exception as e:
             logging.warning(e)
 
     def public_key(self, public_key_path: str):
@@ -59,6 +84,7 @@ class Infra:
             'MinCount': 1,
             'MaxCount': 1,
             'KeyName': self.key_pair,  # replace with your key pair name
+            'SecurityGroupIds': [self.security_group_id],
             'InstanceInitiatedShutdownBehavior': 'terminate',  # instance terminates on shutdown
             'TagSpecifications': [
                 {
@@ -85,8 +111,6 @@ class Infra:
 
 if __name__ == '__main__':
     infra = Infra()
-    # infra.security_group()
-    infra.public_key('~/.ssh/aws.pub')
     instance = infra.gpu_instance()
     with open('instance.json', 'w') as file:
         json.dump(instance, file, indent=2, sort_keys=True, default=str)
