@@ -211,6 +211,18 @@ class Infra:
         while self.instance['State']['Name'] != 'running':
             logging.info(f'Waiting for "running" state (Current state is "{self.instance["State"]["Name"]}")...')
             time.sleep(1)
+    
+    def wait_until_ready(self):
+        # TODO change that
+        while self.instance['State']['Name'] != 'running':
+            logging.info(f'Waiting for "running" state (Current state is "{self.instance["State"]["Name"]}")...')
+            time.sleep(1)
+
+    def wait_until_terminated(self):
+        # TODO change that
+        while self.instance['State']['Name'] != 'terminated':
+            logging.info(f'Waiting for "terminated" state (Current state is "{self.instance["State"]["Name"]}")...')
+            time.sleep(1)
 
     def push_git_key(self, private_key_path: str):
         private_key_path = os.path.expanduser(private_key_path)
@@ -223,10 +235,21 @@ class Infra:
             },
             ).put(private_key_path, remote='/home/ubuntu/.ssh/id_rsa')
     
+    def terminate(self):
+        self.client.terminate_instances(InstanceIds=[self.state.instance_id])
+        self.wait_until_terminated()
+        self.state.instance_id = None
+        self.client.delete_key_pair(KeyPairId=self.state.key_pair_id)
+        self.state.key_pair_id = None
+        self.client.delete_security_group(GroupId=self.state.security_group_id)
+        self.state.security_group_id = None
+        self.state.dump()
 
 if __name__ == '__main__':
     infra = Infra()
-    infra.wait_until_running()
-    print(json.dumps(infra.instance, indent=2, default=str))
-    infra.push_git_key('~/.ssh/id_rsa')
-    print(f"{infra.instance['PublicDnsName']} ({infra.instance['PublicIpAddress']})")
+    # infra.wait_until_running()
+    # print(json.dumps(infra.instance, indent=2, default=str))
+    # infra.push_git_key('~/.ssh/id_rsa')
+    # print(json.dumps(infra.instance, indent=2, default=str))
+    # print(f"{infra.instance['PublicDnsName']} ({infra.instance['PublicIpAddress']})")
+    infra.terminate()
