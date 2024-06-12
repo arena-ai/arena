@@ -1,0 +1,8 @@
+{
+  "image": "ami-0d47c2063be189fce",
+  "instance_type": "g5.2xlarge",
+  "key": "~/.ssh/aws",
+  "name": "arena",
+  "persist_path": "params.json",
+  "region": "eu-north-1"
+}
