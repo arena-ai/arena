@@ -7,6 +7,7 @@ from dataclasses import dataclass, asdict
 import json
 import boto3
 from fabric import Connection
+from rich import print
 
 logging.basicConfig(level=logging.INFO)
 
@@ -250,6 +251,6 @@ if __name__ == '__main__':
     infra.wait_until_running()
     print(json.dumps(infra.instance, indent=2, default=str))
     infra.push_key('~/.ssh/id_rsa')
-    print(json.dumps(infra.instance, indent=2, default=str))
     print(f"{infra.instance['PublicDnsName']} ({infra.instance['PublicIpAddress']})")
-    infra.terminate()
+    
+    # infra.terminate()

@@ -1,6 +1,6 @@
 {
-  "instance_id": null,
-  "key_pair_id": null,
+  "instance_id": "i-0b6348315ded41335",
+  "key_pair_id": "key-097dbfc05c945ccba",
   "persist_path": "state.json",
-  "security_group_id": null
+  "security_group_id": "sg-091f762a3814d605a"
 }
