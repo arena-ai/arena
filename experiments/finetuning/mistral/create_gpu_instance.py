@@ -224,7 +224,7 @@ class Infra:
             logging.info(f'Waiting for "terminated" state (Current state is "{self.instance["State"]["Name"]}")...')
             time.sleep(1)
 
-    def push_git_key(self, private_key_path: str):
+    def push_key(self, private_key_path: str):
         private_key_path = os.path.expanduser(private_key_path)
         print(private_key_path)
         Connection(
@@ -247,9 +247,9 @@ class Infra:
 
 if __name__ == '__main__':
     infra = Infra()
-    # infra.wait_until_running()
-    # print(json.dumps(infra.instance, indent=2, default=str))
-    # infra.push_git_key('~/.ssh/id_rsa')
-    # print(json.dumps(infra.instance, indent=2, default=str))
-    # print(f"{infra.instance['PublicDnsName']} ({infra.instance['PublicIpAddress']})")
+    infra.wait_until_running()
+    print(json.dumps(infra.instance, indent=2, default=str))
+    infra.push_key('~/.ssh/id_rsa')
+    print(json.dumps(infra.instance, indent=2, default=str))
+    print(f"{infra.instance['PublicDnsName']} ({infra.instance['PublicIpAddress']})")
     infra.terminate()
