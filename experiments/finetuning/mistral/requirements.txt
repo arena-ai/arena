@@ -1,3 +1,4 @@
+typer
 fabric
 boto3
 rich

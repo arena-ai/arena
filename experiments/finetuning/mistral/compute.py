@@ -5,6 +5,7 @@ import logging
 import time
 from dataclasses import dataclass, asdict
 import json
+import typer
 import boto3
 from fabric import Connection
 from rich import print
@@ -31,6 +32,7 @@ class Parameters(Persistent):
     instance_type: str ='g5.2xlarge'
     image: str = 'ami-0d47c2063be189fce'
     key: str = '~/.ssh/aws'
+    volume_size: int = 100
 
     @property
     def security_group_name(self) -> str:
@@ -51,13 +53,14 @@ class State(Persistent):
     key_pair_id: str | None = None
     instance_id: str | None = None
 
-class Infra:
-    def __init__(self):
+class Compute:
+    def __init__(self, setup: bool = True):
         self._params = None
         self._state = None
         self.client = boto3.client('ec2', region_name=self.params.region)
-        self.tags = lambda name: [{'Key': 'App', 'Value': 'arena'}, {'Key': 'Name', 'Value': f'arena-{name}'}]
-        self.set_state()
+        self.tags = lambda name: [{'Key': 'App', 'Value': 'arena'}, {'Key': 'Name', 'Value': name}]
+        if setup:
+            self.set_state()
 
     @property
     def params(self) -> Parameters:
@@ -107,6 +110,16 @@ class Infra:
         except Exception as e:
             self.state.instance_id = None
             self.set_state()
+
+    @property
+    def connection(self) -> Connection:
+        return Connection(
+            host=self.instance['PublicDnsName'],
+            user='ubuntu',
+            connect_kwargs={
+                'key_filename': os.path.expanduser(self.params.key),
+            },
+        )
     
     def set_state(self):
         """The controller"""
@@ -178,25 +191,30 @@ class Infra:
             self.state.key_pair_id = key_pairs['KeyPairs'][0]['KeyPairId']
     
     def set_instance(self):
-        # Define the parameters for the instance
-        instance_params = {
-            'ImageId': self.params.image,  # replace with your desired AMI ID
-            'InstanceType': self.params.instance_type,  # instance with GPU
-            'MinCount': 1,
-            'MaxCount': 1,
-            'KeyName': self.params.key_pair_name,  # replace with your key pair name
-            'SecurityGroupIds': [self.state.security_group_id],
-            'InstanceInitiatedShutdownBehavior': 'terminate',  # instance terminates on shutdown
-            'TagSpecifications': [
-                {
-                    'ResourceType': 'instance',
-                    'Tags': self.tags(self.params.instance_name)
-                }
-            ]
-        }
         # Create the instance
         try:
-            instances = self.client.run_instances(**instance_params)
+            instances = self.client.run_instances(
+                ImageId = self.params.image,  # replace with your desired AMI ID
+                InstanceType = self.params.instance_type,  # instance with GPU
+                MinCount = 1,
+                MaxCount = 1,
+                KeyName = self.params.key_pair_name,  # replace with your key pair name
+                SecurityGroupIds = [self.state.security_group_id],
+                InstanceInitiatedShutdownBehavior = 'terminate',  # instance terminates on shutdown
+                BlockDeviceMappings=[
+                    {
+                        'DeviceName': '/dev/xvda',
+                        'Ebs': {
+                            'VolumeSize': self.params.volume_size, # size in GB
+                        },
+                    },
+                ],
+                TagSpecifications = [
+                    {
+                        'ResourceType': 'instance',
+                        'Tags': self.tags(self.params.instance_name)
+                    }
+                ])
             self.state.instance_id = instances['Instances'][0]['InstanceId']
             logging.info(f"Created instance: {self.instance['InstanceId']}")
         except Exception as e:
@@ -224,17 +242,16 @@ class Infra:
         while self.instance['State']['Name'] != 'terminated':
             logging.info(f'Waiting for "terminated" state (Current state is "{self.instance["State"]["Name"]}")...')
             time.sleep(1)
-
-    def push_key(self, private_key_path: str):
-        private_key_path = os.path.expanduser(private_key_path)
-        print(private_key_path)
-        Connection(
-            host=self.instance['PublicDnsName'],
-            user='ubuntu',
-            connect_kwargs={
-                'key_filename': os.path.expanduser(self.params.key),
-            },
-            ).put(private_key_path, remote='/home/ubuntu/.ssh/id_rsa')
+    
+    def put(self, src_path: str, dest_path: str):
+        src_path = os.path.expanduser(src_path)
+        self.connection.put(src_path, remote=dest_path)
+    
+    def run(self, cmd: str):
+        self.connection.run(cmd, pty=True)
+        
+    def put_key(self, private_key_path: str):
+        self.put(private_key_path, '/home/ubuntu/.ssh/id_rsa')
     
     def terminate(self):
         self.client.terminate_instances(InstanceIds=[self.state.instance_id])
@@ -246,11 +263,37 @@ class Infra:
         self.state.security_group_id = None
         self.state.dump()
 
-if __name__ == '__main__':
-    infra = Infra()
-    infra.wait_until_running()
-    print(json.dumps(infra.instance, indent=2, default=str))
-    infra.push_key('~/.ssh/id_rsa')
-    print(f"{infra.instance['PublicDnsName']} ({infra.instance['PublicIpAddress']})")
-    
-    # infra.terminate()
+
+app = typer.Typer()
+
+
+@app.command()
+def create():
+    print(f"Creating a GPU instance")
+    compute = Compute()
+    compute.wait_until_running()
+    print(json.dumps(compute.instance, indent=2, default=str))
+    print(f"{compute.instance['PublicDnsName']} ({compute.instance['PublicIpAddress']})")
+
+
+@app.command()
+def run():
+    print(f"Push the setup script and run it")
+    compute = Compute()
+    compute.wait_until_running()
+    compute.put('setup.sh', '/home/ubuntu/setup.sh')
+    compute.run('/home/ubuntu/setup.sh')
+
+
+@app.command()
+def terminate():
+    compute = Compute(setup=False)
+    if compute.state.instance_id:
+        print(f"Terminating the instance")
+        compute.terminate()
+    else:
+        print(f"Nothing to terminate")
+
+
+if __name__ == "__main__":
+    app()
