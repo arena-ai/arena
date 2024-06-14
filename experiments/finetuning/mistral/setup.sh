@@ -11,6 +11,6 @@ cd $HOME \
 cd mistral-finetune
 pip install -r requirements.txt
 
-mkdir -p ~/${HOME}/mistral_models
+mkdir -p ${HOME}/mistral_models
 cd ${HOME} && wget ${MODEL_URL}
 tar -xf ${MODEL_ARCHIVE} -C mistral_models

@@ -2,3 +2,11 @@ typer
 fabric
 boto3
 rich
+python-dotenv
+numpy
+pandas
+matplotlib
+huggingface_hub
+datasets
+openai
+tiktoken

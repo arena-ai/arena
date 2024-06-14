@@ -5,5 +5,5 @@
   "name": "arena",
   "persist_path": "params.json",
   "region": "eu-north-1",
-  "volume_size": 100
+  "volume_size": 500
 }

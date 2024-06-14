@@ -32,7 +32,7 @@ class Parameters(Persistent):
     instance_type: str ='g5.2xlarge'
     image: str = 'ami-0d47c2063be189fce'
     key: str = '~/.ssh/aws'
-    volume_size: int = 100
+    volume_size: int = 500
 
     @property
     def security_group_name(self) -> str:
@@ -203,11 +203,12 @@ class Compute:
                 InstanceInitiatedShutdownBehavior = 'terminate',  # instance terminates on shutdown
                 BlockDeviceMappings=[
                     {
-                        'DeviceName': '/dev/xvda',
+                        'DeviceName': '/dev/sda1',  # Default root device name; may vary per AMI
                         'Ebs': {
                             'VolumeSize': self.params.volume_size, # size in GB
-                        },
-                    },
+                            'DeleteOnTermination': True,
+                        }
+                    }
                 ],
                 TagSpecifications = [
                     {
@@ -226,20 +227,17 @@ class Compute:
             time.sleep(1)
     
     def wait_until_running(self):
-        # TODO change that
-        while self.instance['State']['Name'] != 'running':
+        while 'State' not in self.instance or 'Name' not in self.instance['State'] or self.instance['State']['Name'] != 'running':
             logging.info(f'Waiting for "running" state (Current state is "{self.instance["State"]["Name"]}")...')
             time.sleep(1)
     
     def wait_until_ready(self):
-        # TODO change that
-        while self.instance['State']['Name'] != 'running':
+        while 'State' not in self.instance or 'Name' not in self.instance['State'] or self.instance['State']['Name'] != 'running':
             logging.info(f'Waiting for "running" state (Current state is "{self.instance["State"]["Name"]}")...')
             time.sleep(1)
 
     def wait_until_terminated(self):
-        # TODO change that
-        while self.instance['State']['Name'] != 'terminated':
+        while 'State' not in self.instance or 'Name' not in self.instance['State'] or self.instance['State']['Name'] != 'terminated':
             logging.info(f'Waiting for "terminated" state (Current state is "{self.instance["State"]["Name"]}")...')
             time.sleep(1)
     
@@ -277,12 +275,19 @@ def create():
 
 
 @app.command()
-def run():
+def setup():
     print(f"Push the setup script and run it")
     compute = Compute()
     compute.wait_until_running()
     compute.put('setup.sh', '/home/ubuntu/setup.sh')
     compute.run('/home/ubuntu/setup.sh')
+
+
+@app.command()
+def shell(cmd: str):
+    compute = Compute()
+    compute.wait_until_running()
+    compute.run(cmd)
 
 
 @app.command()
