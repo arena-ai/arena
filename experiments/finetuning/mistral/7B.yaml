@@ -1,0 +1,27 @@
+batch_size: 1
+ckpt_freq: 100
+data:
+  data: ''
+  eval_instruct_data: ''
+  instruct_data: ''
+eval_freq: 100
+instruct_data: ''
+log_freq: 1
+lora:
+  rank: 64
+max_steps: 300
+model_id_or_path: ''
+no_eval: false
+optim:
+  lr: 6.0e-05
+  pct_start: 0.05
+  weight_decay: 0.1
+run_dir: ''
+save_adapters: true
+seed: 0
+seq_len: 32768
+wandb:
+  key: ''
+  offline: false
+  project: ''
+  run_name: ''

@@ -10,6 +10,9 @@ import boto3
 from fabric import Connection
 from rich import print
 
+from dataset import Dataset
+from config import Config
+
 logging.basicConfig(level=logging.INFO)
 
 class Persistent(ABC):
@@ -279,6 +282,7 @@ def setup():
     print(f"Push the setup script and run it")
     compute = Compute()
     compute.wait_until_running()
+    compute.put('.env', '/home/ubuntu/.env')
     compute.put('setup.sh', '/home/ubuntu/setup.sh')
     compute.run('/home/ubuntu/setup.sh')
 
@@ -298,6 +302,20 @@ def terminate():
         compute.terminate()
     else:
         print(f"Nothing to terminate")
+
+
+@app.command()
+def data():
+    dataset = Dataset()
+    print(f"{len([d for d in dataset.data['train']])} rows loaded from the train set")
+    print(f"{len([d for d in dataset.data['test']])} rows loaded from the test set")
+    print("[green]Data loaded[/green]")
+
+
+@app.command()
+def config():
+    Config()
+    print("[green]Config loaded[/green]")
 
 
 if __name__ == "__main__":

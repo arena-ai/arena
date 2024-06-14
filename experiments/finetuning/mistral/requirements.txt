@@ -3,6 +3,7 @@ fabric
 boto3
 rich
 python-dotenv
+pyyaml
 numpy
 pandas
 matplotlib
