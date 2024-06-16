@@ -1,6 +1,6 @@
 {
-  "instance_id": "i-03c55a63394d4fbfe",
-  "key_pair_id": "key-07cc24869e684f9e9",
+  "instance_id": "i-04ddd16edb5848d22",
+  "key_pair_id": "key-0ebe6108645f061aa",
   "persist_path": "state.json",
-  "security_group_id": "sg-02f074135ad63eae2"
+  "security_group_id": "sg-0c4b767e415b0dbad"
 }
