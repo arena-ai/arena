@@ -13,8 +13,9 @@ from datasets import load_dataset
 logging.basicConfig(level=logging.INFO)
 
 class Dataset:
-    def __init__(self, train_path: str = 'mistral_finetuning_train.jsonl', test_path: str = 'mistral_finetuning_test.jsonl'):
+    def __init__(self, home: str, train_path: str = 'mistral_finetuning_train.jsonl', test_path: str = 'mistral_finetuning_test.jsonl'):
         self._data = None
+        self.home = home
         self.train_path = train_path
         self.test_path = test_path
         self.wandb_key = os.getenv('WANDB_API_TOKEN')
@@ -41,11 +42,11 @@ class Dataset:
                     file.write(json.dumps(self.format(datum))+'\n')
         # Create the iterators
         def train():
-            with open(self.train_path, 'r') as file:
+            with open(f'{self.home}/{self.train_path}', 'r') as file:
                 for row in file:
                     yield json.loads(row)
         def test():
-            with open(self.test_path, 'r') as file:
+            with open(f'{self.home}/{self.test_path}', 'r') as file:
                 for row in file:
                     yield json.loads(row)
         # Assign the iterators to 

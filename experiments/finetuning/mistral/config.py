@@ -37,12 +37,12 @@ class Config:
 
 
     def set_config(self):
-        if os.path.exists(self.config_path):
-            with open(self.config_path, 'r') as config:
+        if os.path.exists(f'{self.home}/{self.config_path}'):
+            with open(f'{self.home}/{self.config_path}', 'r') as config:
                 self._config = load(config, Loader=Loader)
         else:
-            if os.path.exists(self.default_config_path):
-                with open(self.default_config_path, 'r') as default_config:
+            if os.path.exists(f'{self.home}/{self.default_config_path}'):
+                with open(f'{self.home}/{self.default_config_path}', 'r') as default_config:
                     self._config = load(default_config, Loader=Loader)
             else:
                 self._config = {}
@@ -58,7 +58,7 @@ class Config:
             self._config['wandb']['project'] = 'arena-tests'
             self._config['wandb']['run_name'] = f'run-{datetime.now()}'
             self._config['wandb']['key'] = os.getenv('244af66353d33d53b5cb4f28a2ed24a277acd69a')
-            with open(self.config_path, 'w') as config:
+            with open(f'{self.home}/{self.config_path}', 'w') as config:
                 dump(self._config, config, Dumper=Dumper)
                 
 
