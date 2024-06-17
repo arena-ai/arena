@@ -1,6 +1,6 @@
 # data
 data:
-  instruct_data: "instruct_data"  # Fill
+  instruct_data: ""  # Fill
   data: ""  # Optionally fill with pretraining data 
   eval_instruct_data: ""  # Optionally fill
 

@@ -303,18 +303,20 @@ def terminate():
     else:
         print(f"Nothing to terminate")
 
+TRAIN_PATH: str = 'mistral_finetuning_train.jsonl',
+TEST_PATH: str = 'mistral_finetuning_test.jsonl'
 
 @app.command()
-def data():
-    dataset = Dataset()
+def data(home: str):
+    dataset = Dataset(home, train_path=TRAIN_PATH, test_path=TEST_PATH)
     print(f"{len([d for d in dataset.data['train']])} rows loaded from the train set")
     print(f"{len([d for d in dataset.data['test']])} rows loaded from the test set")
     print("[green]Data loaded[/green]")
 
 
 @app.command()
-def config():
-    Config()
+def config(home: str):
+    Config(home, train_path=TRAIN_PATH, test_path=TEST_PATH)
     print("[green]Config loaded[/green]")
 
 

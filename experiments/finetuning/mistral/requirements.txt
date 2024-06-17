@@ -11,3 +11,4 @@ huggingface_hub
 datasets
 openai
 tiktoken
+wandb

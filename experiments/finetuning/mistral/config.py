@@ -17,11 +17,16 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 
 class Config:
-    def __init__(self, config_path: str = '7B.yaml', default_config_path: str = 'default_config.yaml'):
+    def __init__(self, home: str, config_path: str = '7B_instruct.yaml', default_config_path: str = 'default_config.yaml', train_path: str = 'mistral_finetuning_train.jsonl', test_path: str = 'mistral_finetuning_test.jsonl', model_path: str = 'mistral_model', run_dir_path: str = 'mistral_run'):
         """The config is saved as a file according to: https://github.com/mistralai/mistral-finetune/blob/main/example/7B.yaml"""
         self._config = None
+        self.home = home
         self.config_path = config_path
         self.default_config_path = default_config_path
+        self.train_path = train_path
+        self.test_path = test_path
+        self.model_path = model_path
+        self.run_dir_path = run_dir_path
         self.set_config()
     
     @property
@@ -41,6 +46,14 @@ class Config:
                     self._config = load(default_config, Loader=Loader)
             else:
                 self._config = {}
+            # Data
+            self._config['data']['instruct_data'] = f'{self.home}/{self.train_path}'
+            self._config['data']['data'] = ''
+            self._config['data']['eval_instruct_data'] = f'{self.home}/{self.test_path}'
+            # Model
+            self._config['model_id_or_path'] = f'{self.home}/{self.model_path}'
+            # RUn
+            self._config['run_dir'] = f'{self.home}/{self.run_dir_path}'
             # Set the config elements
             self._config['wandb']['project'] = 'arena-tests'
             self._config['wandb']['run_name'] = f'run-{datetime.now()}'

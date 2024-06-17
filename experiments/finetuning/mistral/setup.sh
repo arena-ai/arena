@@ -15,8 +15,8 @@ mkdir -p ${HOME}/mistral_models
 # Setup
 cd ${HOME}/arena/experiments/finetuning/mistral
 pip install -r requirements.txt
-python3 compute.py data
-python3 compute.py config
+python3 compute.py data ${HOME}
+python3 compute.py config ${HOME}
 mv mistral_finetuning_test.jsonl 
 
 # Install mistral-finetune
