@@ -5,6 +5,7 @@ import logging
 import time
 from dataclasses import dataclass, asdict
 import json
+from pathlib import Path
 import typer
 import boto3
 from fabric import Connection
@@ -278,13 +279,13 @@ def create():
 
 
 @app.command()
-def setup():
+def setup(home: str = '/home/ubuntu'):
     print(f"Push the setup script and run it")
     compute = Compute()
     compute.wait_until_running()
-    compute.put('.env', '/home/ubuntu/.env')
-    compute.put('setup.sh', '/home/ubuntu/setup.sh')
-    compute.run('/home/ubuntu/setup.sh')
+    compute.put('.env', Path(home, '.env'))
+    compute.put('setup.sh', Path(home, 'setup.sh'))
+    compute.run(Path(home, 'setup.sh'))
 
 
 @app.command()
@@ -307,7 +308,7 @@ TRAIN_PATH: str = 'mistral_finetuning_train.jsonl'
 TEST_PATH: str = 'mistral_finetuning_test.jsonl'
 
 @app.command()
-def data(home: str):
+def data(home: str = '/home/ubuntu'):
     dataset = Dataset(home, train_path=TRAIN_PATH, test_path=TEST_PATH)
     print(f"{len([d for d in dataset.data['train']])} rows loaded from the train set")
     print(f"{len([d for d in dataset.data['test']])} rows loaded from the test set")
@@ -315,7 +316,7 @@ def data(home: str):
 
 
 @app.command()
-def config(home: str):
+def config(home: str = '/home/ubuntu'):
     Config(home, train_path=TRAIN_PATH, test_path=TEST_PATH)
     print("[green]Config loaded[/green]")
 
