@@ -18,7 +18,9 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 
 class Config:
-    def __init__(self, home: str, config_path: str = '7B_instruct.yaml', default_config_path: str = 'default_config.yaml', train_path: str = 'mistral_finetuning_train.jsonl', test_path: str = 'mistral_finetuning_test.jsonl', model_path: str = 'mistral_model', run_dir_path: str = 'mistral_run'):
+    def __init__(self, home: str, config_path: str = '7B_instruct.yaml', default_config_path: str = 'default_config.yaml',
+                 train_path: str = 'mistral_finetuning_train.jsonl', test_path: str = 'mistral_finetuning_test.jsonl',
+                 model_path: str = 'mistral_model/7B', model_instruct_path: str = 'mistral_model/7B_instruct', run_dir_path: str = 'mistral_run'):
         """The config is saved as a file according to: https://github.com/mistralai/mistral-finetune/blob/main/example/7B.yaml"""
         self._config = None
         self.home = Path(home)
@@ -27,6 +29,7 @@ class Config:
         self.train_path = Path(home, train_path)
         self.test_path = Path(home, test_path)
         self.model_path = Path(home, model_path)
+        self.model_instruct_path = Path(home, model_instruct_path)
         self.run_dir_path = Path(home, run_dir_path)
         self.set_config()
     
@@ -52,7 +55,7 @@ class Config:
             self._config['data']['data'] = ''
             self._config['data']['eval_instruct_data'] = str(self.test_path)
             # Model
-            self._config['model_id_or_path'] = str(self.model_path)
+            self._config['model_id_or_path'] = str(self.model_instruct_path)
             # RUn
             self._config['run_dir'] = str(self.run_dir_path)
             # Set the config elements
