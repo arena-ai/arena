@@ -283,9 +283,9 @@ def setup(home: str = '/home/ubuntu'):
     print(f"Push the setup script and run it")
     compute = Compute()
     compute.wait_until_running()
-    compute.put('.env', Path(home, '.env'))
-    compute.put('setup.sh', Path(home, 'setup.sh'))
-    compute.run(Path(home, 'setup.sh'))
+    compute.put('.env', str(Path(home, '.env')))
+    compute.put('setup.sh', str(Path(home, 'setup.sh')))
+    compute.run(str(Path(home, 'setup.sh')))
 
 
 @app.command()
