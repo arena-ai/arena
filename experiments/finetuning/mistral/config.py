@@ -54,7 +54,7 @@ class Config:
             # Model
             self._config['model_id_or_path'] = str(self.model_path)
             # RUn
-            self._config['run_dir'] = str(self.run_dir_path)str(
+            self._config['run_dir'] = str(self.run_dir_path)
             # Set the config elements
             self._config['wandb']['project'] = 'arena-tests'
             self._config['wandb']['run_name'] = f'run-{datetime.now()}'
