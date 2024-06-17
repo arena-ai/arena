@@ -15,8 +15,8 @@ mkdir -p ${HOME}/mistral_models
 # Setup
 cd ${HOME}/arena/experiments/finetuning/mistral
 pip install -r requirements.txt
-python3 compute.py data --home ${HOME}
-python3 compute.py config --home ${HOME}
+python3 experiment.py data --home ${HOME}
+python3 experiment.py config --home ${HOME}
 
 # Install mistral-finetune
 cd ${HOME}/mistral-finetune

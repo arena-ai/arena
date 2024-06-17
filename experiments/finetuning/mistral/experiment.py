@@ -57,7 +57,7 @@ class State(Persistent):
     key_pair_id: str | None = None
     instance_id: str | None = None
 
-class Compute:
+class Experiment:
     def __init__(self, setup: bool = True):
         self._params = None
         self._state = None
@@ -272,7 +272,7 @@ app = typer.Typer()
 @app.command()
 def create():
     print(f"Creating a GPU instance")
-    compute = Compute()
+    compute = Experiment()
     compute.wait_until_running()
     print(json.dumps(compute.instance, indent=2, default=str))
     print(f"{compute.instance['PublicDnsName']} ({compute.instance['PublicIpAddress']})")
@@ -281,7 +281,7 @@ def create():
 @app.command()
 def setup(home: str = '/home/ubuntu'):
     print(f"Push the setup script and run it")
-    compute = Compute()
+    compute = Experiment()
     compute.wait_until_running()
     compute.put('.env', str(Path(home, '.env')))
     compute.put('setup.sh', str(Path(home, 'setup.sh')))
@@ -290,14 +290,14 @@ def setup(home: str = '/home/ubuntu'):
 
 @app.command()
 def shell(cmd: str):
-    compute = Compute()
+    compute = Experiment()
     compute.wait_until_running()
     compute.run(cmd)
 
 
 @app.command()
 def terminate():
-    compute = Compute(setup=False)
+    compute = Experiment(setup=False)
     if compute.state.instance_id:
         print(f"Terminating the instance")
         compute.terminate()
