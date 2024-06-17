@@ -48,13 +48,13 @@ class Config:
             else:
                 self._config = {}
             # Data
-            self._config['data']['instruct_data'] = self.train_path
+            self._config['data']['instruct_data'] = str(self.train_path)
             self._config['data']['data'] = ''
-            self._config['data']['eval_instruct_data'] = self.test_path
+            self._config['data']['eval_instruct_data'] = str(self.test_path)
             # Model
-            self._config['model_id_or_path'] = self.model_path
+            self._config['model_id_or_path'] = str(self.model_path)
             # RUn
-            self._config['run_dir'] = self.run_dir_path
+            self._config['run_dir'] = str(self.run_dir_path)str(
             # Set the config elements
             self._config['wandb']['project'] = 'arena-tests'
             self._config['wandb']['run_name'] = f'run-{datetime.now()}'

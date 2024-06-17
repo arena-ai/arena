@@ -29,5 +29,6 @@ tar -x --skip-old-files -f ${MODEL_ARCHIVE} -C mistral_models/7B
 wget -nc ${MODEL_URL}${MODEL_INSTRUCT_ARCHIVE}
 mkdir -p ${HOME}/mistral_models/7B_instruct
 tar -x --skip-old-files -f ${MODEL_INSTRUCT_ARCHIVE} -C mistral_models/7B_instruct
+mkdir -p ${HOME}/mistral_run
 
 # python 
