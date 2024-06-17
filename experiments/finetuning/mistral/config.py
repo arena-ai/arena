@@ -57,7 +57,7 @@ class Config:
             self._config['run_dir'] = str(self.run_dir_path)
             # Set the config elements
             self._config['wandb']['project'] = 'arena-tests'
-            self._config['wandb']['run_name'] = f'run-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}'
+            self._config['wandb']['run_name'] = f'run-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}'
             self._config['wandb']['key'] = os.getenv('244af66353d33d53b5cb4f28a2ed24a277acd69a')
             with open(self.config_path, 'w') as config:
                 dump(self._config, config, Dumper=Dumper)
