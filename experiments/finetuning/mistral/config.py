@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 import json
 import os
+from pathlib import Path
 from rich import print
 from dotenv import load_dotenv
 load_dotenv()
@@ -20,13 +21,13 @@ class Config:
     def __init__(self, home: str, config_path: str = '7B_instruct.yaml', default_config_path: str = 'default_config.yaml', train_path: str = 'mistral_finetuning_train.jsonl', test_path: str = 'mistral_finetuning_test.jsonl', model_path: str = 'mistral_model', run_dir_path: str = 'mistral_run'):
         """The config is saved as a file according to: https://github.com/mistralai/mistral-finetune/blob/main/example/7B.yaml"""
         self._config = None
-        self.home = home
-        self.config_path = config_path
-        self.default_config_path = default_config_path
-        self.train_path = train_path
-        self.test_path = test_path
-        self.model_path = model_path
-        self.run_dir_path = run_dir_path
+        self.home = Path(home)
+        self.config_path = Path(home, config_path)
+        self.default_config_path = Path(home, default_config_path)
+        self.train_path = Path(home, train_path)
+        self.test_path = Path(home, test_path)
+        self.model_path = Path(home, model_path)
+        self.run_dir_path = Path(home, run_dir_path)
         self.set_config()
     
     @property
@@ -37,28 +38,28 @@ class Config:
 
 
     def set_config(self):
-        if os.path.exists(f'{self.home}/{self.config_path}'):
-            with open(f'{self.home}/{self.config_path}', 'r') as config:
+        if os.path.exists(self.config_path):
+            with open(self.config_path, 'r') as config:
                 self._config = load(config, Loader=Loader)
         else:
-            if os.path.exists(f'{self.home}/{self.default_config_path}'):
-                with open(f'{self.home}/{self.default_config_path}', 'r') as default_config:
+            if os.path.exists(self.default_config_path):
+                with open(self.default_config_path, 'r') as default_config:
                     self._config = load(default_config, Loader=Loader)
             else:
                 self._config = {}
             # Data
-            self._config['data']['instruct_data'] = f'{self.home}/{self.train_path}'
+            self._config['data']['instruct_data'] = self.train_path
             self._config['data']['data'] = ''
-            self._config['data']['eval_instruct_data'] = f'{self.home}/{self.test_path}'
+            self._config['data']['eval_instruct_data'] = self.test_path
             # Model
-            self._config['model_id_or_path'] = f'{self.home}/{self.model_path}'
+            self._config['model_id_or_path'] = self.model_path
             # RUn
-            self._config['run_dir'] = f'{self.home}/{self.run_dir_path}'
+            self._config['run_dir'] = self.run_dir_path
             # Set the config elements
             self._config['wandb']['project'] = 'arena-tests'
             self._config['wandb']['run_name'] = f'run-{datetime.now()}'
             self._config['wandb']['key'] = os.getenv('244af66353d33d53b5cb4f28a2ed24a277acd69a')
-            with open(f'{self.home}/{self.config_path}', 'w') as config:
+            with open(self.config_path, 'w') as config:
                 dump(self._config, config, Dumper=Dumper)
                 
 

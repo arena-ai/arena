@@ -4,6 +4,7 @@ from collections.abc import Iterator
 import logging
 import json
 import os
+from pathlib import Path
 from rich import print
 from dotenv import load_dotenv
 load_dotenv()
@@ -15,9 +16,9 @@ logging.basicConfig(level=logging.INFO)
 class Dataset:
     def __init__(self, home: str, train_path: str = 'mistral_finetuning_train.jsonl', test_path: str = 'mistral_finetuning_test.jsonl'):
         self._data = None
-        self.home = home
-        self.train_path = train_path
-        self.test_path = test_path
+        self.home = Path(home)
+        self.train_path = Path(home, train_path)
+        self.test_path = Path(home, test_path)
         self.wandb_key = os.getenv('WANDB_API_TOKEN')
         self.set_data()
     
@@ -42,11 +43,11 @@ class Dataset:
                     file.write(json.dumps(self.format(datum))+'\n')
         # Create the iterators
         def train():
-            with open(f'{self.home}/{self.train_path}', 'r') as file:
+            with open(self.train_path, 'r') as file:
                 for row in file:
                     yield json.loads(row)
         def test():
-            with open(f'{self.home}/{self.test_path}', 'r') as file:
+            with open(self.test_path, 'r') as file:
                 for row in file:
                     yield json.loads(row)
         # Assign the iterators to 
