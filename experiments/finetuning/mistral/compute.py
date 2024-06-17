@@ -303,7 +303,7 @@ def terminate():
     else:
         print(f"Nothing to terminate")
 
-TRAIN_PATH: str = 'mistral_finetuning_train.jsonl',
+TRAIN_PATH: str = 'mistral_finetuning_train.jsonl'
 TEST_PATH: str = 'mistral_finetuning_test.jsonl'
 
 @app.command()
