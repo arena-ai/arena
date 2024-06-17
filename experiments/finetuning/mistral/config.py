@@ -23,7 +23,7 @@ class Config:
         self._config = None
         self.home = Path(home)
         self.config_path = Path(home, config_path)
-        self.default_config_path = Path(home, default_config_path)
+        self.default_config_path = Path(default_config_path) # This is a relative path
         self.train_path = Path(home, train_path)
         self.test_path = Path(home, test_path)
         self.model_path = Path(home, model_path)
