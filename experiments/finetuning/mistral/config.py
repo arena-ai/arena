@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 class Config:
     def __init__(self, home: str, config_path: str = '7B_instruct.yaml', default_config_path: str = 'default_config.yaml',
                  train_path: str = 'mistral_finetuning_train.jsonl', test_path: str = 'mistral_finetuning_test.jsonl',
-                 model_path: str = 'mistral_model/7B', model_instruct_path: str = 'mistral_model/7B_instruct', run_dir_path: str = 'mistral_run'):
+                 model_path: str = 'mistral_models/7B', model_instruct_path: str = 'mistral_models/7B_instruct', run_dir_path: str = 'mistral_run'):
         """The config is saved as a file according to: https://github.com/mistralai/mistral-finetune/blob/main/example/7B.yaml"""
         self._config = None
         self.home = Path(home)
