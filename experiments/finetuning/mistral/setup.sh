@@ -17,10 +17,6 @@ cd ${HOME}/arena/experiments/finetuning/mistral
 pip install -r requirements.txt
 python3 compute.py data --home ${HOME}
 python3 compute.py config --home ${HOME}
-# Copy files
-mv mistral_finetuning_train.jsonl ${HOME}
-mv mistral_finetuning_test.jsonl ${HOME}
-mv 7B_instruct.yaml ${HOME}
 
 # Install mistral-finetune
 cd ${HOME}/mistral-finetune
