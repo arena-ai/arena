@@ -32,4 +32,4 @@ cd ${HOME}/mistral-finetune
 pip install -r requirements.txt
 # Run the training
 export CUDA_VISIBLE_DEVICES=0
-torchrun --nproc-per-node 1 --master_port $RANDOM -m train ../7B_instruct.yaml
+# torchrun --nproc-per-node 1 --master_port $RANDOM -m train ../7B_instruct.yaml
