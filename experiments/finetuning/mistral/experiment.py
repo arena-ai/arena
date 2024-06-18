@@ -13,7 +13,6 @@ from rich import print
 
 from dataset import Dataset
 from config import Config
-from inference import Inference
 
 logging.basicConfig(level=logging.INFO)
 
@@ -331,12 +330,14 @@ def config(home: str = '/home/ubuntu'):
     Config(home, train_path=TRAIN_PATH, test_path=TEST_PATH, wandb_key=os.getenv('WANDB_API_TOKEN'))
     print("[green]Config loaded[/green]")
 
-
+    
 @app.command()
-def infer(home: str = '/home/ubuntu', model_path: str = 'mistral_run-2024-06-18-12-00-37/checkpoints/checkpoint_001000/consolidated/'):
-    inference = Inference(home, model_path=model_path)
-    print("[green]Inference[/green]")
-    inference.generate()
+def inference(home: str = '/home/ubuntu'):
+    compute = Experiment()
+    compute.wait_until_running()
+    compute.run("""cd ${HOME}/arena/experiments/finetuning/mistral/
+python3 inference.py
+""")
 
 
 if __name__ == "__main__":

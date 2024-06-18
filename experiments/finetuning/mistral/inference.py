@@ -1,6 +1,7 @@
 import os
 from json import dumps, loads
 from pathlib import Path
+import typer
 
 from mistral_inference.model import Transformer
 from mistral_inference.generate import generate
@@ -8,6 +9,8 @@ from mistral_inference.generate import generate
 from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
 from mistral_common.protocol.instruct.messages import SystemMessage, UserMessage
 from mistral_common.protocol.instruct.request import ChatCompletionRequest
+
+app = typer.Typer()
 
 class Inference:
     def __init__(self, home: str, model_path: str = 'mistral_run-2024-06-18-12-00-37/checkpoints/checkpoint_001000/consolidated/') -> None:
@@ -29,3 +32,13 @@ class Inference:
         result = tokenizer.instruct_tokenizer.tokenizer.decode(out_tokens[0])
 
         print(result)
+
+
+@app.command()
+def inference(home: str = '/home/ubuntu', model_path: str = 'mistral_run-2024-06-18-12-00-37/checkpoints/checkpoint_001000/consolidated/'):
+    inference = Inference(home, model_path=model_path)
+    inference.generate()
+
+
+if __name__ == "__main__":
+    app()
