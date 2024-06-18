@@ -39,8 +39,10 @@ class Inference:
 
 
 @app.command()
-def inference(home: str = '/home/ubuntu', model_path: str = 'mistral_run-2024-06-18-12-00-37/checkpoints/checkpoint_001000/consolidated/'):
-    inference = Inference(home, model_path=model_path)
+def inference(home: str = '/home/ubuntu',
+              model_path: str = 'mistral_models/7B_instruct/',
+              lora_path: str = 'mistral_run-2024-06-18-12-00-37/checkpoints/checkpoint_001000/consolidated/lora.safetensors'):
+    inference = Inference(home, model_path=model_path, lora_path=lora_path)
     inference.generate()
 
 
