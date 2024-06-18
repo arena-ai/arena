@@ -12,4 +12,5 @@ datasets
 openai
 tiktoken
 wandb
+torch
 mistral-inference

@@ -1,19 +1,31 @@
+import os
+from json import dumps, loads
+from pathlib import Path
+
 from mistral_inference.model import Transformer
 from mistral_inference.generate import generate
 
 from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
-from mistral_common.protocol.instruct.messages import UserMessage
+from mistral_common.protocol.instruct.messages import SystemMessage, UserMessage
 from mistral_common.protocol.instruct.request import ChatCompletionRequest
 
+class Inference:
+    def __init__(self, home: str, model_path: str = 'mistral_run-2024-06-18-12-00-37/checkpoints/checkpoint_001000/consolidated/') -> None:
+        self.home = Path(home)
+        self.model_path = Path(home, model_path)
+    
+    def generate(self) -> None:
+        tokenizer = MistralTokenizer.from_file(str(self.model_path / "tokenizer.model.v3"))  # change to extracted tokenizer file
+        model = Transformer.from_folder(str(self.model_path))  # change to extracted model dir
 
-tokenizer = MistralTokenizer.from_file("./mistral_7b_instruct/tokenizer.model.v3")  # change to extracted tokenizer file
-model = Transformer.from_folder("./mistral_7b_instruct")  # change to extracted model dir
+        completion_request = ChatCompletionRequest(messages=[
+                SystemMessage(content="Given a meter ID, you return a series of hourly consumptions given as a json string."),
+                UserMessage(content=dumps({"item_id": "MT_130"}))
+            ])
 
-completion_request = ChatCompletionRequest(messages=[UserMessage(content="Explain Machine Learning to me in a nutshell.")])
+        tokens = tokenizer.encode_chat_completion(completion_request).tokens
 
-tokens = tokenizer.encode_chat_completion(completion_request).tokens
+        out_tokens, _ = generate([tokens], model, max_tokens=64, temperature=1.0, eos_id=tokenizer.instruct_tokenizer.tokenizer.eos_id)
+        result = tokenizer.instruct_tokenizer.tokenizer.decode(out_tokens[0])
 
-out_tokens, _ = generate([tokens], model, max_tokens=64, temperature=0.0, eos_id=tokenizer.instruct_tokenizer.tokenizer.eos_id)
-result = tokenizer.instruct_tokenizer.tokenizer.decode(out_tokens[0])
-
-print(result)
+        print(result)
