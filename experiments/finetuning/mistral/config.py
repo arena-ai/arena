@@ -20,7 +20,8 @@ logging.basicConfig(level=logging.INFO)
 class Config:
     def __init__(self, home: str, config_path: str = '7B_instruct.yaml', default_config_path: str = 'default_config.yaml',
                  train_path: str = 'mistral_finetuning_train.jsonl', test_path: str = 'mistral_finetuning_test.jsonl',
-                 model_path: str = 'mistral_models/7B', model_instruct_path: str = 'mistral_models/7B_instruct', run_dir_path: str = 'mistral_run'):
+                 model_path: str = 'mistral_models/7B', model_instruct_path: str = 'mistral_models/7B_instruct', run_dir_path: str = 'mistral_run',
+                 wandb_project: str = 'arena-tests', wandb_key: str = ''):
         """The config is saved as a file according to: https://github.com/mistralai/mistral-finetune/blob/main/example/7B.yaml"""
         self._config = None
         self.home = Path(home)
@@ -30,7 +31,10 @@ class Config:
         self.test_path = Path(home, test_path)
         self.model_path = Path(home, model_path)
         self.model_instruct_path = Path(home, model_instruct_path)
-        self.run_dir_path = Path(home, run_dir_path)
+        self.run_timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        self.run_dir_path = Path(home, f'{run_dir_path}-{self.run_timestamp}')
+        self.wandb_project = wandb_project
+        self.wandb_key = wandb_key
         self.set_config()
     
     @property
@@ -59,9 +63,9 @@ class Config:
             # RUn
             self._config['run_dir'] = str(self.run_dir_path)
             # Set the config elements
-            self._config['wandb']['project'] = 'arena-tests'
-            self._config['wandb']['run_name'] = f'run-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}'
-            self._config['wandb']['key'] = os.getenv('244af66353d33d53b5cb4f28a2ed24a277acd69a')
+            self._config['wandb']['project'] = self.wandb_project
+            self._config['wandb']['run_name'] = f'run-{self.run_timestamp}'
+            self._config['wandb']['key'] = self.wandb_key
             with open(self.config_path, 'w') as config:
                 dump(self._config, config, Dumper=Dumper)
                 
