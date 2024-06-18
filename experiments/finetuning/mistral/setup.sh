@@ -18,10 +18,7 @@ pip install -r requirements.txt
 python3 experiment.py data --home ${HOME}
 python3 experiment.py config --home ${HOME}
 
-# Install mistral-finetune
-cd ${HOME}/mistral-finetune
-pip install -r requirements.txt
-
+# Download the models
 cd ${HOME}
 wget -nc ${MODEL_URL}${MODEL_ARCHIVE}
 mkdir -p ${HOME}/mistral_models/7B
@@ -30,6 +27,9 @@ wget -nc ${MODEL_URL}${MODEL_INSTRUCT_ARCHIVE}
 mkdir -p ${HOME}/mistral_models/7B_instruct
 tar -x --skip-old-files -f ${MODEL_INSTRUCT_ARCHIVE} -C mistral_models/7B_instruct
 
+# Install mistral-finetune
+cd ${HOME}/mistral-finetune
+pip install -r requirements.txt
 # Run the training
 export CUDA_VISIBLE_DEVICES=0
 torchrun --nproc-per-node 1 --master_port $RANDOM -m train ../7B_instruct.yaml

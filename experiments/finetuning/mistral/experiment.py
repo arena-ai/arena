@@ -317,7 +317,7 @@ def data(home: str = '/home/ubuntu'):
 
 @app.command()
 def config(home: str = '/home/ubuntu'):
-    Config(home, train_path=TRAIN_PATH, test_path=TEST_PATH)
+    Config(home, train_path=TRAIN_PATH, test_path=TEST_PATH, wandb_key=os.getenv('WANDB_API_TOKEN'))
     print("[green]Config loaded[/green]")
 
 
