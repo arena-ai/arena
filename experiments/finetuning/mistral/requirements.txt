@@ -12,3 +12,4 @@ datasets
 openai
 tiktoken
 wandb
+mistral-inference

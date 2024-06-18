@@ -7,7 +7,8 @@ MODEL_URL=https://models.mistralcdn.com/mistral-7b-v0-3/
 # move to HOME and clone some repos
 cd $HOME \
     && git clone https://github.com/arena-ai/arena.git \
-    && git clone https://github.com/mistralai/mistral-finetune.git
+    && git clone https://github.com/mistralai/mistral-finetune.git \
+    && git clone https://github.com/mistralai/mistral-inference.git
 
 # Where the training files are put
 mkdir -p ${HOME}/mistral_models
@@ -33,3 +34,5 @@ pip install -r requirements.txt
 # Run the training
 export CUDA_VISIBLE_DEVICES=0
 #torchrun -m train ../7B_instruct.yaml
+
+# Install mistral-inference
