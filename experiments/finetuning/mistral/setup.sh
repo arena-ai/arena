@@ -32,4 +32,4 @@ cd ${HOME}/mistral-finetune
 pip install -r requirements.txt
 # Run the training
 export CUDA_VISIBLE_DEVICES=0
-nohup torchrun -m train ../7B_instruct.yaml & # Run the training in the background
+#torchrun -m train ../7B_instruct.yaml

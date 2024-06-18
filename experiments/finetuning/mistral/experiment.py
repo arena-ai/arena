@@ -289,6 +289,16 @@ def setup(home: str = '/home/ubuntu'):
 
 
 @app.command()
+def train(home: str = '/home/ubuntu'):
+    print(f"Run a new training")
+    compute = Experiment()
+    compute.wait_until_running()
+    compute.run("""cd ${HOME}/mistral-finetune
+nohup torchrun -m train ../7B_instruct.yaml > output.log 2>&1 & # Run the training in the background
+""")
+
+
+@app.command()
 def shell(cmd: str):
     compute = Experiment()
     compute.wait_until_running()
