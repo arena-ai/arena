@@ -7,11 +7,11 @@ data:
 # model
 model_id_or_path: ""  # Change to downloaded path
 lora:
-  rank: 64
+  rank: 32
 
 # optim
 # seq_len: 32768
-seq_len: 4096
+seq_len: 1024
 batch_size: 1
 max_steps: 600
 optim:
