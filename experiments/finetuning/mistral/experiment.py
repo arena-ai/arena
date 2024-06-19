@@ -33,7 +33,7 @@ class Parameters(Persistent):
     persist_path: str = 'params.json'
     name: str = 'arena'
     region: str = 'eu-north-1'
-    instance_type: str ='g5.2xlarge'
+    instance_type: str ='g5.16xlarge'
     image: str = 'ami-0d47c2063be189fce'
     key: str = '~/.ssh/aws'
     volume_size: int = 500
@@ -293,9 +293,10 @@ def train(home: str = '/home/ubuntu'):
     print(f"Run a new training")
     compute = Experiment()
     compute.wait_until_running()
-    compute.run("""cd ${HOME}/mistral-finetune
-nohup torchrun -m train ../7B_instruct.yaml > output.log 2>&1 & # Run the training in the background
-""")
+    compute.connection.run("""cd ${HOME}/mistral-finetune
+export CUDA_VISIBLE_DEVICES=0
+nohup ${HOME}/.local/bin/torchrun -m train ../7B_instruct.yaml > output.log 2>&1 & # Run the training in the background
+""", hide=True, pty=False)
 
 
 @app.command()
