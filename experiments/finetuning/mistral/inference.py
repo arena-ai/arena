@@ -15,15 +15,19 @@ app = typer.Typer()
 class Inference:
     def __init__(self, home: str,
                     model_path: str = 'mistral_models/7B_instruct/',
-                    lora_path: str = 'mistral_run-2024-06-20-11-44-18/checkpoints/checkpoint_000600/consolidated/lora.safetensors') -> None:
+                    lora_path: str | None = None) -> None:
         self.home = Path(home)
         self.model_path = Path(home, model_path)
-        self.lora_path = Path(home, lora_path)
+        if lora_path:
+            self.lora_path = Path(home, lora_path)
+        else:
+            self.lora_path = None
     
     def generate(self) -> None:
         tokenizer = MistralTokenizer.from_file(str(self.model_path / "tokenizer.model.v3"))  # change to extracted tokenizer file
         model = Transformer.from_folder(str(self.model_path))  # change to extracted model dir
-        model.load_lora(str(self.lora_path))
+        if self.lora_path:
+            model.load_lora(str(self.lora_path))
 
         completion_request = ChatCompletionRequest(messages=[
                 SystemMessage(content="Given a meter ID, you return a series of hourly consumptions given as a json string."),
@@ -41,7 +45,7 @@ class Inference:
 @app.command()
 def inference(home: str = '/home/ubuntu',
               model_path: str = 'mistral_models/7B_instruct/',
-              lora_path: str = 'mistral_run-2024-06-20-11-44-18/checkpoints/checkpoint_000600/consolidated/lora.safetensors'):
+              lora_path: str | None = None):
     inference = Inference(home, model_path=model_path, lora_path=lora_path)
     inference.generate()
 
