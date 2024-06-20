@@ -343,7 +343,7 @@ def inference(home: str = '/home/ubuntu'):
     compute = Experiment()
     compute.wait_until_running()
     compute.run("""cd ${HOME}/arena/experiments/finetuning/mistral/
-${HOME}/.local/bin/torchrun --nproc-per-node 4 inference.py --model-path $(awk '/run_dir:/ {print $2}' ${HOME}/7B_instruct.yaml)/checkpoints/checkpoint_000$(awk '/max_steps:/ {print $2}' ${HOME}/7B_instruct.yaml)/consolidated/consolidated.safetensors
+python3 inference.py --model-path $(awk '/run_dir:/ {print $2}' ${HOME}/7B_instruct.yaml)/checkpoints/checkpoint_000$(awk '/max_steps:/ {print $2}' ${HOME}/7B_instruct.yaml)/consolidated
 """)
 
 
