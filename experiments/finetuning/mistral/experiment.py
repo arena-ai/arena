@@ -343,7 +343,7 @@ def inference(home: str = '/home/ubuntu'):
     compute = Experiment()
     compute.wait_until_running()
     compute.run("""cd ${HOME}/arena/experiments/finetuning/mistral/
-torchrun --nproc-per-node 4 inference.py --lora-path ${HOME}/mistral_run-2024-06-20-11-44-18/checkpoints/checkpoint_000600/consolidated/lora.safetensors
+${HOME}/.local/bin/torchrun --nproc-per-node 4 inference.py --lora-path ${HOME}/mistral_run-2024-06-20-11-44-18/checkpoints/checkpoint_000600/consolidated/lora.safetensors
 """)
 
 
