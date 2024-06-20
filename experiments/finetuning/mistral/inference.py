@@ -15,7 +15,7 @@ app = typer.Typer()
 class Inference:
     def __init__(self, home: str,
                     model_path: str = 'mistral_models/7B_instruct/',
-                    lora_path: str = 'mistral_run-2024-06-18-12-00-37/checkpoints/checkpoint_001000/consolidated/lora.safetensors') -> None:
+                    lora_path: str = 'mistral_run-2024-06-20-11-44-18/checkpoints/checkpoint_000600/consolidated/lora.safetensors') -> None:
         self.home = Path(home)
         self.model_path = Path(home, model_path)
         self.lora_path = Path(home, lora_path)
