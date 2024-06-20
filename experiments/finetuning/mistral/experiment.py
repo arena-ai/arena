@@ -295,9 +295,13 @@ def train(home: str = '/home/ubuntu'):
     print(f"Run a new training")
     compute = Experiment()
     compute.wait_until_running()
+#     compute.connection.run("""cd ${HOME}/mistral-finetune
+# export CUDA_VISIBLE_DEVICES="0"
+# nohup ${HOME}/.local/bin/torchrun -m train ../7B_instruct.yaml > output.log 2>&1 & # Run the training in the background
+# """, hide=True, pty=False)
     compute.connection.run("""cd ${HOME}/mistral-finetune
-export CUDA_VISIBLE_DEVICES=0
-nohup ${HOME}/.local/bin/torchrun -m train ../7B_instruct.yaml > output.log 2>&1 & # Run the training in the background
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
+nohup ${HOME}/.local/bin/torchrun -m train --nproc-per-node 4 --master_port $RANDOM ../7B_instruct.yaml > output.log 2>&1 & # Run the training in the background
 """, hide=True, pty=False)
 
 

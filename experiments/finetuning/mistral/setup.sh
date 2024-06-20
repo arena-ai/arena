@@ -32,7 +32,7 @@ tar -x --skip-old-files -f ${MODEL_INSTRUCT_ARCHIVE} -C mistral_models/7B_instru
 cd ${HOME}/mistral-finetune
 pip install -r requirements.txt
 # Run the training
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
 #torchrun -m train ../7B_instruct.yaml
 
 # Install mistral-inference
