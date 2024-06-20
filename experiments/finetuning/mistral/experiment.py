@@ -34,7 +34,7 @@ class Parameters(Persistent):
     name: str = 'arena'
     # region: str = 'eu-west-1'
     region: str = 'eu-north-1'
-    instance_type: str ='g5.16xlarge'
+    instance_type: str ='g5.12xlarge'
     image: str = 'ami-0d47c2063be189fce' # For eu-north-1
     # image: str = 'ami-0e1fae342f89b4159' # For eu-west-1
     key: str = '~/.ssh/aws'
