@@ -29,17 +29,19 @@ class Inference:
         if self.lora_path:
             model.load_lora(str(self.lora_path))
 
-        completion_request = ChatCompletionRequest(messages=[
-                SystemMessage(content="Given a meter ID, you return a series of hourly consumptions given as a json string."),
-                UserMessage(content=dumps({"item_id": "MT_130"}))
-            ])
-
-        tokens = tokenizer.encode_chat_completion(completion_request).tokens
-
-        out_tokens, _ = generate([tokens], model, max_tokens=64, temperature=1.0, eos_id=tokenizer.instruct_tokenizer.tokenizer.eos_id)
-        result = tokenizer.instruct_tokenizer.tokenizer.decode(out_tokens[0])
-
-        print(result)
+        with open(self.home / "out.jsonl", "w") as file:
+            for i in range(400,600):
+                completion_request = ChatCompletionRequest(messages=[
+                        SystemMessage(content="Given a meter ID, you return a series of hourly consumptions given as a json string."),
+                        UserMessage(content=dumps({"item_id": "MT_{i:03d}"}))
+                    ])
+                tokens = tokenizer.encode_chat_completion(completion_request).tokens
+                # Generate the tokens
+                out_tokens, _ = generate([tokens], model, max_tokens=1024, temperature=1.01, eos_id=tokenizer.instruct_tokenizer.tokenizer.eos_id)
+                result = tokenizer.instruct_tokenizer.tokenizer.decode(out_tokens[0])
+                # Write the generated row
+                file.write(result+"\n")
+                print(f"REQUEST = {completion_request}\nRESULT = {result}\n")
 
 
 @app.command()
