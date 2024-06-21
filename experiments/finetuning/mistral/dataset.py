@@ -36,10 +36,10 @@ class Dataset:
         if not os.path.exists(self.train_path) or not os.path.exists(self.test_path):
             dataset = load_dataset('LeoTungAnh/electricity_hourly')
             with open(self.train_path, 'w') as file:
-                for datum in dataset['train']:
+                for datum in list(dataset['train'])[:300]:
                     file.write(json.dumps(self.format(datum))+'\n')
             with open(self.test_path, 'w') as file:
-                for datum in dataset['test']:
+                for datum in list(dataset['test'])[300:]:
                     file.write(json.dumps(self.format(datum))+'\n')
         # Create the iterators
         def train():

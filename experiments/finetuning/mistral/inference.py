@@ -31,7 +31,7 @@ class Inference:
 
         with open(self.home / "out.jsonl", "w") as file:
             for i in range(400,600):
-                completion_request = ChatCompletionRequest(messages=[
+                completion_request = ChatCompletionRequest(temperature=1.01, messages=[
                         SystemMessage(content="Given a meter ID, you return a series of hourly consumptions given as a json string."),
                         UserMessage(content=dumps({"item_id": f"MT_{i:03d}"}))
                     ])
