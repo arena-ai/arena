@@ -343,7 +343,10 @@ def inference(home: str = '/home/ubuntu'):
     compute = Experiment()
     compute.wait_until_running()
     compute.run("""cd ${HOME}/arena/experiments/finetuning/mistral/
-python3 inference.py --model-path $(awk '/run_dir:/ {print $2}' ${HOME}/7B_instruct.yaml)/checkpoints/checkpoint_000$(awk '/max_steps:/ {print $2}' ${HOME}/7B_instruct.yaml)/consolidated
+export RUN_PATH = $(awk '/run_dir:/ {print $2}' ${HOME}/7B_instruct.yaml)
+export RUN_PATH = ${HOME}/mistral_run-2024-06-20-14-24-20
+export STEPS = $(awk '/max_steps:/ {printf "%06d\n", $2}' ${HOME}/7B_instruct.yaml)
+python3 inference.py --model-path ${RUN_PATH}/checkpoints/checkpoint_${STEPS}/consolidated
 """)
 
 
