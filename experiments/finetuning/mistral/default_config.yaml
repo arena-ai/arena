@@ -13,7 +13,7 @@ lora:
 # seq_len: 32768
 seq_len: 2048
 batch_size: 1
-max_steps: 500
+max_steps: 300
 optim:
   lr: 6.e-5
   weight_decay: 0.1
@@ -22,7 +22,7 @@ optim:
 # other
 seed: 0
 log_freq: 1
-eval_freq: 100
+eval_freq: 10
 no_eval: False
 ckpt_freq: 100
 
