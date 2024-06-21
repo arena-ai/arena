@@ -13,7 +13,7 @@ lora:
 # seq_len: 32768
 seq_len: 2048
 batch_size: 1
-max_steps: 300
+max_steps: 180
 optim:
   lr: 6.e-5
   weight_decay: 0.1
@@ -22,9 +22,9 @@ optim:
 # other
 seed: 0
 log_freq: 1
-eval_freq: 10
+eval_freq: 9
 no_eval: False
-ckpt_freq: 100
+ckpt_freq: 180
 
 save_adapters: False  # save only trained LoRA adapters. Set to `False` to merge LoRA adapter into the base model and save full fine-tuned model
 
