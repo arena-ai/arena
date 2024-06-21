@@ -33,7 +33,7 @@ class Inference:
             for i in range(400,600):
                 completion_request = ChatCompletionRequest(messages=[
                         SystemMessage(content="Given a meter ID, you return a series of hourly consumptions given as a json string."),
-                        UserMessage(content=dumps({"item_id": "MT_{i:03d}"}))
+                        UserMessage(content=dumps({"item_id": f"MT_{i:03d}"}))
                     ])
                 tokens = tokenizer.encode_chat_completion(completion_request).tokens
                 # Generate the tokens
