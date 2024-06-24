@@ -344,7 +344,7 @@ def inference(home: str = '/home/ubuntu'):
     compute.wait_until_running()
     compute.run("""cd ${HOME}/arena/experiments/finetuning/mistral/
 export RUN_PATH=$(awk '/run_dir:/ {print $2}' ${HOME}/7B_instruct.yaml)
-export RUN_PATH=${HOME}/mistral_run-2024-06-20-14-24-20
+export RUN_PATH=${HOME}/mistral_run-2024-06-21-15-39-53
 export STEPS=$(awk '/max_steps:/ {printf "%06d", $2}' ${HOME}/7B_instruct.yaml)
 python3 inference.py --model-path ${RUN_PATH}/checkpoints/checkpoint_${STEPS}/consolidated
 """)
