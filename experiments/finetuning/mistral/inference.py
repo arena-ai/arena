@@ -31,13 +31,13 @@ class Inference:
 
         with open(self.home / "out.jsonl", "w") as file:
             for i in range(400,600):
-                completion_request = ChatCompletionRequest(temperature=1.01, messages=[
+                completion_request = ChatCompletionRequest(temperature=0.99, messages=[
                         SystemMessage(content="Given a meter ID, you return a series of hourly consumptions given as a json string."),
                         UserMessage(content=dumps({"item_id": f"MT_{i:03d}"}))
                     ])
                 tokens = tokenizer.encode_chat_completion(completion_request).tokens
                 # Generate the tokens
-                out_tokens, _ = generate([tokens], model, max_tokens=1024, temperature=1.01, eos_id=tokenizer.instruct_tokenizer.tokenizer.eos_id)
+                out_tokens, _ = generate([tokens], model, max_tokens=1024, temperature=0.99, eos_id=tokenizer.instruct_tokenizer.tokenizer.eos_id)
                 result = tokenizer.instruct_tokenizer.tokenizer.decode(out_tokens[0])
                 # Write the generated row
                 file.write(result+"\n")
