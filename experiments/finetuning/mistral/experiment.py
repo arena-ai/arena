@@ -13,6 +13,8 @@ from rich import print
 
 from dataset import Dataset
 from config import Config
+import numpy as np
+import matplotlib.pyplot as plt
 
 logging.basicConfig(level=logging.INFO)
 
@@ -348,6 +350,83 @@ export RUN_PATH=${HOME}/mistral_run-2024-06-21-15-39-53
 export STEPS=$(awk '/max_steps:/ {printf "%06d", $2}' ${HOME}/7B_instruct.yaml)
 python3 inference.py --model-path ${RUN_PATH}/checkpoints/checkpoint_${STEPS}/consolidated
 """)
+
+
+@app.command()
+def analyze(data_path: str = 'mistral_finetuning_train.jsonl', output_path: str = 'out.jsonl'):
+    train_data = []
+    with open(data_path, "r") as f:
+        for row in f:
+            train_data.append(np.array(json.loads(json.loads(row)["messages"][-1]["content"])["consumption"]))
+
+    # Plot a few trajectories
+    plt.title("Some training data")
+    for i in range(10):
+        plt.plot(train_data[i])
+    plt.show()
+
+    synth_data = []
+    with open(output_path, "r") as f:
+        for row in f:
+            synth_data.append(np.array(json.loads(row)['consumption']))
+    
+    # Plot a few synthetic trajectories
+    plt.title("Synthetic data")
+    for i in range(10):
+        plt.plot(synth_data[i])
+    plt.show()
+
+    def closest(synthetic: np.ndarray, training: list[np.ndarray]) -> np.ndarray:
+        current_closest = training[0]
+        current_dist = np.sum(np.square(synthetic-current_closest))
+        for training in training[1:]:
+            dist = np.sum(np.square(synthetic-training))
+            if dist < current_dist:
+                current_closest = training
+        return current_closest
+
+    for synth in synth_data:
+        try:
+            close = closest(synth[:100], train_data)
+            if np.std(close) > 0.1:
+                plt.title("Closest series to a generated one")
+                plt.ylim(-2, 6)
+                plt.plot(synth)
+                plt.plot(close)
+                plt.show()
+        except:
+            pass
+    
+    stacked_train_data = np.vstack(train_data)
+    mean_train = np.mean(stacked_train_data, axis=0)
+    med_train = np.median(stacked_train_data, axis=0)
+    perc90_train = np.percentile(stacked_train_data, 90, axis=0)
+    perc10_train = np.percentile(stacked_train_data, 10, axis=0)
+
+    stacked_synth_data = np.vstack([series[:100] for series in synth_data if len(series)>=100])
+    mean_synth = np.mean(stacked_synth_data, axis=0)
+    med_synth = np.median(stacked_synth_data, axis=0)
+    perc90_synth = np.percentile(stacked_synth_data, 90, axis=0)
+    perc10_synth = np.percentile(stacked_synth_data, 10, axis=0)
+
+    plt.title("Compare means")
+    plt.plot(mean_train, color="tab:blue")
+    plt.plot(mean_synth, color="tab:orange")
+    plt.show()
+
+    plt.title("Compare percentiles")
+    plt.plot(med_train, color="tab:blue", linewidth=2)
+    plt.plot(med_synth, color="tab:orange", linewidth=2)
+    plt.plot(perc90_train, color="tab:blue", linewidth=0.5)
+    plt.plot(perc90_synth, color="tab:orange", linewidth=0.5)
+    plt.plot(perc10_train, color="tab:blue", linewidth=0.5)
+    plt.plot(perc10_synth, color="tab:orange", linewidth=0.5)
+    plt.show()
+
+    plt.title("Cross correlation (time 0 x time 24)")
+    plt.plot(stacked_train_data[:, 0], stacked_train_data[:, 24], marker=".", color="tab:blue", linewidth=0)
+    plt.plot(stacked_synth_data[:, 0], stacked_synth_data[:, 24], marker=".", color="tab:orange", linewidth=0)
+    plt.show()
 
 
 if __name__ == "__main__":
