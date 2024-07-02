@@ -35,6 +35,10 @@ class OpenAI(Service[openai.ChatCompletionRequest, openai.ChatCompletionResponse
     def from_any(self, a: Any) -> openai.ChatCompletionResponse:
         return openai.ChatCompletionResponse.model_validate(a)
 
+    def has_model(self, model: str) -> bool:
+        """Return True if the model is from OpenAI"""
+        return "gpt-4" in model or "gpt-3" in model or model in self.models
+    
     async def openai_chat_completion(self, ccc: openai.ChatCompletionRequest) -> Response[openai.ChatCompletionResponse]:
         return await self.call(ccc)
 
@@ -70,6 +74,10 @@ class Mistral(Service[mistral.ChatCompletionRequest, mistral.ChatCompletionRespo
     def from_any(self, a: Any) -> mistral.ChatCompletionResponse:
         return mistral.ChatCompletionResponse.model_validate(a)
     
+    def has_model(self, model: str) -> bool:
+        """Return True if the model is from Mistral"""
+        return "open-mistral-" in model or "open-mixtral-" in model or "mistral-" in model or model in self.models
+    
     async def mistral_chat_completion(self, ccc: mistral.ChatCompletionRequest) -> Response[mistral.ChatCompletionResponse]:
         return await self.call(ccc)
 
@@ -80,7 +88,6 @@ class Mistral(Service[mistral.ChatCompletionRequest, mistral.ChatCompletionRespo
             headers=response.headers,
             content=response.content.to_chat_completion_response()
         )
-
 
 @dataclass
 class Anthropic(Service[anthropic.ChatCompletionRequest, anthropic.ChatCompletionResponse]):
@@ -105,6 +112,10 @@ class Anthropic(Service[anthropic.ChatCompletionRequest, anthropic.ChatCompletio
     
     def from_any(self, a: Any) -> anthropic.ChatCompletionResponse:
         return anthropic.ChatCompletionResponse.model_validate(a)
+    
+    def has_model(self, model: str) -> bool:
+        """Return True if the model is from Anthropic"""
+        return "claude-" in model or model in self.models
     
     async def anthropic_chat_completion(self, ccc: anthropic.ChatCompletionRequest) -> Response[anthropic.ChatCompletionRequest]:
         return await self.call(ccc)
