@@ -152,13 +152,13 @@ class LanguageModels:
 
     def request(self, req: ChatCompletionRequest) -> Request[ChatCompletionRequest]:
         for service in self.services:
-            if req.model in service.models:
+            if service.has_model(req.model):
                 return service.request(req=req)
         raise ValueError(req.model)
 
     async def chat_completion(self, ccc: ChatCompletionRequest) -> Response[ChatCompletionResponse]:
         for service in self.services:
-            if ccc.model in service.models:
+            if service.has_model(ccc.model):
                 return await service.chat_completion(ccc=ccc)
         raise ValueError(ccc.model)
         
