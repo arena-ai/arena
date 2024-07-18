@@ -30,3 +30,7 @@ https://weaviate.io/
 [Git repo](https://github.com/weaviate/weaviate)
 [Helm chart](https://artifacthub.io/packages/helm/weaviate/weaviate)
 
+# PDF parsing
+
+- [pypdf](https://pypdf.readthedocs.io/en/latest/)
+- [pymupdf](https://pymupdf.readthedocs.io/en/latest/index.html)
