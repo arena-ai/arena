@@ -26,7 +26,7 @@ class Op(BaseModel, ABC, Generic[*As, B]):
     @computed_field
     @property
     def type(self) -> str:
-        return self.__class__.__qualname__
+        return self.__class__.__name__
 
     @abstractmethod
     async def call(self, *args: *As) -> B:
@@ -54,7 +54,7 @@ class Op(BaseModel, ABC, Generic[*As, B]):
     def from_dict(cls, value: dict[str, Any]) -> 'Op':
         module = importlib.import_module(value['module'])
         cls = getattr(module, value['type'])
-        return cls.model_validate(value)
+        return cls.model_validate(value['value'])
 
     @classmethod
     def from_json(cls, value: str) -> 'Op':

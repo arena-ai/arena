@@ -1,18 +1,27 @@
 import os
 from sqlmodel import Session
 from anyio import run
+from kombu.utils.json import register_type
 from celery import Celery
 from app.core.config import settings
 from app.core.db import engine
 from app.ops import Op, Computation
 
+# Register Computations
+register_type(
+    Computation,
+    None,
+    lambda o: o.to_json(),
+    lambda o: Computation.from_json(o),
+)
+
 app = Celery(__name__,
              broker=str(settings.CELERY_STORE_URI),
              result_backend=str(settings.CELERY_STORE_URI),
-             event_serializer = 'pickle',
-             task_serializer = 'pickle',
-             result_serializer = 'pickle',
-             accept_content = ['application/json', 'application/x-python-serialize'],
+             event_serializer = 'json',
+             task_serializer = 'json',
+             result_serializer = 'json',
+             accept_content = ['application/json'],
             )
 
 

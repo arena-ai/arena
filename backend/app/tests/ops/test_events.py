@@ -16,16 +16,21 @@ class Text(BaseModel):
 
 
 def test_log_requests(db: Session) -> None:
+    ses = session_op()
     user = crud.create_user(session=db, user_create=UserCreate(email=random_email(), password=random_lower_string()))
+    usr = user_op(ses, user.id)
     req = Request(method="POST", url="http://localhost", headers={"x-name": "first"}, content=Text(text="hello"))
-    event = LogRequest()(db, user, None, req)
+    event = LogRequest()(ses, usr, None, req)
     req = Request(method="POST", url="http://localhost", headers={"x-name": "second"}, content=Text(text="world"))
-    event = LogRequest()(db, user, event, req)
+    event = LogRequest()(ses, usr, event, req)
     print(f"event {event}")
     events = db.exec(select(Event).where(Event.name=='request')).all()
     print(f"events {[e.model_dump_json() for e in events]}")
     assert(len(events)==0)
-    print(f"event.evaluate() {run(event.evaluate)}")
+    async def event_eval():
+        return await event.evaluate(session=db)
+    res = run(event_eval)
+    print(f"event.evaluate() {res}")
     events = db.exec(select(Event).where(Event.name=='request')).all()
     print(f"events {[e.model_dump_json() for e in events]}")
     assert(len(events)==2)
@@ -36,16 +41,21 @@ def test_log_requests(db: Session) -> None:
 
 
 def test_log_responses(db: Session) -> None:
+    ses = session_op()
     user = crud.create_user(session=db, user_create=UserCreate(email=random_email(), password=random_lower_string()))
+    usr = user_op(ses, user.id)
     resp = Response(status_code=200, headers={"x-name": "first"}, content=Text(text="hello"))
-    event = LogResponse()(db, user, None, resp)
+    event = LogResponse()(ses, usr, None, resp)
     resp = Response(status_code=404, headers={"x-name": "first"}, content=Text(text="world"))
-    event = LogResponse()(db, user, event, resp)
+    event = LogResponse()(ses, usr, event, resp)
     print(f"event {event}")
     events = db.exec(select(Event).where(Event.name=='response')).all()
     print(f"events {[e.model_dump_json() for e in events]}")
     assert(len(events)==0)
-    print(f"event.evaluate() {run(event.evaluate)}")
+    async def event_eval():
+        return await event.evaluate(session=db)
+    res = run(event_eval)
+    print(f"event.evaluate() {res}")
     events = db.exec(select(Event).where(Event.name=='response')).all()
     print(f"events {[e.model_dump_json() for e in events]}")
     assert(len(events)==2)
