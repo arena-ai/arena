@@ -66,3 +66,8 @@ def test_const_many_pipe(sleep_hello, sleep_pipe):
     comp = sleep_pipe(sleep_pipe(sleep_hello()))
     value = run(comp.evaluate)
     print(value)
+
+
+def test_to_json(sleep_hello, sleep_pipe):
+    comp = sleep_pipe(sleep_pipe(sleep_hello()))
+    print(comp.to_json())

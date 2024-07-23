@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from time import time
 from asyncio import TaskGroup, Task
+import json
+import importlib
 from anyio import run
 from pydantic import BaseModel, ConfigDict, Field, computed_field, SerializeAsAny
 
@@ -18,8 +20,13 @@ class Op(BaseModel, ABC, Generic[*As, B]):
     
     @computed_field
     @property
-    def opname(self) -> str:
-        return self.__class__.__name__
+    def module(self) -> str:
+        return self.__class__.__module__
+    
+    @computed_field
+    @property
+    def type(self) -> str:
+        return self.__class__.__qualname__
 
     @abstractmethod
     async def call(self, *args: *As) -> B:
@@ -30,8 +37,28 @@ class Op(BaseModel, ABC, Generic[*As, B]):
         """Compose Ops into Computations"""
         return Computation(op=self, args=[Computation.from_any(arg) for arg in args])
     
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            'module': self.module,
+            'type': self.type,
+            'value': self.model_dump(),
+        }
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())
+
     def __str__(self) -> str:
-        return self.opname
+        return self.to_json()
+    
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> 'Op':
+        module = importlib.import_module(value['module'])
+        cls = getattr(module, value['type'])
+        return cls.model_validate(value)
+
+    @classmethod
+    def from_json(cls, value: str) -> 'Op':
+        return cls.from_dict(json.loads(value))
 
 
 class Const(Op[tuple[()], B], Generic[B]):
@@ -41,9 +68,6 @@ class Const(Op[tuple[()], B], Generic[B]):
     async def call(self) -> B:
         return self.value
 
-    def __str__(self) -> str:
-        return f"{self.opname} ({str(self.value) if len(str(self.value)) < 16 else str(self.value)[:16]+'...'})"
-
 
 class Getattr(Op[A, B], Generic[A, B]):
     """A getattr op"""
@@ -51,9 +75,6 @@ class Getattr(Op[A, B], Generic[A, B]):
 
     async def call(self, a: A) -> B:
         return a.__getattribute__(self.attr)
-
-    def __str__(self) -> str:
-        return f"{self.opname} ({self.attr})"
 
 
 class Getitem(Op[*As, B], Generic[*As, B]):
@@ -70,9 +91,6 @@ class Call(Op[*As, B], Generic[*As, B]):
 
     async def call(self, a: A) -> B:
         return a.__call__(*self.args)
-    
-    def __str__(self) -> str:
-        return f"{self.opname}"
 
 
 class Then(Op[tuple[A, B], B], Generic[A, B]):
@@ -151,6 +169,26 @@ class Computation(BaseModel, Generic[B]):
     def then(self, other: 'Computation') -> 'Computation':
         return Then()(self, other)
     
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            'op': self.op.to_dict(),
+            'args': [arg.to_dict() for arg in self.args],
+        }
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())
+    
+    def __str__(self) -> str:
+        return self.to_json()
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> 'Computation':
+        return Computation(op=Op.from_dict(value['op']), args=[Computation.from_dict(arg) for arg in value['args']])
+
+    @classmethod
+    def from_json(cls, value: str) -> 'Computation':
+        return Computation.from_dict(json.loads(value))
+
     @classmethod
     def from_any(cls, arg: Any) -> 'Computation':
         if isinstance(arg, Computation):
