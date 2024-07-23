@@ -1,6 +1,10 @@
 import os
 from collections.abc import Generator
 
+# Load environment variables
+import dotenv
+dotenv.load_dotenv()
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, delete
@@ -12,7 +16,6 @@ from app.models import User, Setting, Event, EventIdentifier, Attribute, EventAt
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
 from app.lm.models import LMApiKeys, ChatCompletionRequest, ChatCompletionResponse, openai, mistral, anthropic
-
 
 @pytest.fixture(scope="module", autouse=True)
 def db() -> Generator[Session, None, None]:

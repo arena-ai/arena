@@ -30,8 +30,9 @@ def test_log_requests(db: Session) -> None:
     print(f"events {[e.model_dump_json() for e in events]}")
     assert(len(events)==2)
     # Cleanup
-    for e in events:
-        crud.delete_event(session=db, event_id=e.id)
+    for event in events:
+        db.delete(event)
+    db.commit()
 
 
 def test_log_responses(db: Session) -> None:
@@ -49,8 +50,9 @@ def test_log_responses(db: Session) -> None:
     print(f"events {[e.model_dump_json() for e in events]}")
     assert(len(events)==2)
     # Cleanup
-    for e in events:
-        crud.delete_event(session=db, event_id=e.id)
+    for event in events:
+        db.delete(event)
+    db.commit()
 
 
 def test_log_many_requests(db: Session) -> None:
@@ -75,5 +77,6 @@ def test_log_many_requests(db: Session) -> None:
     print(f"\nevents {[e.model_dump(exclude_none=True) for e in events]}")
     assert(len(events)==3)
     # Cleanup
-    for e in events:
-        crud.delete_event(session=db, event_id=e.id)
+    for event in events:
+        db.delete(event)
+    db.commit()

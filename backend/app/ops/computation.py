@@ -11,7 +11,9 @@ A = TypeVar('A')
 B = TypeVar('B')
 
 class Op(BaseModel, ABC, Generic[*As, B]):
-    """A basic template for ops"""
+    """Ops are a lazy functions,
+    they can be composed together like functions (calling `self.__call__`)
+    and evaluated by calling `self.call`."""
     context: dict[str, Any] | None = Field(default=None, exclude=True)
     
     @computed_field
