@@ -10,17 +10,18 @@ from app.ops import Op, Computation
 # Register Computations
 register_type(
     Computation,
-    None,
+    'computation',
     lambda o: o.to_json(),
     lambda o: Computation.from_json(o),
 )
 
+# Modify computation to avoid infinite loops
+Computation.__json__ = None
+
 app = Celery(__name__,
              broker=str(settings.CELERY_STORE_URI),
              result_backend=str(settings.CELERY_STORE_URI),
-             event_serializer = 'json',
-             task_serializer = 'json',
-             result_serializer = 'json',
+             serializer = 'json',
              accept_content = ['application/json'],
             )
 

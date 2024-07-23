@@ -3,6 +3,20 @@ from app.worker import evaluate
 from app.ops.lm import Chat
 from app.lm.models import ChatCompletionRequest, Message
 
+def test_kombu_serialization(language_models_api_keys):
+    lm = Chat()
+    comp = lm(language_models_api_keys, ChatCompletionRequest(
+        model="gpt-3.5-turbo",
+        messages=[
+            Message(role="system", content="You are a helpful assistant."),
+            Message(role="user", content="What is the capital of France? Give it a score strictly between 0 and 10. Do the same with London.")
+        ]
+    )).content
+    from kombu.utils.json import JSONEncoder
+    json_encoder = JSONEncoder()
+    ser = json_encoder.encode(comp)
+    print(ser)
+
 def test_evaluate(language_models_api_keys):
     lm = Chat()
     comp = lm(language_models_api_keys, ChatCompletionRequest(
