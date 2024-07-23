@@ -41,7 +41,7 @@ class Op(BaseModel, ABC, Generic[*As, B]):
         return {
             'module': self.module,
             'type': self.type,
-            'value': self.model_dump(),
+            'value': self.model_dump(mode='json', serialize_as_any=True),
         }
 
     def to_json(self) -> str:

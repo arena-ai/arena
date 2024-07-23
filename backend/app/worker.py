@@ -1,5 +1,6 @@
 import os
 from sqlmodel import Session
+from pydantic import BaseModel
 from anyio import run
 from kombu.utils.json import register_type
 from celery import Celery
@@ -13,6 +14,14 @@ register_type(
     'computation',
     lambda o: o.to_json(),
     lambda o: Computation.from_json(o),
+)
+
+# Register Base
+register_type(
+    BaseModel,
+    'base_model',
+    lambda o: o.model_dump_json(),
+    lambda o: BaseModel.model_validate_json(o),
 )
 
 # Modify computation to avoid infinite loops
