@@ -1,5 +1,6 @@
 from typing import Any, Generic, TypeVar, TypeVarTuple, Sequence
 from abc import ABC, abstractmethod
+from collections.abc import Sequence, Mapping
 from dataclasses import dataclass
 from time import time
 from asyncio import TaskGroup, Task
@@ -12,21 +13,55 @@ As = TypeVarTuple('As')
 A = TypeVar('A')
 B = TypeVar('B')
 
-class Op(BaseModel, ABC, Generic[*As, B]):
+# A mixin class to add json serializability to pydantic models
+class JsonSerializable:
+    @staticmethod
+    def to_dict(obj: Any) -> Any:
+        if isinstance(obj, BaseModel):
+            print(f'DEBUG to_dict basemodel {obj}')
+            return {
+                'module': obj.__class__.__module__,
+                'type': obj.__class__.__name__,
+                'value': {k: JsonSerializable.to_dict(o) for k,o in obj},
+            }
+        elif isinstance(obj, dict):
+            return {k: JsonSerializable.to_dict(obj[k]) for k in obj}
+        elif isinstance(obj, list):
+            return [JsonSerializable.to_dict(o) for o in obj]
+        elif hasattr(obj, '__dict__'):
+            return JsonSerializable.to_dict(getattr(obj, '__dict__'))
+        else:
+            return obj
+    
+    @staticmethod
+    def from_dict(obj: Any) -> Any:
+        if 'module' in obj and 'type' in obj:
+            module = importlib.import_module(obj['module'])
+            cls = getattr(module, obj['type'])
+            return cls.model_validate(obj['value'])
+        elif isinstance(obj, list):
+            return [JsonSerializable.from_dict(o) for o in obj]
+        elif isinstance(obj, dict):
+            return {k: JsonSerializable.from_dict(obj[k]) for k in obj}
+        else:
+            return obj
+
+    def to_json(self) -> str:
+        return json.dumps(JsonSerializable.to_dict(self))
+
+    @staticmethod
+    def from_json(value: str) -> 'Op':
+        return JsonSerializable.from_dict(json.loads(value))
+    
+    def __str__(self) -> str:
+        return self.to_json()
+
+
+class Op(BaseModel, JsonSerializable, ABC, Generic[*As, B]):
     """Ops are a lazy functions,
     they can be composed together like functions (calling `self.__call__`)
     and evaluated by calling `self.call`."""
     context: dict[str, Any] | None = Field(default=None, exclude=True)
-    
-    @computed_field
-    @property
-    def module(self) -> str:
-        return self.__class__.__module__
-    
-    @computed_field
-    @property
-    def type(self) -> str:
-        return self.__class__.__name__
 
     @abstractmethod
     async def call(self, *args: *As) -> B:
@@ -36,29 +71,6 @@ class Op(BaseModel, ABC, Generic[*As, B]):
     def __call__(self, *args: Any) -> 'Computation[B]':
         """Compose Ops into Computations"""
         return Computation(op=self, args=[Computation.from_any(arg) for arg in args])
-    
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            'module': self.module,
-            'type': self.type,
-            'value': self.model_dump(mode='json', serialize_as_any=True),
-        }
-
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict())
-
-    def __str__(self) -> str:
-        return self.to_json()
-    
-    @classmethod
-    def from_dict(cls, value: dict[str, Any]) -> 'Op':
-        module = importlib.import_module(value['module'])
-        cls = getattr(module, value['type'])
-        return cls.model_validate(value['value'])
-
-    @classmethod
-    def from_json(cls, value: str) -> 'Op':
-        return cls.from_dict(json.loads(value))
 
 
 class Const(Op[tuple[()], B], Generic[B]):
@@ -99,7 +111,7 @@ class Then(Op[tuple[A, B], B], Generic[A, B]):
         return b
 
 
-class Computation(BaseModel, Generic[B]):
+class Computation(BaseModel, JsonSerializable, Generic[B]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     """An Op applied to arguments"""
     op: SerializeAsAny[Op]
@@ -168,26 +180,6 @@ class Computation(BaseModel, Generic[B]):
 
     def then(self, other: 'Computation') -> 'Computation':
         return Then()(self, other)
-    
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            'op': self.op.to_dict(),
-            'args': [arg.to_dict() for arg in self.args],
-        }
-
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict())
-    
-    def __str__(self) -> str:
-        return self.to_json()
-
-    @classmethod
-    def from_dict(cls, value: dict[str, Any]) -> 'Computation':
-        return Computation(op=Op.from_dict(value['op']), args=[Computation.from_dict(arg) for arg in value['args']])
-
-    @classmethod
-    def from_json(cls, value: str) -> 'Computation':
-        return Computation.from_dict(json.loads(value))
 
     @classmethod
     def from_any(cls, arg: Any) -> 'Computation':

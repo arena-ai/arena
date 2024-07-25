@@ -16,14 +16,6 @@ register_type(
     lambda o: Computation.from_json(o),
 )
 
-# Register Base
-register_type(
-    BaseModel,
-    'base_model',
-    lambda o: o.model_dump_json(),
-    lambda o: BaseModel.model_validate_json(o),
-)
-
 # Modify computation to avoid infinite loops
 Computation.__json__ = None
 

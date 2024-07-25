@@ -91,6 +91,16 @@ def test_access() -> None:
     print(run((b.a[2].txt.upper()).evaluate))
 
 
+def test_from_json() -> None:
+    from app.ops.settings import LMConfigSetting
+    from app.ops.session import session, user
+    s = LMConfigSetting()(session(), user())
+    print(f'BEFORE {s}')
+    value = s.to_json()
+    s = Computation.from_json(value)
+    print(f'AFTER {s}')
+
+
 def test_to_json() -> None:
     class Sum(Op[tuple[float, float], float]):
         name: str = "sum"
