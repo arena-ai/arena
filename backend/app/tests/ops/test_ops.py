@@ -120,4 +120,6 @@ def test_from_json() -> None:
     value = s.to_json()
     s = Computation.from_json(value)
     print(f'AFTER {s}')
-    
+
+def test_flatten() -> None:
+    pass

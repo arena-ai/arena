@@ -3,13 +3,13 @@ from asyncio import sleep
 from anyio import run
 from pytest import fixture
 
-from app.ops.computation import Op, Computation
+from app.ops.computation import Op, Computation, FlatComputation
 from app.ops.events import LogRequest, Request
+from app.ops.dot import dot
 
 T = time()
 
 class SleepConst(Op):
-    name: str = "sleep_const"
     value: str
     async def call(self) -> str:
         print(f"\n{time()-T} start const")
@@ -18,7 +18,6 @@ class SleepConst(Op):
         return self.value
 
 class SleepPipe(Op):
-    name: str = "sleep_pipe"
     async def call(self, value: str) -> str:
         print(f"\n{time()-T} start pipe")
         await sleep(1)
@@ -26,7 +25,6 @@ class SleepPipe(Op):
         return f"{value}."
 
 class SleepPipeMany(Op):
-    name: str = "sleep_pipe_many"
     async def call(self, *args: str) -> str:
         print(f"\n{time()-T} start pipe many")
         await sleep(1)
@@ -79,3 +77,12 @@ def test_from_json(sleep_hello, sleep_pipe):
     value = comp.to_json()
     comp = Computation.from_json(value)
     print(f'AFTER {comp}')
+
+
+def test_flat_computations(sleep_hello, sleep_world, sleep_pipe, sleep_pipe_many):
+    init_comp = sleep_pipe_many(sleep_hello(), sleep_world())
+    comp = sleep_pipe_many(init_comp, sleep_pipe(init_comp))
+    print(f'comp = {dot(comp)}')
+    print(f'comps = {[c.op.__class__.__name__ for c in comp.computations()]}')
+    # flat_comp = FlatComputation.from_computation(comp)
+    # print(f'flat_comp = {flat_comp}')
