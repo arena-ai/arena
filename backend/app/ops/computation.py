@@ -6,6 +6,7 @@ from time import time
 from asyncio import TaskGroup, Task
 import json
 import importlib
+import base64
 from anyio import run
 from pydantic import BaseModel, ConfigDict, Field, computed_field, SerializeAsAny
 
@@ -22,6 +23,9 @@ class Hashable:
     
     def __hash__(self) -> int:
         return hash(self.to_immutable(self))
+
+    def hash_str(self) -> str:
+        return base64.urlsafe_b64encode(hash(self).to_bytes(length=8, byteorder='big', signed=True)).decode('ascii')
     
     @classmethod
     def to_immutable(cls, obj: Any) -> Any:
@@ -213,7 +217,7 @@ class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
     def computations(self) -> set['Computation']:
         result = {self}
         for arg in self.args:
-            print(f"DEBUG {arg.op.__class__.__name__} ({hash(arg)})")
+            print(f"DEBUG {arg.op.__class__.__name__} ({arg.hash_str()})")
             result |= arg.computations()
         return result
 
