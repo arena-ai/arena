@@ -11,9 +11,9 @@ def dot(computation: Computation) -> Dot:
 
 def nodes(graph: Dot, flat_computations: FlatComputations):
     for fc in flat_computations.flat_computations:
-        graph.add_node(Node(flat_computations.computation.encoder()[fc], label=str(fc.op)))
+        graph.add_node(Node(fc.index, label=str(fc.op)))
 
 def edges(graph: Dot, flat_computations: FlatComputations):
     for fc in flat_computations.flat_computations:
         for arg in fc.args:
-            graph.add_edge(Edge(flat_computations.computation.encoder()[fc], arg))
+            graph.add_edge(Edge(fc.index, arg))

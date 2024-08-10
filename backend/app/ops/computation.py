@@ -214,19 +214,23 @@ class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
         else:
             return Const(value=arg)()
     
-    def computations(self) -> list['Computation']:
+    def computation_set(self) -> set['Computation']:
         result = {self}
         for arg in self.args:
-            result |= arg.computations()
-        return sorted(result, key=lambda c: hash(c))
+            result |= arg.computation_set()
+        return result
+
+    def computations(self) -> list['Computation']:
+        return sorted(self.computation_set(), key=lambda c: hash(c))
     
     def encoder(self) -> dict['Computation', int]:
-        { c: i for i, c in enumerate(self.computations()) }
+        return { c: i for i, c in enumerate(self.computations()) }
 
 
 class FlatComputation(JsonSerializable, BaseModel, Generic[B]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     """An Op applied to arguments"""
+    index: int
     op: Op
     args: list[int]
 
@@ -240,12 +244,12 @@ class FlatComputations(JsonSerializable, BaseModel, Generic[B]):
         encoder = computation.encoder()
         computations = computation.computations()
         flat_computations = [
-            FlatComputation(op=computation.op, args=[encoder[arg] for arg in computation.args])
-            for computation in computations
+            FlatComputation(index=encoder[c], op=c.op, args=[encoder[arg] for arg in c.args])
+            for c in computations
             ]
         return FlatComputations(computation=computation, flat_computations=flat_computations)
     
-    @classmathod
+    @classmethod
     def to_computation(cls, flat_computation: 'FlatComputations') -> Computation:
         pass
     
