@@ -86,3 +86,5 @@ def test_flat_computations(sleep_hello, sleep_world, sleep_pipe, sleep_pipe_many
     print(f'comps = {[c.op.__class__.__name__ for c in comp.computations()]}')
     flat_comps = FlatComputations.from_computation(comp)
     print(f'flat_comps = {flat_comps}')
+    unflatten_comp = FlatComputations.to_computation(flat_comps)
+    print(f'unflatten_comp = {dot(unflatten_comp)}')

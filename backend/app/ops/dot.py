@@ -10,10 +10,10 @@ def dot(computation: Computation) -> Dot:
     return graph
 
 def nodes(graph: Dot, flat_computations: FlatComputations):
-    for fc in flat_computations.flat_computations:
+    for fc in flat_computations.flat_computation_list:
         graph.add_node(Node(fc.index, label=str(fc.op)))
 
 def edges(graph: Dot, flat_computations: FlatComputations):
-    for fc in flat_computations.flat_computations:
+    for fc in flat_computations.flat_computation_list:
         for arg in fc.args:
             graph.add_edge(Edge(fc.index, arg))

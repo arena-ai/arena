@@ -227,7 +227,7 @@ class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
         return { c: i for i, c in enumerate(self.computations()) }
 
 
-class FlatComputation(JsonSerializable, BaseModel, Generic[B]):
+class FlatComputation(JsonSerializable, BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     """An Op applied to arguments"""
     index: int
@@ -235,9 +235,8 @@ class FlatComputation(JsonSerializable, BaseModel, Generic[B]):
     args: list[int]
 
 
-class FlatComputations(JsonSerializable, BaseModel, Generic[B]):
-    computation: Computation
-    flat_computations: list[FlatComputation]
+class FlatComputations(JsonSerializable, BaseModel):
+    flat_computation_list: list[FlatComputation]
 
     @classmethod
     def from_computation(cls, computation: Computation) -> 'FlatComputations':
@@ -247,10 +246,15 @@ class FlatComputations(JsonSerializable, BaseModel, Generic[B]):
             FlatComputation(index=encoder[c], op=c.op, args=[encoder[arg] for arg in c.args])
             for c in computations
             ]
-        return FlatComputations(computation=computation, flat_computations=flat_computations)
+        return FlatComputations(flat_computation_list=flat_computations)
     
     @classmethod
-    def to_computation(cls, flat_computation: 'FlatComputations') -> Computation:
-        pass
-    
+    def to_computation(cls, flat_computations: 'FlatComputations') -> Computation:
+        parents = {fc.index for fc in flat_computations.flat_computation_list}
+        children = {index for fc in flat_computations.flat_computation_list for index in fc.args}
+        maximal_parent = next(iter(parents - children))
+        computations = [Computation(op=fc.op, args=[]) for fc in flat_computations.flat_computation_list]
+        for fc in flat_computations.flat_computation_list:
+            computations[fc.index].args = [computations[index] for index in fc.args]
+        return computations[maximal_parent]
 
