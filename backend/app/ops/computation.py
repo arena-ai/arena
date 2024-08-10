@@ -1,7 +1,7 @@
 from typing import Any, Generic, TypeVar, TypeVarTuple, Sequence, Mapping
 from abc import ABC, abstractmethod
 from collections.abc import Sequence, Mapping
-from dataclasses import dataclass
+from functools import cached_property
 from time import time
 from asyncio import TaskGroup, Task
 import json
@@ -214,29 +214,39 @@ class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
         else:
             return Const(value=arg)()
     
-    def computations(self) -> set['Computation']:
+    def computations(self) -> list['Computation']:
         result = {self}
         for arg in self.args:
-            print(f"DEBUG {arg.op.__class__.__name__} ({arg.hash_str()})")
             result |= arg.computations()
-        return result
+        return sorted(result, key=lambda c: hash(c))
+    
+    def encoder(self) -> dict['Computation', int]:
+        { c: i for i, c in enumerate(self.computations()) }
 
-class FlatComputation(BaseModel, JsonSerializable, Generic[B]):
+
+class FlatComputation(JsonSerializable, BaseModel, Generic[B]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    computations: dict[str, 'FlatComputation']
     """An Op applied to arguments"""
-    op: SerializeAsAny[Op]
-    args: list[str]
+    op: Op
+    args: list[int]
+
+
+class FlatComputations(JsonSerializable, BaseModel, Generic[B]):
+    computation: Computation
+    flat_computations: list[FlatComputation]
 
     @classmethod
-    def from_computation(cls, computation: Computation) -> 'FlatComputation':
-        if len(computation.args)>0:
-            flat_args = [FlatComputation.from_computation(arg) for arg in computation.args]
-            args = [arg.name() for arg in flat_args]
-            computations = {k: v for arg in args for k,v in arg.items()}
-            return FlatComputation(computations=computations, op=computation.op, args=args)
-        else:
-            return FlatComputation(computations={}, op=computation.op, args=[])
+    def from_computation(cls, computation: Computation) -> 'FlatComputations':
+        encoder = computation.encoder()
+        computations = computation.computations()
+        flat_computations = [
+            FlatComputation(op=computation.op, args=[encoder[arg] for arg in computation.args])
+            for computation in computations
+            ]
+        return FlatComputations(computation=computation, flat_computations=flat_computations)
+    
+    @classmathod
+    def to_computation(cls, flat_computation: 'FlatComputations') -> Computation:
+        pass
+    
 
-    def name(self) -> str:
-        return f"c_{hash(self.op)}"

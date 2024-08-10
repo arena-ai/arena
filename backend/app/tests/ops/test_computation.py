@@ -3,7 +3,7 @@ from asyncio import sleep
 from anyio import run
 from pytest import fixture
 
-from app.ops.computation import Op, Computation, FlatComputation
+from app.ops.computation import Op, Computation, FlatComputation, FlatComputations
 from app.ops.events import LogRequest, Request
 from app.ops.dot import dot
 
@@ -84,5 +84,5 @@ def test_flat_computations(sleep_hello, sleep_world, sleep_pipe, sleep_pipe_many
     comp = sleep_pipe_many(init_comp, sleep_pipe(init_comp))
     print(f'comp = {dot(comp)}')
     print(f'comps = {[c.op.__class__.__name__ for c in comp.computations()]}')
-    # flat_comp = FlatComputation.from_computation(comp)
-    # print(f'flat_comp = {flat_comp}')
+    flat_comps = FlatComputations.from_computation(comp)
+    print(f'flat_comps = {flat_comps}')
