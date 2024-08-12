@@ -61,10 +61,10 @@ class JsonSerializable:
     
     @classmethod
     def from_dict(cls, obj: Any) -> Any:
-        if 'module' in obj and 'type' in obj:
+        if isinstance(obj, dict) and 'module' in obj and 'type' in obj:
             module = importlib.import_module(obj['module'])
-            cls = getattr(module, obj['type'])
-            return cls.model_validate(obj['value'])
+            obj_cls = getattr(module, obj['type'])
+            return obj_cls.model_validate(obj_cls.from_dict(obj['value']))
         elif isinstance(obj, dict):
             return {k: cls.from_dict(obj[k]) for k in obj}
         elif isinstance(obj, list):
@@ -76,7 +76,7 @@ class JsonSerializable:
         return json.dumps(self.to_dict(self))
 
     @classmethod
-    def from_json(cls, value: str) -> 'Op':
+    def from_json(cls, value: str) -> Any:
         return cls.from_dict(json.loads(value))
     
     def __str__(self) -> str:
@@ -225,6 +225,15 @@ class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
     
     def encoder(self) -> dict['Computation', int]:
         return { c: i for i, c in enumerate(self.computations()) }
+    
+    def to_json(self) -> str:
+        flat_computations = FlatComputations.from_computation(self)
+        return json.dumps(self.to_dict(flat_computations))
+
+    @classmethod
+    def from_json(cls, value: str) -> Any:
+        flat_computations = cls.from_dict(json.loads(value))
+        return FlatComputations.to_computation(flat_computations)
 
 
 class FlatComputation(JsonSerializable, BaseModel):

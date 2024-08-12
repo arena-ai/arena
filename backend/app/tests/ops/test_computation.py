@@ -74,6 +74,7 @@ def test_to_json(sleep_hello, sleep_pipe):
 def test_from_json(sleep_hello, sleep_pipe):
     comp = sleep_pipe(sleep_pipe(sleep_hello()))
     print(f'BEFORE {comp}')
+    print(f'comp = {dot(comp)}')
     value = comp.to_json()
     comp = Computation.from_json(value)
     print(f'AFTER {comp}')
