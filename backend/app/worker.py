@@ -6,7 +6,7 @@ from kombu.utils.json import register_type
 from celery import Celery
 from app.core.config import settings
 from app.core.db import engine
-from app.ops import Op, Computation
+from app.ops import Computation
 
 # Register Computations
 register_type(

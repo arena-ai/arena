@@ -1,7 +1,6 @@
-from typing import Any, Generic, TypeVar, TypeVarTuple, Sequence, Mapping
+from typing import Any, Generic, TypeVar, TypeVarTuple
+from types import NoneType, MappingProxyType
 from abc import ABC, abstractmethod
-from collections.abc import Sequence, Mapping
-from functools import cached_property
 from time import time
 from asyncio import TaskGroup, Task
 import json
@@ -30,15 +29,17 @@ class Hashable:
     @classmethod
     def to_immutable(cls, obj: Any) -> Any:
         if isinstance(obj, BaseModel):
-            return (obj.__class__.__name__,) + tuple((key, cls.to_immutable(value)) for key, value in obj)
+            return (obj.__class__.__name__,) + tuple((k, cls.to_immutable(getattr(obj, k))) for k in obj.model_dump(exclude_unset=True))
         elif isinstance(obj, dict):
-            return tuple((key, cls.to_immutable(value)) for key, value in obj.items())
-        elif isinstance(obj, list | set | tuple):
-            return tuple(cls.to_immutable(item) for item in obj)
+            return tuple((k, cls.to_immutable(obj[k])) for k in obj)
+        elif isinstance(obj, list | tuple | set):
+            return tuple(cls.to_immutable(o) for o in obj)
         elif hasattr(obj, '__dict__'):
             return cls.to_immutable(getattr(obj, '__dict__'))
-        else:
+        elif isinstance(obj, str | int | float | NoneType):
             return obj
+        else:
+            raise ValueError(f"{obj} ({obj.__class__})")
 
 # A mixin class to add json serializability to pydantic models
 class JsonSerializable:
@@ -48,21 +49,24 @@ class JsonSerializable:
             return {
                 'module': obj.__class__.__module__,
                 'type': obj.__class__.__name__,
-                'value': {k: cls.to_dict(o) for k,o in obj},
+                'value': {k: cls.to_dict(getattr(obj, k)) for k in obj.model_dump(exclude_unset=True)},
             }
         elif isinstance(obj, dict):
             return {k: cls.to_dict(obj[k]) for k in obj}
-        elif isinstance(obj, list | set | tuple):
+        elif isinstance(obj, list | tuple | set):
             return [cls.to_dict(o) for o in obj]
         elif hasattr(obj, '__dict__'):
             return cls.to_dict(getattr(obj, '__dict__'))
-        else:
+        elif isinstance(obj, str | int | float | NoneType):
             return obj
+        else:
+            raise ValueError(f"{obj} ({obj.__class__})")
     
     @classmethod
     def from_dict(cls, obj: Any) -> Any:
         if isinstance(obj, dict) and 'module' in obj and 'type' in obj:
             module = importlib.import_module(obj['module'])
+            print(f"DEBUG FROM DICT {obj}")
             obj_cls = getattr(module, obj['type'])
             return obj_cls.model_validate(obj_cls.from_dict(obj['value']))
         elif isinstance(obj, dict):
@@ -208,11 +212,11 @@ class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
         return Then()(self, other)
 
     @classmethod
-    def from_any(cls, arg: Any) -> 'Computation':
-        if isinstance(arg, Computation):
-            return arg
+    def from_any(cls, obj: Any) -> 'Computation':
+        if isinstance(obj, Computation):
+            return obj
         else:
-            return Const(value=arg)()
+            return Const(value=obj)()
     
     def computation_set(self) -> set['Computation']:
         result = {self}

@@ -78,14 +78,25 @@ def test_from_json(sleep_hello, sleep_pipe):
     value = comp.to_json()
     comp = Computation.from_json(value)
     print(f'AFTER {comp}')
+    print(f'comp = {dot(comp)}')
 
 
 def test_flat_computations(sleep_hello, sleep_world, sleep_pipe, sleep_pipe_many):
     init_comp = sleep_pipe_many(sleep_hello(), sleep_world())
     comp = sleep_pipe_many(init_comp, sleep_pipe(init_comp))
     print(f'comp = {dot(comp)}')
+    print(f'DEBUG {Computation.to_immutable(comp)}')
     print(f'comps = {[c.op.__class__.__name__ for c in comp.computations()]}')
     flat_comps = FlatComputations.from_computation(comp)
     print(f'flat_comps = {flat_comps}')
     unflatten_comp = FlatComputations.to_computation(flat_comps)
     print(f'unflatten_comp = {dot(unflatten_comp)}')
+
+
+def test_to_immutable(sleep_hello, sleep_world, sleep_pipe, sleep_pipe_many):
+    init_comp = sleep_pipe_many(sleep_hello(), sleep_world())
+    comp = sleep_pipe_many(init_comp, sleep_pipe(init_comp))
+    print(f'comp = {dot(comp)}')
+    print(f'comps = {[c.op.__class__.__name__ for c in comp.computations()]}')
+    immutable_comp = Computation.to_immutable(comp)
+    print(f'immutable_comp = {immutable_comp}')
