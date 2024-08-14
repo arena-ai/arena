@@ -68,7 +68,10 @@ class JsonSerializable:
             module = importlib.import_module(obj['module'])
             print(f"DEBUG FROM DICT {obj}")
             obj_cls = getattr(module, obj['type'])
-            return obj_cls.model_validate(obj_cls.from_dict(obj['value']))
+            if hasattr(obj_cls, 'from_dict'):
+                return obj_cls.model_validate(obj_cls.from_dict(obj['value']))
+            else:
+                return obj_cls.model_validate(cls.from_dict(obj['value']))
         elif isinstance(obj, dict):
             return {k: cls.from_dict(obj[k]) for k in obj}
         elif isinstance(obj, list):
