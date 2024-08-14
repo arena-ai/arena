@@ -2,12 +2,13 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: arena-storageclass
+  annotations:
+    storageclass.kubernetes.io/is-default-class: 'true'
 {{- if eq .Values.cluster.provider "AKS"}}
+provisioner: disk.csi.azure.com
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
 {{- else if eq .Values.cluster.provider "EKS"}}
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
 provisioner: ebs.csi.aws.com
 parameters:
   type: gp2

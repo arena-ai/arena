@@ -140,7 +140,7 @@ masking:
 qdrant:
   persistence:
     accessModes: ["ReadWriteOnce"]
-    size: 10Gi
+    size: 5Gi
     annotations: {}
     storageVolumeName: qdrant-data
     # storageClassName: arena-storageclass
@@ -150,18 +150,18 @@ milvus:
   minio:
     persistence:
       # storageClass: arena-storageclass
-      size: 50Gi
+      size: 10Gi
   etcd:
     persistence:
       # storageClass: arena-storageclass
-      size: 5Gi
+      size: 2Gi
   pulsar:
     bookkeeper:
       volumes:
         journal:
-          size: 50Gi
+          size: 5Gi
         ledgers:
-          size: 100Gi
+          size: 10Gi
       pdb:
         usePolicy: false
     zookeeper:
@@ -177,4 +177,4 @@ milvus:
   kafka:
     persistence:
       # storageClass: arena-storageclass
-      size: 50Gi
+      size: 5Gi

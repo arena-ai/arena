@@ -52,3 +52,21 @@ Or:
 ```sh
 source .env; helm uninstall ${RELEASE_NAME}
 ```
+
+To install a staging version (e.g. if it runs on EKS)
+
+```sh
+source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+--set cluster.provider=EKS \
+--set cluster.host=${STAGING_CLUSTER_HOST} \
+--set postgresql.user=${POSTGRES_USER} \
+--set postgresql.password=${POSTGRES_PASSWORD} \
+--set redis.password=${REDIS_PASSWORD} \
+--set backend.firstSuperUser.user=${FIRST_SUPERUSER} \
+--set backend.firstSuperUser.password=${FIRST_SUPERUSER_PASSWORD} \
+--set backend.smtp.host=${SMTP_HOST} \
+--set backend.smtp.requireAuthentication=True \
+--set backend.smtp.user=${SMTP_USER} \
+--set backend.smtp.password="${SMTP_PASSWORD}" \
+--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
+```
