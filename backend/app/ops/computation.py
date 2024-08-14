@@ -1,8 +1,11 @@
-from typing import Any, Generic, TypeVar, TypeVarTuple, Sequence
+from typing import Any, Generic, TypeVar, TypeVarTuple
+from types import NoneType, MappingProxyType
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from time import time
 from asyncio import TaskGroup, Task
+import json
+import importlib
+import base64
 from anyio import run
 from pydantic import BaseModel, ConfigDict, Field, computed_field, SerializeAsAny
 
@@ -10,14 +13,87 @@ As = TypeVarTuple('As')
 A = TypeVar('A')
 B = TypeVar('B')
 
-class Op(BaseModel, ABC, Generic[*As, B]):
-    """A basic template for ops"""
-    context: dict[str, Any] | None = Field(default=None, exclude=True)
+# A mixin class to add hashability to pydantic models
+class Hashable:
+    def __eq__(self, other) -> bool:
+        if isinstance(other, self.__class__):
+            return self.to_immutable(self) == self.to_immutable(other)
+        return False
     
-    @computed_field
-    @property
-    def opname(self) -> str:
-        return self.__class__.__name__
+    def __hash__(self) -> int:
+        return hash(self.to_immutable(self))
+
+    def _hash_str(self) -> str:
+        return base64.urlsafe_b64encode(hash(self).to_bytes(length=8, byteorder='big', signed=True)).decode('ascii')
+    
+    @classmethod
+    def to_immutable(cls, obj: Any) -> Any:
+        if isinstance(obj, BaseModel):
+            return (obj.__class__.__name__,) + tuple((k, cls.to_immutable(getattr(obj, k))) for k in obj.model_dump(exclude_unset=True))
+        elif isinstance(obj, dict):
+            return tuple((k, cls.to_immutable(obj[k])) for k in obj)
+        elif isinstance(obj, list | tuple | set):
+            return tuple(cls.to_immutable(o) for o in obj)
+        elif hasattr(obj, '__dict__'):
+            return cls.to_immutable(getattr(obj, '__dict__'))
+        elif isinstance(obj, str | int | float | NoneType):
+            return obj
+        else:
+            raise ValueError(f"{obj} ({obj.__class__})")
+
+# A mixin class to add json serializability to pydantic models
+class JsonSerializable:
+    @classmethod
+    def to_json_dict(cls, obj: Any) -> Any:
+        if isinstance(obj, BaseModel):
+            return {
+                'module': obj.__class__.__module__,
+                'type': obj.__class__.__name__,
+                'value': {k: cls.to_json_dict(getattr(obj, k)) for k in obj.model_dump(exclude_unset=True)},
+            }
+        elif isinstance(obj, dict):
+            return {k: cls.to_json_dict(obj[k]) for k in obj}
+        elif isinstance(obj, list | tuple | set):
+            return [cls.to_json_dict(o) for o in obj]
+        elif hasattr(obj, '__dict__'):
+            return cls.to_json_dict(getattr(obj, '__dict__'))
+        elif isinstance(obj, str | int | float | NoneType):
+            return obj
+        else:
+            raise ValueError(f"{obj} ({obj.__class__})")
+    
+    @classmethod
+    def from_json_dict(cls, obj: Any) -> Any:
+        if isinstance(obj, dict) and 'module' in obj and 'type' in obj:
+            module = importlib.import_module(obj['module'])
+            obj_cls = getattr(module, obj['type'])
+            if hasattr(obj_cls, 'from_json_dict'):
+                return obj_cls.model_validate(obj_cls.from_json_dict(obj['value']))
+            else:
+                return obj_cls.model_validate(cls.from_json_dict(obj['value']))
+        elif isinstance(obj, dict):
+            return {k: cls.from_json_dict(obj[k]) for k in obj}
+        elif isinstance(obj, list):
+            return [cls.from_json_dict(o) for o in obj]
+        else:
+            return obj
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_json_dict(self))
+
+    @classmethod
+    def from_json(cls, value: str) -> Any:
+        return cls.from_json_dict(json.loads(value))
+    
+    def __str__(self) -> str:
+        return self.to_json()
+
+
+class Op(Hashable, JsonSerializable, BaseModel, ABC, Generic[*As, B]):
+    """Ops are a lazy functions,
+    they can be composed together like functions (calling `self.__call__`)
+    and evaluated by calling `self.call`."""
+    context: dict[str, Any] | None = Field(default=None, exclude=True)
 
     @abstractmethod
     async def call(self, *args: *As) -> B:
@@ -28,9 +104,6 @@ class Op(BaseModel, ABC, Generic[*As, B]):
         """Compose Ops into Computations"""
         return Computation(op=self, args=[Computation.from_any(arg) for arg in args])
     
-    def __str__(self) -> str:
-        return self.opname
-
 
 class Const(Op[tuple[()], B], Generic[B]):
     """A constant op"""
@@ -39,9 +112,6 @@ class Const(Op[tuple[()], B], Generic[B]):
     async def call(self) -> B:
         return self.value
 
-    def __str__(self) -> str:
-        return f"{self.opname} ({str(self.value) if len(str(self.value)) < 16 else str(self.value)[:16]+'...'})"
-
 
 class Getattr(Op[A, B], Generic[A, B]):
     """A getattr op"""
@@ -49,9 +119,6 @@ class Getattr(Op[A, B], Generic[A, B]):
 
     async def call(self, a: A) -> B:
         return a.__getattribute__(self.attr)
-
-    def __str__(self) -> str:
-        return f"{self.opname} ({self.attr})"
 
 
 class Getitem(Op[*As, B], Generic[*As, B]):
@@ -68,9 +135,6 @@ class Call(Op[*As, B], Generic[*As, B]):
 
     async def call(self, a: A) -> B:
         return a.__call__(*self.args)
-    
-    def __str__(self) -> str:
-        return f"{self.opname}"
 
 
 class Then(Op[tuple[A, B], B], Generic[A, B]):
@@ -79,11 +143,11 @@ class Then(Op[tuple[A, B], B], Generic[A, B]):
         return b
 
 
-class Computation(BaseModel, Generic[B]):
+class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     """An Op applied to arguments"""
-    op: SerializeAsAny[Op]
-    args: Sequence['Computation']
+    op: Op
+    args: list['Computation']
     task: Task | None = Field(None, exclude=True)
     
     def clear(self):
@@ -148,11 +212,64 @@ class Computation(BaseModel, Generic[B]):
 
     def then(self, other: 'Computation') -> 'Computation':
         return Then()(self, other)
+
+    @classmethod
+    def from_any(cls, obj: Any) -> 'Computation':
+        if isinstance(obj, Computation):
+            return obj
+        else:
+            return Const(value=obj)()
+    
+    def computation_set(self) -> set['Computation']:
+        result = {self}
+        for arg in self.args:
+            result |= arg.computation_set()
+        return result
+
+    def computations(self) -> list['Computation']:
+        return sorted(self.computation_set(), key=lambda c: hash(c))
+    
+    def encoder(self) -> dict['Computation', int]:
+        return { c: i for i, c in enumerate(self.computations()) }
+    
+    def to_json(self) -> str:
+        flat_computations = FlatComputations.from_computation(self)
+        return json.dumps(self.to_json_dict(flat_computations))
+
+    @classmethod
+    def from_json(cls, value: str) -> Any:
+        flat_computations = cls.from_json_dict(json.loads(value))
+        return FlatComputations.to_computation(flat_computations)
+
+
+class FlatComputation(JsonSerializable, BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    """An Op applied to arguments"""
+    index: int
+    op: Op
+    args: list[int]
+
+
+class FlatComputations(JsonSerializable, BaseModel):
+    flat_computation_list: list[FlatComputation]
+
+    @classmethod
+    def from_computation(cls, computation: Computation) -> 'FlatComputations':
+        encoder = computation.encoder()
+        computations = computation.computations()
+        flat_computations = [
+            FlatComputation(index=encoder[c], op=c.op, args=[encoder[arg] for arg in c.args])
+            for c in computations
+            ]
+        return FlatComputations(flat_computation_list=flat_computations)
     
     @classmethod
-    def from_any(cls, arg: Any) -> 'Computation':
-        if isinstance(arg, Computation):
-            return arg
-        else:
-            return Const(value=arg)()
+    def to_computation(cls, flat_computations: 'FlatComputations') -> Computation:
+        parents = {fc.index for fc in flat_computations.flat_computation_list}
+        children = {index for fc in flat_computations.flat_computation_list for index in fc.args}
+        maximal_parent = next(iter(parents - children))
+        computations = [Computation(op=fc.op, args=[]) for fc in flat_computations.flat_computation_list]
+        for fc in flat_computations.flat_computation_list:
+            computations[fc.index].args = [computations[index] for index in fc.args]
+        return computations[maximal_parent]
 

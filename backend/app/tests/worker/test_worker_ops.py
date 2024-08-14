@@ -1,4 +1,5 @@
 from app.worker import evaluate
+from app.ops.computation import Computation
 
 from app.ops.lm import Chat
 from app.lm.models import ChatCompletionRequest, Message

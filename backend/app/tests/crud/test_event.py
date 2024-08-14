@@ -9,6 +9,10 @@ def test_create_event(db: Session) -> None:
     event = crud.create_event(session=db, event_in=EventCreate(name="test_request", content=random_lower_string()), owner_id=user.id)
     assert event.owner.id == user.id
     assert len(user.events) == 1
+    # Cleanup
+    db.delete(user)
+    db.delete(event)
+    db.commit()
 
 def test_create_event_identifier(db: Session) -> None:
     user = crud.create_user(session=db, user_create=UserCreate(email=random_email(), password=random_lower_string()))
@@ -19,6 +23,10 @@ def test_create_event_identifier(db: Session) -> None:
     assert identifier_1.event.name == "test_request_id"
     assert identifier_2.event.name == "test_request_id"
     assert identifier_2.id == "other-1234"
+    # Cleanup
+    db.delete(user)
+    db.delete(event)
+    db.commit()
 
 def test_create_attribute(db: Session) -> None:
     attribute = crud.create_attribute_if_not_exist(session=db, attribute="test")
@@ -32,6 +40,10 @@ def test_create_event_attribute(db: Session) -> None:
     crud.create_event_attribute_from_name_value(session=db, attribute="test2", value="world", event_id=event.id)
     assert len(event.attributes) == 2
     assert event.attributes[0].value == "hello"
+    # Cleanup
+    db.delete(user)
+    db.delete(event)
+    db.commit()
 
 def test_delete_event(db: Session) -> None:
     alice = crud.create_user(session=db, user_create=UserCreate(email=random_email(), password=random_lower_string()))
@@ -44,6 +56,10 @@ def test_delete_event(db: Session) -> None:
     db.commit()
     assert len(db.exec(select(User)).all()) == 3 # Should not change
     assert len(db.exec(select(Event)).all()) == 0 # None
+    # Cleanup
+    db.delete(alice)
+    db.delete(bob)
+    db.commit()
 
 def test_delete_owner(db: Session) -> None:
     alice = crud.create_user(session=db, user_create=UserCreate(email=random_email(), password=random_lower_string()))
@@ -56,3 +72,7 @@ def test_delete_owner(db: Session) -> None:
     db.commit()
     assert len(db.exec(select(User)).all()) == 2 # Should not change
     assert len(db.exec(select(Event)).all()) == 0 # None
+    # Cleanup
+    db.delete(bob)
+    db.delete(parent_event)
+    db.commit()

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from anyio import run
 
-from app.ops import Op, Const, cst, rnd, rndi
+from app.ops import Op, Const, cst, rnd, rndi, Computation
 
 def test_const_op() -> None:
     c = cst(4).op
@@ -89,3 +89,37 @@ def test_access() -> None:
     print(b.c)
     print(run((b.c).evaluate))
     print(run((b.a[2].txt.upper()).evaluate))
+
+
+def test_from_json() -> None:
+    from app.ops.settings import LMConfigSetting
+    from app.ops.session import session, user
+    s = LMConfigSetting()(session(), user())
+    print(f'BEFORE {s}')
+    value = s.to_json()
+    s = Computation.from_json(value)
+    print(f'AFTER {s}')
+
+
+def test_to_json() -> None:
+    class Sum(Op[tuple[float, float], float]):
+        name: str = "sum"
+        
+        async def call(self, a: float, b: float) -> float:
+            return a+b
+
+    s = Sum()
+    s12 = s(cst(1), cst(2))
+    print(s12.to_json())
+
+def test_from_json() -> None:
+    from app.ops.settings import LMConfigSetting
+    from app.ops.session import session, user
+    s = LMConfigSetting()(session(), user())
+    print(f'BEFORE {s}')
+    value = s.to_json()
+    s = Computation.from_json(value)
+    print(f'AFTER {s}')
+
+def test_flatten() -> None:
+    pass
