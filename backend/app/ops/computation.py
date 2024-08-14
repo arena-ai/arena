@@ -23,7 +23,7 @@ class Hashable:
     def __hash__(self) -> int:
         return hash(self.to_immutable(self))
 
-    def hash_str(self) -> str:
+    def _hash_str(self) -> str:
         return base64.urlsafe_b64encode(hash(self).to_bytes(length=8, byteorder='big', signed=True)).decode('ascii')
     
     @classmethod
@@ -44,47 +44,46 @@ class Hashable:
 # A mixin class to add json serializability to pydantic models
 class JsonSerializable:
     @classmethod
-    def to_dict(cls, obj: Any) -> Any:
+    def to_json_dict(cls, obj: Any) -> Any:
         if isinstance(obj, BaseModel):
             return {
                 'module': obj.__class__.__module__,
                 'type': obj.__class__.__name__,
-                'value': {k: cls.to_dict(getattr(obj, k)) for k in obj.model_dump(exclude_unset=True)},
+                'value': {k: cls.to_json_dict(getattr(obj, k)) for k in obj.model_dump(exclude_unset=True)},
             }
         elif isinstance(obj, dict):
-            return {k: cls.to_dict(obj[k]) for k in obj}
+            return {k: cls.to_json_dict(obj[k]) for k in obj}
         elif isinstance(obj, list | tuple | set):
-            return [cls.to_dict(o) for o in obj]
+            return [cls.to_json_dict(o) for o in obj]
         elif hasattr(obj, '__dict__'):
-            return cls.to_dict(getattr(obj, '__dict__'))
+            return cls.to_json_dict(getattr(obj, '__dict__'))
         elif isinstance(obj, str | int | float | NoneType):
             return obj
         else:
             raise ValueError(f"{obj} ({obj.__class__})")
     
     @classmethod
-    def from_dict(cls, obj: Any) -> Any:
+    def from_json_dict(cls, obj: Any) -> Any:
         if isinstance(obj, dict) and 'module' in obj and 'type' in obj:
             module = importlib.import_module(obj['module'])
-            print(f"DEBUG FROM DICT {obj}")
             obj_cls = getattr(module, obj['type'])
-            if hasattr(obj_cls, 'from_dict'):
-                return obj_cls.model_validate(obj_cls.from_dict(obj['value']))
+            if hasattr(obj_cls, 'from_json_dict'):
+                return obj_cls.model_validate(obj_cls.from_json_dict(obj['value']))
             else:
-                return obj_cls.model_validate(cls.from_dict(obj['value']))
+                return obj_cls.model_validate(cls.from_json_dict(obj['value']))
         elif isinstance(obj, dict):
-            return {k: cls.from_dict(obj[k]) for k in obj}
+            return {k: cls.from_json_dict(obj[k]) for k in obj}
         elif isinstance(obj, list):
-            return [cls.from_dict(o) for o in obj]
+            return [cls.from_json_dict(o) for o in obj]
         else:
             return obj
 
     def to_json(self) -> str:
-        return json.dumps(self.to_dict(self))
+        return json.dumps(self.to_json_dict(self))
 
     @classmethod
     def from_json(cls, value: str) -> Any:
-        return cls.from_dict(json.loads(value))
+        return cls.from_json_dict(json.loads(value))
     
     def __str__(self) -> str:
         return self.to_json()
@@ -235,11 +234,11 @@ class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
     
     def to_json(self) -> str:
         flat_computations = FlatComputations.from_computation(self)
-        return json.dumps(self.to_dict(flat_computations))
+        return json.dumps(self.to_json_dict(flat_computations))
 
     @classmethod
     def from_json(cls, value: str) -> Any:
-        flat_computations = cls.from_dict(json.loads(value))
+        flat_computations = cls.from_json_dict(json.loads(value))
         return FlatComputations.to_computation(flat_computations)
 
 

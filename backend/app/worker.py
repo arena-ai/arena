@@ -25,7 +25,7 @@ register_type(
 register_type(
     BaseModel,
     'base_model',
-    lambda o: json.dumps(JsonSerializable.to_dict(o)),
+    lambda o: json.dumps(JsonSerializable.to_json_dict(o)),
     lambda o: JsonSerializable.from_json(o),
 )
 
