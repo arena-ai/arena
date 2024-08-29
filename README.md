@@ -31,3 +31,4 @@ To start the test environment, run:
 
 `docker compose up`
 
+Docker compose uses `compose.yml` and overrides it with `compose.override.yml`.
