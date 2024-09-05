@@ -16,13 +16,15 @@ class Bucket:
     object_store: Minio = store
 
     def put(self, name: str, data: BinaryIO) -> ObjectWriteResult:
-        return store.put_object(bucket_name=self.name, object_name=name, data=data)
+        return store.put_object(bucket_name=self.name, object_name=name, data=data, length=-1, part_size=10000000)
 
     def get(self, name: str ) -> BaseHTTPResponse:
         return store.get_object(bucket_name=self.name, object_name=name)
 
+@dataclass
 class Documents(Bucket):
     name: str = settings.MINIO_DOCUMENT_BUCKET
 
+@dataclass
 class Models(Bucket):
     name: str = settings.MINIO_MODEL_BUCKET

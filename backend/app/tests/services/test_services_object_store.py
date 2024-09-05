@@ -3,8 +3,8 @@ from minio import Minio
 from app.services.object_store import Documents
 
 
-def test_documents(store: Minio) -> None:
-    docs = Documents(object_store=store)
+def test_documents(object_store: Minio) -> None:
+    docs = Documents(object_store=object_store)
     f = io.BytesIO(b"some initial binary data: \x00\x01")
     docs.put("test", f)
     with docs.get("test") as g:

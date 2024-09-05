@@ -76,7 +76,7 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - PRESIDIO_ANALYZER_SERVER=presidio-analyzer
       - PRESIDIO_ANONYMIZER_SERVER=presidio-anonymizer
-      - STORAGE_SERVER=minio
+      - MINIO_SERVER=minio
     build:
       context: ./backend
       args:
@@ -129,7 +129,7 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - PRESIDIO_ANALYZER_SERVER=presidio-analyzer
       - PRESIDIO_ANONYMIZER_SERVER=presidio-anonymizer
-      - STORAGE_SERVER=minio
+      - MINIO_SERVER=minio
     build:
       context: ./backend
       args:
@@ -230,6 +230,8 @@ services:
     environment:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
+    ports:
+      - "9000:9000"
     volumes:
       - minio-data:/minio_data
     command: minio server /minio_data

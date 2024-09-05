@@ -17,7 +17,7 @@ Or if you want to run a specific test: `docker compose exec backend bash /app/sp
 
 It can be costly to run the full stack in docker compose. You can run parts of the stack using profiles: `docker compose --profile milvus up`
 
-Then run for example `docker compose exec backend bash /app/specific-tests-start.sh /app/tests/services/test_services_object_store.py`
+Then run for example `docker compose exec backend bash /app/specific-tests-start.sh app/tests/services/test_services_object_store.py`
 
 ## The backend is pushed to github container registry (ghcr.io)
 

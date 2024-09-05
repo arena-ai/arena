@@ -5,6 +5,7 @@ store = Minio(
     f"{settings.MINIO_SERVER}:{settings.MINIO_PORT}",
     access_key=settings.MINIO_ACCESS_KEY,
     secret_key=settings.MINIO_SECRET_KEY,
+    secure=False,
 )
 
 def init_store(object_storage: Minio) -> None:
