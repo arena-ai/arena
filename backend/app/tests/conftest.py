@@ -40,9 +40,14 @@ def db() -> Generator[Session, None, None]:
 
 
 @pytest.fixture(scope="module")
-def object_store() -> Minio:
+def object_store() -> Generator[Minio, None, None]:
     init_store(store)
-    return store
+    yield store
+    # Cleanup after the tests
+    for bucket in [settings.MINIO_DOCUMENT_BUCKET, settings.MINIO_MODEL_BUCKET]:
+        for obj in store.list_objects(bucket_name=bucket, recursive=True):
+            store.remove_object(bucket_name=bucket, object_name=obj.object_name)
+        store.remove_bucket(bucket)
 
 
 @pytest.fixture(scope="module")

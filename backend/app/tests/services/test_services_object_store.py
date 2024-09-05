@@ -19,4 +19,9 @@ def test_documents(object_store: Minio) -> None:
         f = io.BytesIO(b"some initial binary data: \x00\x01 "+f"{i}".encode())
         docs.put(f"user/obj_{i}", f)
     print(f"We wrote the following objects {docs.list(prefix='user/')}")
+    # Remove one object
+    docs.remove("test")
+    docs.remove("obj_3")
+    docs.remove("user/obj_3")
+    print(f"After removal we have the following objects {docs.list() + docs.list(prefix='user/')}")
 
