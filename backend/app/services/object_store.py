@@ -18,8 +18,11 @@ class Bucket:
     def put(self, name: str, data: BinaryIO) -> ObjectWriteResult:
         return store.put_object(bucket_name=self.name, object_name=name, data=data, length=-1, part_size=10000000)
 
-    def get(self, name: str ) -> BaseHTTPResponse:
+    def get(self, name: str) -> BaseHTTPResponse:
         return store.get_object(bucket_name=self.name, object_name=name)
+
+    def list(self, prefix: str | None=None) -> list[str]:
+        return [obj.object_name for obj in store.list_objects(bucket_name=self.name, prefix=prefix)]
 
 @dataclass
 class Documents(Bucket):
