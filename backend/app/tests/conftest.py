@@ -8,9 +8,11 @@ dotenv.load_dotenv()
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, delete
+from minio import Minio
 
 from app.core.config import settings
 from app.core.db import engine, init_db
+from app.core.object_store import store, init_store
 from app.main import app
 from app.models import User, Setting, Event, EventIdentifier, Attribute, EventAttribute
 from app.tests.utils.user import authentication_token_from_email
@@ -35,6 +37,12 @@ def db() -> Generator[Session, None, None]:
         statement = delete(User)
         session.exec(statement)
         session.commit()
+
+
+@pytest.fixture(scope="module")
+def object_store() -> Minio:
+    init_store(store)
+    return store
 
 
 @pytest.fixture(scope="module")

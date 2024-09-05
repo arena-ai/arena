@@ -98,6 +98,17 @@ class Settings(BaseSettings):
         },
     }
 
+    # Milvus components
+
+    # MinIO
+    MINIO_SERVER: str = "localhost"
+    MINIO_PORT: int = 9000
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_DOCUMENT_BUCKET: str = "arena-documents"
+    MINIO_MODEL_BUCKET: str = "arena-models"
+
+    # E-mail settings
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
     SMTP_PORT: int = 587

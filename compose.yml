@@ -76,6 +76,7 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - PRESIDIO_ANALYZER_SERVER=presidio-analyzer
       - PRESIDIO_ANONYMIZER_SERVER=presidio-anonymizer
+      - STORAGE_SERVER=minio
     build:
       context: ./backend
       args:
@@ -128,6 +129,7 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - PRESIDIO_ANALYZER_SERVER=presidio-analyzer
       - PRESIDIO_ANONYMIZER_SERVER=presidio-anonymizer
+      - STORAGE_SERVER=minio
     build:
       context: ./backend
       args:
