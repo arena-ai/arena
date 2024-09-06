@@ -1,12 +1,10 @@
-from typing import Mapping, Sequence, Literal, BinaryIO, Any
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from pydantic import BaseModel, Field, TypeAdapter
+from io import BytesIO
+from typing import BinaryIO
+from dataclasses import dataclass
 from minio import Minio
 from minio.helpers import ObjectWriteResult
 from urllib3 import BaseHTTPResponse
 
-from app.lm.models import ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
 from app.core.config import settings
 from app.core.object_store import store
 
@@ -17,6 +15,10 @@ class Bucket:
 
     def put(self, name: str, data: BinaryIO) -> ObjectWriteResult:
         return store.put_object(bucket_name=self.name, object_name=name, data=data, length=-1, part_size=10000000)
+
+    def puts(self, name: str, data: str) -> ObjectWriteResult:
+        data = BytesIO(data.encode())
+        return self.put(name, data)
 
     def get(self, name: str) -> BaseHTTPResponse:
         return store.get_object(bucket_name=self.name, object_name=name)
