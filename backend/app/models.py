@@ -205,3 +205,4 @@ class Attribute(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, unique=True)
     events: EventAttribute = Relationship(back_populates="attribute", sa_relationship_kwargs={"cascade": "all, delete"})
+

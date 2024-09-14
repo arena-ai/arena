@@ -22,6 +22,11 @@ class Bucket:
 
     def get(self, name: str) -> BaseHTTPResponse:
         return store.get_object(bucket_name=self.name, object_name=name)
+    
+    def gets(self, name: str) -> str:
+        data = self.get(name)
+        print(data)
+        return data.decode()
 
     def list(self, prefix: str | None=None, recursive: bool=False) -> list[str]:
         return [obj.object_name for obj in store.list_objects(bucket_name=self.name, prefix=prefix, recursive=recursive)]
