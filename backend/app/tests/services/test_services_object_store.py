@@ -23,5 +23,7 @@ def test_documents(object_store: Minio) -> None:
     docs.remove("test")
     docs.remove("obj_3")
     docs.remove("user/obj_3")
+    docs.puts(f"user/test_string", "Hello world")
+    print(docs.gets(f"user/test_string"))
     print(f"After removal we have the following objects {docs.list() + docs.list(prefix='user/')}")
 

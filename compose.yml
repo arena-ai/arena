@@ -143,8 +143,6 @@ services:
       - default
     depends_on:
       - db
-      - minio
-      - milvus
     env_file:
       - .env
     environment:
@@ -198,8 +196,6 @@ services:
     restart: always
     depends_on:
       - db
-      - minio
-      - milvus
     env_file:
       - .env
     environment:
