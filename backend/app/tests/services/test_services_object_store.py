@@ -26,4 +26,6 @@ def test_documents(object_store: Minio) -> None:
     docs.puts(f"user/test_string", "Hello world")
     print(docs.gets(f"user/test_string"))
     print(f"After removal we have the following objects {docs.list() + docs.list(prefix='user/')}")
+    print(f'user/test_string exists: {docs.exists(f"user/test_string")}')
+    print(f'user/unknown exists: {docs.exists(f"user/unknown")}')
 

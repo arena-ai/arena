@@ -1,7 +1,7 @@
 from io import BytesIO
 from typing import BinaryIO
 from dataclasses import dataclass
-from minio import Minio
+from minio import Minio, S3Error
 from minio.helpers import ObjectWriteResult
 from urllib3 import BaseHTTPResponse
 
@@ -26,6 +26,17 @@ class Bucket:
     def gets(self, name: str) -> str:
         data = self.get(name)
         return data.read().decode()
+
+    def exists(self, name: str) -> bool:
+        """Check if an object exists"""
+        try:
+            store.stat_object(bucket_name=self.name, object_name=name)
+            return True
+        except S3Error as err:
+            if err.code == "NoSuchKey":
+                return False
+            else:
+                raise err
 
     def list(self, prefix: str | None=None, recursive: bool=False) -> list[str]:
         return [obj.object_name for obj in store.list_objects(bucket_name=self.name, prefix=prefix, recursive=recursive)]

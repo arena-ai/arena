@@ -60,17 +60,19 @@ async def read_file_as_text(*, current_user: CurrentUser, name: str):
     path = get_path(docs, current_user, name)
     input = BytesIO(docs.get(f"{path}data").read())
     content_type = docs.gets(f"{path}content_type")
-    if content_type=='application/pdf':
-        doc = pymupdf.Document(stream=input)
-        output = BytesIO()
-        for page in doc: # iterate the document pages
-            text = page.get_text().encode("utf8") # get plain text (is in UTF-8)
-            output.write(text) # write text of page
-            output.write(bytes((12,))) # write page delimiter (form feed 0x0C)
-        output.seek(0)
-        docs.put(f"{path}as_text", output)
-    else:
-        docs.puts(f"{path}as_text", "Error: Could not read as text")
+    if not docs.exists(f"{path}as_text"):
+        # The doc should be created
+        if content_type=='application/pdf':
+            doc = pymupdf.Document(stream=input)
+            output = BytesIO()
+            for page in doc: # iterate the document pages
+                text = page.get_text().encode("utf8") # get plain text (is in UTF-8)
+                output.write(text) # write text of page
+                output.write(bytes((12,))) # write page delimiter (form feed 0x0C)
+            output.seek(0)
+            docs.put(f"{path}as_text", output)
+        else:
+            docs.puts(f"{path}as_text", "Error: Could not read as text")
     # output the file
     input = docs.get(f"{path}as_text")
-    return StreamingResponse(content=input.stream(), media_type='application/octet-stream')
+    return StreamingResponse(content=input.stream(), media_type='text/plain')
