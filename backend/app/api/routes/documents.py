@@ -1,5 +1,4 @@
 from uuid import uuid4 as uuid
-from typing import Any, Annotated
 from io import BytesIO
 
 from fastapi import APIRouter, File, UploadFile
@@ -59,17 +58,19 @@ async def read_file_as_text(*, current_user: CurrentUser, name: str):
     user_id = current_user.id
     docs = Documents()
     path = get_path(docs, current_user, name)
-    data = docs.get(f"{path}data")
+    input = BytesIO(docs.get(f"{path}data").read())
     content_type = docs.gets(f"{path}content_type")
     if content_type=='application/pdf':
-        doc = pymupdf.Document(stream=data)
+        doc = pymupdf.Document(stream=input)
         output = BytesIO()
         for page in doc: # iterate the document pages
             text = page.get_text().encode("utf8") # get plain text (is in UTF-8)
             output.write(text) # write text of page
             output.write(bytes((12,))) # write page delimiter (form feed 0x0C)
-        output.seek(0) 
+        output.seek(0)
         docs.put(f"{path}as_text", output)
-        # output the file
-        data = docs.get(f"{path}as_text")
-        return StreamingResponse(content=data.stream(), media_type='text/plain')
+    else:
+        docs.puts(f"{path}as_text", "Error: Could not read as text")
+    # output the file
+    input = docs.get(f"{path}as_text")
+    return StreamingResponse(content=input.stream(), media_type='application/octet-stream')
