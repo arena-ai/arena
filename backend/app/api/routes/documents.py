@@ -55,7 +55,6 @@ async def read_file(*, current_user: CurrentUser, name: str):
 
 @router.get("/{name}/as_text")
 async def read_file_as_text(*, current_user: CurrentUser, name: str, start_page: int = 0, end_page: int | None = None):
-    user_id = current_user.id
     docs = Documents()
     path = get_path(docs, current_user, name)
     input = BytesIO(docs.get(f"{path}data").read())
