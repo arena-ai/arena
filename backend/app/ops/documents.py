@@ -15,29 +15,29 @@ class Paths(Op[User, list[str]]):
         prefixes = docs.list() if user.is_superuser else [f"{user.id}/"]
         return [path for prefix in prefixes for path in docs.list(prefix=prefix)]
 
-class Path(Op[[User, str], str]):
-    async def call(self, user: User) -> list[str]:
-        docs = Documents()
-        prefixes = docs.list() if user.is_superuser else [f"{user.id}/"]
-        return [path for prefix in prefixes for path in docs.list(prefix=prefix)]
+# class Path(Op[[User, str], str]):
+#     async def call(self, user: User) -> list[str]:
+#         docs = Documents()
+#         prefixes = docs.list() if user.is_superuser else [f"{user.id}/"]
+#         return [path for prefix in prefixes for path in docs.list(prefix=prefix)]
 
-def get_path(docs: Documents, current_user: CurrentUser, name: str):
-    """Get the path of a document from its name"""
-    if current_user.is_superuser:
-        return next(path for path in list_paths(docs, current_user) if path.split("/")[1]==name)
-    else:
-        return f"{current_user.id}/{name}/"
+# def get_path(docs: Documents, current_user: CurrentUser, name: str):
+#     """Get the path of a document from its name"""
+#     if current_user.is_superuser:
+#         return next(path for path in list_paths(docs, current_user) if path.split("/")[1]==name)
+#     else:
+#         return f"{current_user.id}/{name}/"
 
-class GetAsText(Op[tuple[Session, User, str], str]):
-    async def call(self, session: Session, user: User, ) -> str:
-        analyzer = Analyzer()
-        anonymizer = Anonymizer()
-        analysis = await analyzer.analyze(AnalyzerRequest(text=input))
-        anonymized = await anonymizer.anonymize(AnonymizerRequest(
-            text=input,
-            anonymizers=Anonymizers(DEFAULT=Replace()),
-            analyzer_results=analysis,
-        ))
-        return anonymized.text
+# class GetAsText(Op[tuple[Session, User, str], str]):
+#     async def call(self, session: Session, user: User, ) -> str:
+#         analyzer = Analyzer()
+#         anonymizer = Anonymizer()
+#         analysis = await analyzer.analyze(AnalyzerRequest(text=input))
+#         anonymized = await anonymizer.anonymize(AnonymizerRequest(
+#             text=input,
+#             anonymizers=Anonymizers(DEFAULT=Replace()),
+#             analyzer_results=analysis,
+#         ))
+#         return anonymized.text
 
-masking = Masking()
+# get_as_text = GetAsText()
