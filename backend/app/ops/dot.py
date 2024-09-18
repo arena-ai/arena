@@ -9,9 +9,11 @@ def dot(computation: Computation) -> Dot:
     edges(graph, flat_computations)
     return graph
 
+
 def nodes(graph: Dot, flat_computations: FlatComputations):
     for fc in flat_computations.flat_computation_list:
         graph.add_node(Node(fc.index, label=str(fc.op)))
+
 
 def edges(graph: Dot, flat_computations: FlatComputations):
     for fc in flat_computations.flat_computation_list:

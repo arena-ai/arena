@@ -50,11 +50,20 @@ services:
     restart: "no"
     ports:
       - "8080:8080"
+  
+  milvus:
+    restart: "no"
+  
+  minio:
+    restart: "no"
+
+  etcd:
+    restart: "no"
 
   backend:
     restart: "no"
     ports:
-      - "8888:8888"
+      - "8000:80"
     volumes:
       - ./backend/:/app
     build:
@@ -83,6 +92,7 @@ services:
       args:
         - VITE_API_URL=http://${DOMAIN?Variable not set}
         - NODE_ENV=development
+
 
 networks:
   traefik-public:

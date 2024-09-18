@@ -32,9 +32,11 @@ openai = "^1.23"
 anthropic = "^0.34"
 mistralai = "^1.0"
 anyio = {extras = ["trio"], version = "^4.3.0"}
-faker = "^28.0"
+faker = "^28.4"
 pyarrow = "^17.0"
 pydot = "^3.0"
+minio = "^7.2.8"
+pymupdf = "^1.24.10"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3"
