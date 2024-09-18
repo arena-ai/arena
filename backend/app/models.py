@@ -211,35 +211,35 @@ class Attribute(SQLModel, table=True):
 
 # DocumentDataExtractor
 
-# Shared properties
-class DocumentDataExtractorBase(SQLModel):
-    name: str = Field(unique=True, index=True)
-    prompt: str
+# # Shared properties
+# class DocumentDataExtractorBase(SQLModel):
+#     name: str = Field(unique=True, index=True)
+#     prompt: str
 
-class DocumentDataExtractorCreate(DocumentDataExtractorBase):
-    name: str
-    prompt: str
+# class DocumentDataExtractorCreate(DocumentDataExtractorBase):
+#     name: str
+#     prompt: str
 
-class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    timestamp: datetime | None =  Field(default=func.now())
-    owner_id: int | None = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), default=None))
-    owner: User | None = Relationship(back_populates="document_data_extractors")
-    document_data_examples: list["DocumentDataExample"] = Relationship(back_populates="document_data_extractor", sa_relationship_kwargs={"cascade": "all, delete"})
+# class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
+#     id: int | None = Field(default=None, primary_key=True)
+#     timestamp: datetime | None =  Field(default=func.now())
+#     owner_id: int | None = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), default=None))
+#     owner: User | None = Relationship(back_populates="document_data_extractors")
+#     document_data_examples: list["DocumentDataExample"] = Relationship(back_populates="document_data_extractor", sa_relationship_kwargs={"cascade": "all, delete"})
 
-# Properties to return via API, id is always required
-class DocumentDataExtractorOut(DocumentDataExtractorBase):
-    id: int
-    timestamp: datetime
-    owner_id: int
+# # Properties to return via API, id is always required
+# class DocumentDataExtractorOut(DocumentDataExtractorBase):
+#     id: int
+#     timestamp: datetime
+#     owner_id: int
 
-class DocumentDataExtractorsOut(SQLModel):
-    data: list[DocumentDataExtractorOut]
-    count: int
+# class DocumentDataExtractorsOut(SQLModel):
+#     data: list[DocumentDataExtractorOut]
+#     count: int
 
 
-class DocumentDataExample(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    document_data_extractor: DocumentDataExtractor = Relationship(back_populates="document_data_examples")
-    document: str
-    data: str
+# class DocumentDataExample(SQLModel, table=True):
+#     id: int | None = Field(default=None, primary_key=True)
+#     document_data_extractor: DocumentDataExtractor = Relationship(back_populates="document_data_examples")
+#     document: str
+#     data: str
