@@ -34,7 +34,7 @@ def db() -> Generator[Session, None, None]:
         session.exec(statement)
         statement = delete(Setting)
         session.exec(statement)
-        statement = delete(User)
+        statement = delete(User).where(not User.is_superuser)
         session.exec(statement)
         session.commit()
 

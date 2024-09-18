@@ -52,6 +52,10 @@ class Bucket:
 class Documents(Bucket):
     name: str = settings.MINIO_DOCUMENT_BUCKET
 
+documents = Documents()
+
 @dataclass
 class Models(Bucket):
     name: str = settings.MINIO_MODEL_BUCKET
+
+models = Models()
