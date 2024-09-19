@@ -44,7 +44,7 @@ class AsText(Op[tuple[User, str], str]):
         if not documents.exists(path_as_text):
             # The doc should be created
             if content_type=='application/pdf':
-                documents.puts(path_as_text, pdf_reader.as_text(input))
+                documents.puts(path_as_text, pdf_reader.as_text(input, start_page=start_page, end_page=end_page))
             else:
                 documents.puts(path_as_text, "Error: Could not read as text")
         # output the file

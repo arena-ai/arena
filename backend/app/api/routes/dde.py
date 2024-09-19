@@ -10,8 +10,11 @@ import pyarrow.csv as pc
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
+from app.lm.models import ChatCompletionResponse, ChatCompletionRequest, Message as ChatCompletionMessage
 from app.services.object_store import documents
 from app.services.pdf_reader import pdf_reader
+from app.ops import tup
+from app.ops.documents import as_text
 from app.models import (Message, DocumentDataExtractorCreate, DocumentDataExtractorUpdate, DocumentDataExtractor, DocumentDataExtractorOut, DocumentDataExtractorsOut,
                         DocumentDataExampleCreate, DocumentDataExampleUpdate, DocumentDataExample, DocumentDataExampleOut)
 
@@ -187,7 +190,7 @@ def update_document_data_example(
 
 
 @router.delete("/{name}/example/{id}")
-def delete_document_data_example(session: SessionDep, current_user: CurrentUser, name: str, id: int) -> Message:
+def delete_document_data_example(*, session: SessionDep, current_user: CurrentUser, name: str, id: int) -> Message:
     """
     Delete an event identifier.
     """
@@ -205,10 +208,21 @@ def delete_document_data_example(session: SessionDep, current_user: CurrentUser,
     session.commit()
     return Message(message="DocumentDataExample deleted successfully")
 
-
 @router.post("/extract/{name}")
-async def extract_from_file(*, current_user: CurrentUser, name: str, upload: UploadFile) -> JSONResponse:
+async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, name: str, upload: UploadFile) -> JSONResponse:
+    document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
+    if not document_data_extractor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExtractor not found")
+    if not document_data_extractor.owner_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExtractor has no owner")
+    # Build examples
+    examples = tup(*(tup(as_text(document_data_extractor.owner, example.document_id), example.data) for example in document_data_extractor.document_data_examples))
+    chat_completion_request = ChatCompletionRequest(
+        model='gpt4o',
+        messages=[ChatCompletionMessage(role=role, content=content) for example in await examples.evaluate() for role, content in [("user", example[0]), ("assistant", example[1])]]
+    )
+    # Pull data from the file
     if upload.content_type != 'application/pdf':
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This endpoint can only process pdfs")
     text = pdf_reader.as_text(upload.file.read())
-    return JSONResponse({'content': text})
+    return JSONResponse({'content': text, 'examples': chat_completion_request.model_dump()})
