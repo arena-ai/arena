@@ -232,6 +232,7 @@ class DocumentDataExtractorOut(DocumentDataExtractorBase):
     id: int
     timestamp: datetime
     owner_id: int
+    document_data_examples: list["DocumentDataExample"]
 
 class DocumentDataExtractorsOut(SQLModel):
     data: list[DocumentDataExtractorOut]
@@ -251,7 +252,6 @@ class DocumentDataExampleCreate(DocumentDataExampleBase):
 class DocumentDataExampleUpdate(DocumentDataExampleBase):
     document_id: str | None = None
     data: str | None = None
-    document_data_extractor_id: int | None = None
 
 class DocumentDataExample(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)

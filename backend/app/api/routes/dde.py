@@ -9,6 +9,7 @@ import pyarrow.csv as pc
 
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
+from app.services.object_store import documents
 from app.models import (Message, DocumentDataExtractorCreate, DocumentDataExtractorUpdate, DocumentDataExtractor, DocumentDataExtractorOut, DocumentDataExtractorsOut,
                         DocumentDataExampleCreate, DocumentDataExampleUpdate, DocumentDataExample, DocumentDataExampleOut)
 
@@ -86,7 +87,7 @@ def update_document_data_extractor(
     """
     Update a DocumentDataExtractor.
     """
-    document_data_extractor = session.get(DocumentDataExtractorUpdate, id)
+    document_data_extractor = session.get(DocumentDataExtractor, id)
     if not document_data_extractor:
         raise HTTPException(status_code=404, detail="DocumentDataExtractor not found")
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
@@ -127,7 +128,7 @@ def read_document_data_extractor_by_name(
     """
     Get DocumentDataExtractor by name.
     """
-    document_data_extractor = crud.get_document_data_extractor(session, name)
+    document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
     if not document_data_extractor:
         raise HTTPException(status_code=404, detail="DocumentDataExtractor not found")
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
@@ -142,12 +143,41 @@ def create_document_data_example(
     """
     Create new DocumentDataExample.
     """
-    document_data_extractor = crud.get_document_data_extractor(session, name)
+    if not documents.exists(f"{current_user.id}/{document_data_example_in.document_id}/data"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Document not found")
+    document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
+    if not document_data_extractor:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="DocumentDataExtractor not found")
+    if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not enough permissions")
+    document_data_example = DocumentDataExample.model_validate(document_data_example_in, update={"document_data_extractor_id": document_data_extractor.id})
+    session.add(document_data_example)
+    session.commit()
+    session.refresh(document_data_example)
+    return document_data_example
+
+
+@router.put("/{name}/example/{id}", response_model=DocumentDataExampleOut, operation_id="update_document_data_example")
+def update_document_data_example(
+    *, session: SessionDep, current_user: CurrentUser, name: str, id: int, document_data_example_in: DocumentDataExampleUpdate
+) -> Any:
+    """
+    Create new DocumentDataExample.
+    """
+    if document_data_example_in.document_id and not documents.exists(f"{current_user.id}/{document_data_example_in.document_id}/data"):
+        raise HTTPException(status_code=404, detail="Document not found")
+    document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
     if not document_data_extractor:
         raise HTTPException(status_code=404, detail="DocumentDataExtractor not found")
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    document_data_example = DocumentDataExample.model_validate(document_data_example_in, update={"document_data_extractor_id": document_data_extractor.id})
+    document_data_example = session.get(DocumentDataExample, id)
+    if not document_data_example:
+        raise HTTPException(status_code=404, detail="DocumentDataExample not found")
+    if document_data_example.document_data_extractor_id != document_data_extractor.id:
+        raise HTTPException(status_code=400, detail="DocumentDataExample not found in this DocumentDataExtractor")
+    update_dict = document_data_example_in.model_dump(exclude_unset=True)
+    document_data_example.sqlmodel_update(update_dict)
     session.add(document_data_example)
     session.commit()
     session.refresh(document_data_example)
@@ -159,16 +189,16 @@ def delete_document_data_example(session: SessionDep, current_user: CurrentUser,
     """
     Delete an event identifier.
     """
-    document_data_extractor = crud.get_document_data_extractor(session, name)
+    document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
     if not document_data_extractor:
         raise HTTPException(status_code=404, detail="DocumentDataExtractor not found")
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
     document_data_example = session.get(DocumentDataExample, id)
     if not document_data_example:
-        raise HTTPException(status_code=404, detail="Event not found")
+        raise HTTPException(status_code=404, detail="DocumentDataExample not found")
     if document_data_example.document_data_extractor_id != document_data_extractor.id:
-        raise HTTPException(status_code=400, detail="This DocumentDataExample does nort exist for this DocumentDataExtractor")
+        raise HTTPException(status_code=400, detail="DocumentDataExample not found in this DocumentDataExtractor")
     session.delete(document_data_example)
     session.commit()
     return Message(message="DocumentDataExample deleted successfully")
