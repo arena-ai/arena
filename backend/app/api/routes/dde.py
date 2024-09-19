@@ -1,6 +1,7 @@
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, status, UploadFile
+from fastapi.responses import JSONResponse
 from sqlmodel import func, select
 from sqlalchemy.exc import IntegrityError
 import pyarrow as pa
@@ -10,6 +11,7 @@ import pyarrow.csv as pc
 from app.api.deps import CurrentUser, SessionDep
 from app import crud
 from app.services.object_store import documents
+from app.services.pdf_reader import pdf_reader
 from app.models import (Message, DocumentDataExtractorCreate, DocumentDataExtractorUpdate, DocumentDataExtractor, DocumentDataExtractorOut, DocumentDataExtractorsOut,
                         DocumentDataExampleCreate, DocumentDataExampleUpdate, DocumentDataExample, DocumentDataExampleOut)
 
@@ -165,17 +167,17 @@ def update_document_data_example(
     Create new DocumentDataExample.
     """
     if document_data_example_in.document_id and not documents.exists(f"{current_user.id}/{document_data_example_in.document_id}/data"):
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
     document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
     if not document_data_extractor:
-        raise HTTPException(status_code=404, detail="DocumentDataExtractor not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExtractor not found")
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough permissions")
     document_data_example = session.get(DocumentDataExample, id)
     if not document_data_example:
-        raise HTTPException(status_code=404, detail="DocumentDataExample not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExample not found")
     if document_data_example.document_data_extractor_id != document_data_extractor.id:
-        raise HTTPException(status_code=400, detail="DocumentDataExample not found in this DocumentDataExtractor")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExample not found in this DocumentDataExtractor")
     update_dict = document_data_example_in.model_dump(exclude_unset=True)
     document_data_example.sqlmodel_update(update_dict)
     session.add(document_data_example)
@@ -191,14 +193,22 @@ def delete_document_data_example(session: SessionDep, current_user: CurrentUser,
     """
     document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
     if not document_data_extractor:
-        raise HTTPException(status_code=404, detail="DocumentDataExtractor not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExtractor not found")
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough permissions")
     document_data_example = session.get(DocumentDataExample, id)
     if not document_data_example:
-        raise HTTPException(status_code=404, detail="DocumentDataExample not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExample not found")
     if document_data_example.document_data_extractor_id != document_data_extractor.id:
-        raise HTTPException(status_code=400, detail="DocumentDataExample not found in this DocumentDataExtractor")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExample not found in this DocumentDataExtractor")
     session.delete(document_data_example)
     session.commit()
     return Message(message="DocumentDataExample deleted successfully")
+
+
+@router.post("/extract/{name}")
+async def extract_from_file(*, current_user: CurrentUser, name: str, upload: UploadFile) -> JSONResponse:
+    if upload.content_type != 'application/pdf':
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This endpoint can only process pdfs")
+    text = pdf_reader.as_text(upload.file.read())
+    return JSONResponse({'content': text})
