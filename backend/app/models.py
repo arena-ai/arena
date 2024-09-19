@@ -128,19 +128,16 @@ class EventBase(SQLModel):
     content: str
     parent_id: int | None = None
 
-
 # Properties to receive on event creation
 class EventCreate(EventBase):
     name: str
     content: str
-
 
 # Properties to receive on item update
 class EventUpdate(EventBase):
     name: str | None = None
     content: str | None = None
     parent_id: int | None = None
-
 
 # Database model, database table inferred from class name
 class Event(EventBase, table=True):
@@ -153,7 +150,6 @@ class Event(EventBase, table=True):
     children: list["Event"] = Relationship(back_populates="parent", sa_relationship_kwargs={"cascade": "all, delete"})
     identifiers: list["EventIdentifier"] = Relationship(back_populates="event", sa_relationship_kwargs={"cascade": "all, delete"})
     attributes: list["EventAttribute"] = Relationship(back_populates="event", sa_relationship_kwargs={"cascade": "all, delete"})
-
 
 # Properties to return via API, id is always required
 class EventOut(EventBase):
@@ -173,7 +169,6 @@ class EventIdentifier(SQLModel, table=True):
     event_id: int | None = Field(sa_column=Column(Integer, ForeignKey("event.id", ondelete="CASCADE"), default=None))
     event: Event = Relationship(back_populates="identifiers")
 
-
 class EventIdentifierOut(SQLModel):
     id: str
     event_id: int
@@ -185,13 +180,11 @@ class EventAttributeBase(SQLModel):
     attribute_id: int
     value: str | None
 
-
 # Properties to receive on event creation
 class EventAttributeCreate(EventAttributeBase):
     event_id: int
     attribute_id: int
     value: str | None = None
-
 
 # Database model, database table inferred from class name
 class EventAttribute(EventAttributeBase, table=True):
@@ -202,7 +195,6 @@ class EventAttribute(EventAttributeBase, table=True):
     value: str | None = Field(default=None)
     event: Event = Relationship(back_populates="attributes")
     attribute: "Attribute" = Relationship(back_populates="events")
-
 
 # Database model, database table inferred from class name
 class Attribute(SQLModel, table=True):
@@ -218,17 +210,14 @@ class DocumentDataExtractorBase(SQLModel):
     name: str = Field(unique=True, index=True)
     prompt: str
 
-
 class DocumentDataExtractorCreate(DocumentDataExtractorBase):
     name: str
     prompt: str
-
 
 # Properties to receive on DocumentDataExtractor update
 class DocumentDataExtractorUpdate(DocumentDataExtractorBase):
     name: str | None = None
     prompt: str | None = None
-
 
 class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -249,9 +238,27 @@ class DocumentDataExtractorsOut(SQLModel):
     count: int
 
 
+# Examples
+class DocumentDataExampleBase(SQLModel):
+    document_id: str
+    data: str
+    document_data_extractor_id: int | None = None
+
+class DocumentDataExampleCreate(DocumentDataExampleBase):
+    document_id: str
+    data: str
+
+class DocumentDataExampleUpdate(DocumentDataExampleBase):
+    document_id: str | None = None
+    data: str | None = None
+    document_data_extractor_id: int | None = None
+
 class DocumentDataExample(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     document_id: str
     data: str
-    document_data_extractor_id: int | None = Field(sa_column=Column(Integer, ForeignKey("documentdataextractor.id", ondelete="CASCADE"), default=None))
+    document_data_extractor_id: int = Field(sa_column=Column(Integer, ForeignKey("documentdataextractor.id", ondelete="CASCADE")))
     document_data_extractor: DocumentDataExtractor | None = Relationship(back_populates="document_data_examples")
+
+class DocumentDataExampleOut(DocumentDataExampleBase):
+    id: int
