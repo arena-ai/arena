@@ -77,6 +77,18 @@ def test_reset_password(
     assert r.status_code == 200
     assert r.json() == {"message": "Password updated successfully"}
 
+    # Revert to the old password to keep consistency in test
+    old_data = {
+        "current_password": "changethis",
+        "new_password": settings.FIRST_SUPERUSER_PASSWORD,
+    }
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/me/password",
+        headers=superuser_token_headers,
+        json=old_data,
+    )
+    assert r.status_code == 200
+
 
 def test_reset_password_invalid_token(
     client: TestClient, superuser_token_headers: dict[str, str]

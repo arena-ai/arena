@@ -215,6 +215,7 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     if upload.content_type != 'application/pdf':
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This endpoint can only process pdfs")
     prompt = pdf_reader.as_text(upload.file.read())
+    # TODO Marta can improve this
     chat_completion_request = ChatCompletionRequest(
         model='gpt4o',
         messages=[ChatCompletionMessage(role="system", content=document_data_extractor.prompt)]+
