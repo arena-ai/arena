@@ -48,6 +48,7 @@ def object_store() -> Generator[Minio, None, None]:
         for obj in store.list_objects(bucket_name=bucket, recursive=True):
             store.remove_object(bucket_name=bucket, object_name=obj.object_name)
         store.remove_bucket(bucket)
+    init_store(store)
 
 
 @pytest.fixture(scope="module")

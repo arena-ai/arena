@@ -13,6 +13,7 @@ from app.services import crud
 from app.lm.models import ChatCompletionResponse, ChatCompletionRequest, Message as ChatCompletionMessage
 from app.services.object_store import documents
 from app.services.pdf_reader import pdf_reader
+from app.lm.handlers import ArenaHandler
 from app.ops import tup
 from app.ops.documents import as_text
 from app.models import (Message, DocumentDataExtractorCreate, DocumentDataExtractorUpdate, DocumentDataExtractor, DocumentDataExtractorOut, DocumentDataExtractorsOut,
@@ -81,8 +82,6 @@ def create_document_data_extractor(
     except IntegrityError as e:
         session.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="document data extractor already registered")
-    finally:
-        session.close()
 
 
 @router.put("/{id}", response_model=DocumentDataExtractorOut)
@@ -202,7 +201,7 @@ def delete_document_data_example(*, session: SessionDep, current_user: CurrentUs
     session.commit()
     return Message(message="DocumentDataExample deleted successfully")
 
-@router.post("/extract/{name}")
+@router.post("/extract/{name}", response_model=ChatCompletionResponse)
 async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, name: str, upload: UploadFile) -> JSONResponse:
     document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
     if not document_data_extractor:
@@ -222,4 +221,5 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
             [ChatCompletionMessage(role=role, content=content) for example in await examples.evaluate() for role, content in [("user", example[0]), ("assistant", example[1])]]+
             [ChatCompletionMessage(role="user", content=prompt)]
     )
-    return JSONResponse(chat_completion_request.model_dump())
+    chat_completion_response = await ArenaHandler(session, current_user, chat_completion_request).process_request()
+    return chat_completion_response
