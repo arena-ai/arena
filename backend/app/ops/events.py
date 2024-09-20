@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlmodel import Session
 
 from app.ops import Op
-import app.crud as crud
+import app.services.crud as crud
 from app.models import EventCreate, EventOut, User, EventIdentifier
 from app.lm.models import Score, LMConfig
 from app.services import Request, Response

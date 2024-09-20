@@ -1,44 +1,44 @@
 import re
 
 from app.lm.models import LMApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, Score
-import app.lm.models.openai as oai
-import app.lm.models.mistral as mis
-import app.lm.models.anthropic as ant
+import app.lm.models.openai as openai_models
+import app.lm.models.mistral as mistral_models
+import app.lm.models.anthropic as anthropic_models
 from app.services import Request, Response
 import app.services.lm as slm
 from app.ops import Op
 
 
-class OpenAI(Op[tuple[str, oai.ChatCompletionRequest], Response[oai.ChatCompletionResponse]]):
-    async def call(self, api_key: str, input: oai.ChatCompletionRequest) -> Response[oai.ChatCompletionResponse]:
+class OpenAI(Op[tuple[str, openai_models.ChatCompletionRequest], Response[openai_models.ChatCompletionResponse]]):
+    async def call(self, api_key: str, input: openai_models.ChatCompletionRequest) -> Response[openai_models.ChatCompletionResponse]:
         return await slm.OpenAI(api_key=api_key).openai_chat_completion(input)
 
-class OpenAIRequest(Op[oai.ChatCompletionRequest, Request[oai.ChatCompletionRequest]]):
-    async def call(self, input: oai.ChatCompletionRequest) -> Request[oai.ChatCompletionRequest]:
+class OpenAIRequest(Op[openai_models.ChatCompletionRequest, Request[openai_models.ChatCompletionRequest]]):
+    async def call(self, input: openai_models.ChatCompletionRequest) -> Request[openai_models.ChatCompletionRequest]:
         return slm.OpenAI().request(input)
 
 # instances
 openai = OpenAI()
 openai_request = OpenAIRequest()
 
-class Mistral(Op[tuple[str, mis.ChatCompletionRequest], Response[mis.ChatCompletionResponse]]):
-    async def call(self, api_key: str, input: mis.ChatCompletionRequest) -> Response[mis.ChatCompletionResponse]:
+class Mistral(Op[tuple[str, mistral_models.ChatCompletionRequest], Response[mistral_models.ChatCompletionResponse]]):
+    async def call(self, api_key: str, input: mistral_models.ChatCompletionRequest) -> Response[mistral_models.ChatCompletionResponse]:
         return await slm.Mistral(api_key=api_key).mistral_chat_completion(input)
 
-class MistralRequest(Op[mis.ChatCompletionRequest, Request[mis.ChatCompletionRequest]]):
-    async def call(self, input: mis.ChatCompletionRequest) -> Request[mis.ChatCompletionRequest]:
+class MistralRequest(Op[mistral_models.ChatCompletionRequest, Request[mistral_models.ChatCompletionRequest]]):
+    async def call(self, input: mistral_models.ChatCompletionRequest) -> Request[mistral_models.ChatCompletionRequest]:
         return slm.Mistral().request(input)
 
 # instances
 mistral = Mistral()
 mistral_request = MistralRequest()
 
-class Anthropic(Op[tuple[str, ant.ChatCompletionRequest], Response[ant.ChatCompletionResponse]]):
-    async def call(self, api_key: str, input: ant.ChatCompletionRequest) -> Response[ant.ChatCompletionResponse]:
+class Anthropic(Op[tuple[str, anthropic_models.ChatCompletionRequest], Response[anthropic_models.ChatCompletionResponse]]):
+    async def call(self, api_key: str, input: anthropic_models.ChatCompletionRequest) -> Response[anthropic_models.ChatCompletionResponse]:
         return await slm.Anthropic(api_key=api_key).anthropic_chat_completion(input)
 
-class AnthropicRequest(Op[ant.ChatCompletionRequest, Request[ant.ChatCompletionRequest]]):
-    async def call(self, input: ant.ChatCompletionRequest) -> Request[ant.ChatCompletionRequest]:
+class AnthropicRequest(Op[anthropic_models.ChatCompletionRequest, Request[anthropic_models.ChatCompletionRequest]]):
+    async def call(self, input: anthropic_models.ChatCompletionRequest) -> Request[anthropic_models.ChatCompletionRequest]:
         return slm.Anthropic().request(input)
 
 # instances

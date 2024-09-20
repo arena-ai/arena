@@ -5,27 +5,27 @@ from app.lm.models import LMConfig
 from app.ops import tup
 from app.ops.lm import openai, mistral, anthropic, chat, judge
 from app.lm.models import ChatCompletionRequest, Message
-import app.lm.models.openai as oai
-import app.lm.models.mistral as mis
-import app.lm.models.anthropic as ant
+import app.lm.models.openai as openai_models
+import app.lm.models.mistral as mistral_models
+import app.lm.models.anthropic as anthropic_models
 
 
 def test_openai_mistral_anthropic(language_models_api_keys) -> None:
-    comp_oai = openai(language_models_api_keys.openai_api_key, oai.ChatCompletionRequest(
+    comp_oai = openai(language_models_api_keys.openai_api_key, openai_models.ChatCompletionRequest(
         model="gpt-3.5-turbo",
         messages=[
             Message(role="system", content="You are a helpful assistant."),
             Message(role="user", content="What is the capital of France?")
         ]
     ))
-    comp_mis = mistral(language_models_api_keys.mistral_api_key, mis.ChatCompletionRequest(
+    comp_mis = mistral(language_models_api_keys.mistral_api_key, mistral_models.ChatCompletionRequest(
         model="mistral-small",
         messages=[
             Message(role="system", content="You are a helpful assistant."),
             Message(role="user", content="What is the capital of France?")
         ]
     ))
-    comp_ant = anthropic(language_models_api_keys.anthropic_api_key, ant.ChatCompletionRequest(
+    comp_ant = anthropic(language_models_api_keys.anthropic_api_key, anthropic_models.ChatCompletionRequest(
         model="claude-2.0",
         messages=[
             Message(role="system", content="You are a helpful assistant."),

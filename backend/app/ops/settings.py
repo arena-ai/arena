@@ -1,5 +1,5 @@
 from sqlmodel import Session
-from app import crud
+from app.services import crud
 from app.models import UserOut
 import app.lm.models as lmm
 

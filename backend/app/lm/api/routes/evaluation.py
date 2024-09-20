@@ -4,10 +4,11 @@ import json
 from fastapi import APIRouter
 
 from app.api.deps import CurrentUser, SessionDep
-from app import crud, models
+from app import models
 from app.lm.models import Evaluation, Score
 from app.ops.session import Session, User, EventIdentifier, Event
 from app.ops.events import LogUserEvaluation
+from app.services import crud
 
 
 

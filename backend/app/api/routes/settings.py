@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
-from app import crud
+from app.services import crud
 from app.models import Message, SettingCreate, Setting, SettingsOut, SettingOut
 
 router = APIRouter()

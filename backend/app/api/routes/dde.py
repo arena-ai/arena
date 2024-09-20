@@ -9,7 +9,7 @@ import pyarrow.parquet as pq
 import pyarrow.csv as pc
 
 from app.api.deps import CurrentUser, SessionDep
-from app import crud
+from app.services import crud
 from app.lm.models import ChatCompletionResponse, ChatCompletionRequest, Message as ChatCompletionMessage
 from app.services.object_store import documents
 from app.services.pdf_reader import pdf_reader
@@ -57,7 +57,7 @@ def read_document_data_extractor(session: SessionDep, current_user: CurrentUser,
     """
     Get a DocumentDataExtractor by ID.
     """
-    document_data_extractor = session.get(DocumentDataExtractorOut, id)
+    document_data_extractor = session.get(DocumentDataExtractor, id)
     if not document_data_extractor:
         raise HTTPException(status_code=404, detail="DocumentDataExtractor not found")
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
@@ -99,16 +99,10 @@ def update_document_data_extractor(
         raise HTTPException(status_code=400, detail="Not enough permissions")
     update_dict = document_data_extractor_in.model_dump(exclude_unset=True)
     document_data_extractor.sqlmodel_update(update_dict)
-    try:
-        session.add(document_data_extractor)
-        session.commit()
-        session.refresh(document_data_extractor)
-        return document_data_extractor
-    except IntegrityError as e:
-        session.rollback()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="document data extractor already registered")
-    finally:
-        session.close()
+    session.add(document_data_extractor)
+    session.commit()
+    session.refresh(document_data_extractor)
+    return document_data_extractor
 
 
 @router.delete("/{id}")
@@ -217,12 +211,14 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExtractor has no owner")
     # Build examples
     examples = tup(*(tup(as_text(document_data_extractor.owner, example.document_id), example.data) for example in document_data_extractor.document_data_examples))
-    chat_completion_request = ChatCompletionRequest(
-        model='gpt4o',
-        messages=[ChatCompletionMessage(role=role, content=content) for example in await examples.evaluate() for role, content in [("user", example[0]), ("assistant", example[1])]]
-    )
     # Pull data from the file
     if upload.content_type != 'application/pdf':
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This endpoint can only process pdfs")
-    text = pdf_reader.as_text(upload.file.read())
-    return JSONResponse({'content': text, 'examples': chat_completion_request.model_dump()})
+    prompt = pdf_reader.as_text(upload.file.read())
+    chat_completion_request = ChatCompletionRequest(
+        model='gpt4o',
+        messages=[ChatCompletionMessage(role="system", content=document_data_extractor.prompt)]+
+            [ChatCompletionMessage(role=role, content=content) for example in await examples.evaluate() for role, content in [("user", example[0]), ("assistant", example[1])]]+
+            [ChatCompletionMessage(role="user", content=prompt)]
+    )
+    return JSONResponse(chat_completion_request.model_dump())

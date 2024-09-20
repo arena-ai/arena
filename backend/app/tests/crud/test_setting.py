@@ -1,7 +1,7 @@
 from fastapi.encoders import jsonable_encoder
 from sqlmodel import Session
 
-from app import crud
+from app.services import crud
 from app.models import UserCreate, Setting, SettingCreate
 from app.tests.utils.utils import random_email, random_lower_string
 
