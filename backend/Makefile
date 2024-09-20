@@ -16,7 +16,7 @@ push: build
 	docker image push $(REGISTRY)/$(IMAGE_NAME):$(TAG)
 
 up:
-	docker compose up -d
+	docker compose --profile "*" up -d
 
 test: up
 	docker compose exec backend bash /app/tests-start.sh

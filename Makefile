@@ -40,7 +40,7 @@ clean:
 
 # Dev environment
 dev:
-	docker compose up -d
+	docker compose --profile "*" up -d
 
 # Deploy the helm app
 kubernetes:
