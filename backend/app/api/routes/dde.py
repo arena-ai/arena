@@ -216,10 +216,12 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     prompt = pdf_reader.as_text(upload.file.read())
     # TODO Marta can improve this
     chat_completion_request = ChatCompletionRequest(
-        model='gpt4o',
+        model='gpt-3.5-turbo',
         messages=[ChatCompletionMessage(role="system", content=document_data_extractor.prompt)]+
             [ChatCompletionMessage(role=role, content=content) for example in await examples.evaluate() for role, content in [("user", example[0]), ("assistant", example[1])]]+
             [ChatCompletionMessage(role="user", content=prompt)]
-    )
+    ).model_dump(exclude_unset=True)
+    print(chat_completion_request)
     chat_completion_response = await ArenaHandler(session, current_user, chat_completion_request).process_request()
+    print(chat_completion_response)
     return chat_completion_response

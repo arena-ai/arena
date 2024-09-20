@@ -55,7 +55,7 @@ async def anthropic_chat_completion(
 
 @router.post("/chat/completions", response_model=ChatCompletionResponse)
 async def chat_completion(
-    session_dep: SessionDep, current_user: CurrentUser, chat_completion_request: ChatCompletionRequest
+    session_dep: SessionDep, current_user: CurrentUser, chat_completion_request: Mapping
 ) -> ChatCompletionResponse:
     """
     Abstract version
@@ -65,7 +65,7 @@ async def chat_completion(
 
 @router.post("/chat/completions/request", response_model=EventOut)
 async def chat_completion_request(
-    session_dep: SessionDep, current_user: CurrentUser, chat_completion_request: ChatCompletionRequest
+    session_dep: SessionDep, current_user: CurrentUser, chat_completion_request: Mapping
 ) -> EventOut:
     ses = session()
     usr = user(ses, current_user.id)
