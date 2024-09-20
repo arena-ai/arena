@@ -98,7 +98,7 @@ def test_mistral_client_arena_endpoint(
         headers=superuser_token_headers,
         json={"name": "MISTRAL_API_KEY", "content": os.getenv("ARENA_MISTRAL_API_KEY")},
     )
-    mistral_client = Mistral(api_key=superuser_token_headers["Authorization"][7:], endpoint=f"http://localhost/api/v1/lm/mistral")
+    mistral_client = Mistral(api_key=superuser_token_headers["Authorization"][7:], server_url=f"http://localhost/api/v1/lm/mistral")
     response =  mistral_client.chat.complete(**chat_input_gen("mistral-small"))
     assert len(response.choices) == 1
 
