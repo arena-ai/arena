@@ -47,6 +47,7 @@ class User(UserBase, table=True):
     hashed_password: str
     settings: list["Setting"] = Relationship(back_populates="owner", sa_relationship_kwargs={"cascade": "all, delete"})
     events: list["Event"] = Relationship(back_populates="owner", sa_relationship_kwargs={"cascade": "all, delete"})
+    document_data_extractors: list["DocumentDataExtractor"] = Relationship(back_populates="owner", sa_relationship_kwargs={"cascade": "all, delete"})
 
 
 # Properties to return via API, id is always required
@@ -127,7 +128,6 @@ class EventBase(SQLModel):
     content: str
     parent_id: int | None = None
 
-
 # Properties to receive on event creation
 class EventCreate(EventBase):
     name: str
@@ -138,7 +138,6 @@ class EventUpdate(EventBase):
     name: str | None = None
     content: str | None = None
     parent_id: int | None = None
-
 
 # Database model, database table inferred from class name
 class Event(EventBase, table=True):
@@ -151,7 +150,6 @@ class Event(EventBase, table=True):
     children: list["Event"] = Relationship(back_populates="parent", sa_relationship_kwargs={"cascade": "all, delete"})
     identifiers: list["EventIdentifier"] = Relationship(back_populates="event", sa_relationship_kwargs={"cascade": "all, delete"})
     attributes: list["EventAttribute"] = Relationship(back_populates="event", sa_relationship_kwargs={"cascade": "all, delete"})
-
 
 # Properties to return via API, id is always required
 class EventOut(EventBase):
@@ -170,7 +168,6 @@ class EventIdentifier(SQLModel, table=True):
     id: str | None = Field(default=None, primary_key=True)
     event_id: int | None = Field(sa_column=Column(Integer, ForeignKey("event.id", ondelete="CASCADE"), default=None))
     event: Event = Relationship(back_populates="identifiers")
-
 
 class EventIdentifierOut(SQLModel):
     id: str
@@ -199,7 +196,6 @@ class EventAttribute(EventAttributeBase, table=True):
     event: Event = Relationship(back_populates="attributes")
     attribute: "Attribute" = Relationship(back_populates="events")
 
-
 # Database model, database table inferred from class name
 class Attribute(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -207,39 +203,62 @@ class Attribute(SQLModel, table=True):
     events: EventAttribute = Relationship(back_populates="attribute", sa_relationship_kwargs={"cascade": "all, delete"})
 
 
-
-
 # DocumentDataExtractor
 
-# # Shared properties
-# class DocumentDataExtractorBase(SQLModel):
-#     name: str = Field(unique=True, index=True)
-#     prompt: str
+# Shared properties
+class DocumentDataExtractorBase(SQLModel):
+    name: str = Field(unique=True, index=True)
+    prompt: str
 
-# class DocumentDataExtractorCreate(DocumentDataExtractorBase):
-#     name: str
-#     prompt: str
+class DocumentDataExtractorCreate(DocumentDataExtractorBase):
+    name: str
+    prompt: str
 
-# class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
-#     id: int | None = Field(default=None, primary_key=True)
-#     timestamp: datetime | None =  Field(default=func.now())
-#     owner_id: int | None = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), default=None))
-#     owner: User | None = Relationship(back_populates="document_data_extractors")
-#     document_data_examples: list["DocumentDataExample"] = Relationship(back_populates="document_data_extractor", sa_relationship_kwargs={"cascade": "all, delete"})
+# Properties to receive on DocumentDataExtractor update
+class DocumentDataExtractorUpdate(DocumentDataExtractorBase):
+    name: str | None = None
+    prompt: str | None = None
 
-# # Properties to return via API, id is always required
-# class DocumentDataExtractorOut(DocumentDataExtractorBase):
-#     id: int
-#     timestamp: datetime
-#     owner_id: int
-
-# class DocumentDataExtractorsOut(SQLModel):
-#     data: list[DocumentDataExtractorOut]
-#     count: int
+class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    timestamp: datetime | None =  Field(default=func.now())
+    owner_id: int | None = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), default=None))
+    owner: User | None = Relationship(back_populates="document_data_extractors")
+    document_data_examples: list["DocumentDataExample"] = Relationship(back_populates="document_data_extractor", sa_relationship_kwargs={"cascade": "all, delete"})
 
 
-# class DocumentDataExample(SQLModel, table=True):
-#     id: int | None = Field(default=None, primary_key=True)
-#     document_data_extractor: DocumentDataExtractor = Relationship(back_populates="document_data_examples")
-#     document: str
-#     data: str
+# Properties to return via API, id is always required
+class DocumentDataExtractorOut(DocumentDataExtractorBase):
+    id: int
+    timestamp: datetime
+    owner_id: int
+    document_data_examples: list["DocumentDataExample"]
+
+class DocumentDataExtractorsOut(SQLModel):
+    data: list[DocumentDataExtractorOut]
+    count: int
+
+
+# Examples
+class DocumentDataExampleBase(SQLModel):
+    document_id: str
+    data: str
+    document_data_extractor_id: int | None = None
+
+class DocumentDataExampleCreate(DocumentDataExampleBase):
+    document_id: str
+    data: str
+
+class DocumentDataExampleUpdate(DocumentDataExampleBase):
+    document_id: str | None = None
+    data: str | None = None
+
+class DocumentDataExample(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    document_id: str
+    data: str
+    document_data_extractor_id: int = Field(sa_column=Column(Integer, ForeignKey("documentdataextractor.id", ondelete="CASCADE")))
+    document_data_extractor: DocumentDataExtractor | None = Relationship(back_populates="document_data_examples")
+
+class DocumentDataExampleOut(DocumentDataExampleBase):
+    id: int

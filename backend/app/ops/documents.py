@@ -8,8 +8,8 @@ import pymupdf
 from app.models import User
 from app.services.masking import Analyzer, AnalyzerRequest, Anonymizer, AnonymizerRequest, Anonymizers, Replace, Redact, Mask, Hash, Encrypt, Keep
 from app.ops import Op
-from app.api.deps import CurrentUser
-from app.services.object_store import documents, Documents
+from app.services.object_store import documents
+from app.services.pdf_reader import pdf_reader
 
 class Paths(Op[User, list[str]]):
     async def call(self, user: User) -> list[str]:
@@ -44,15 +44,7 @@ class AsText(Op[tuple[User, str], str]):
         if not documents.exists(path_as_text):
             # The doc should be created
             if content_type=='application/pdf':
-                doc = pymupdf.Document(stream=input)
-                output = BytesIO()
-                pages = [page for page_num, page in enumerate(doc) if page_num>=start_page and (not end_page or page_num<end_page)]
-                for page in pages: # iterate the document pages
-                    text = page.get_text().encode('utf8') # get plain text (is in UTF-8)
-                    output.write(text) # write text of page
-                    output.write(bytes((12,))) # write page delimiter (form feed 0x0C)
-                output.seek(0)
-                documents.put(path_as_text, output)
+                documents.puts(path_as_text, pdf_reader.as_text(input, start_page=start_page, end_page=end_page))
             else:
                 documents.puts(path_as_text, "Error: Could not read as text")
         # output the file

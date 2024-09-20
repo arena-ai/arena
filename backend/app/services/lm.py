@@ -1,15 +1,12 @@
-from typing import Mapping, Sequence, Any
-from abc import ABC, abstractmethod
+from typing import Mapping, Mapping, Sequence, Any
 from dataclasses import dataclass, field
 from functools import cached_property
 
-from fastapi import APIRouter
-from sqlmodel import func, select
 import httpx
 
+from app.lm.models import LMApiKeys, ChatCompletionResponse, ChatCompletionRequest
+from app.lm.models import openai, mistral, anthropic
 from app.services import Service, Request, Response
-from app import crud
-from app.lm.models import LMApiKeys, ChatCompletionResponse, ChatCompletionRequest, openai, mistral, anthropic
 
 
 @dataclass
@@ -89,6 +86,7 @@ class Mistral(Service[mistral.ChatCompletionRequest, mistral.ChatCompletionRespo
             content=response.content.to_chat_completion_response()
         )
 
+
 @dataclass
 class Anthropic(Service[anthropic.ChatCompletionRequest, anthropic.ChatCompletionResponse]):
     api_key: str = ""
@@ -161,4 +159,4 @@ class LanguageModels:
             if service.has_model(ccc.model):
                 return await service.chat_completion(ccc=ccc)
         raise ValueError(ccc.model)
-        
+

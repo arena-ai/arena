@@ -10,7 +10,7 @@
 * Start the stack with Docker Compose:
 
 ```bash
-docker compose up -d
+docker compose --profile "*" up -d
 ```
 
 * Now you can open your browser and interact with these URLs:
@@ -80,7 +80,7 @@ For example, the directory with the backend code is mounted as a Docker "host vo
 There is also a command override that runs `/start-reload.sh` (included in the base image) instead of the default `/start.sh` (also included in the base image). It starts a single server process (instead of multiple, as would be for production) and reloads the process whenever the code changes. Have in mind that if you have a syntax error and save the Python file, it will break and exit, and the container will stop. After that, you can restart the container by fixing the error and running again:
 
 ```console
-$ docker compose up -d
+$ docker compose --profile "*" up -d
 ```
 
 There is also a commented out `command` override, you can uncomment it and comment the default one. It makes the backend container run a process that does "nothing", but keeps the container alive. That allows you to get inside your running container and execute commands inside, for example a Python interpreter to test installed dependencies, or start the development server that reloads when it detects changes.
@@ -88,7 +88,7 @@ There is also a commented out `command` override, you can uncomment it and comme
 To get inside the container with a `bash` session you can start the stack with:
 
 ```console
-$ docker compose up -d
+$ docker compose --profile "*" up -d
 ```
 
 and then `exec` inside the running container:

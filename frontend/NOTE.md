@@ -2,8 +2,8 @@
 
 ## Testing the frontend
 
-First launch the stack with: `docker compose up`
-or `docker compose up -d` to run it in the background
+First launch the stack with: `docker compose --profile "*" up`
+or `docker compose --profile "*" up -d` to run it in the background
 
 Then run the local frontend server with: `npm run dev`
 

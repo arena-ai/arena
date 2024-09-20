@@ -3,7 +3,10 @@ from typing import Any
 from sqlmodel import Session, select, desc
 
 from app.core.security import get_password_hash, verify_password
-from app.models import User, UserCreate, UserUpdate, Setting, SettingCreate, Event, EventCreate, EventIdentifier, EventAttribute, EventAttributeCreate, Attribute
+from app.models import (User, UserCreate, UserUpdate, Setting, SettingCreate,
+                        Event, EventCreate, EventIdentifier, EventAttribute, EventAttributeCreate, Attribute,
+                        DocumentDataExtractorCreate, DocumentDataExtractorUpdate, DocumentDataExtractor, DocumentDataExtractorOut, DocumentDataExtractorsOut,
+                        DocumentDataExample)
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     db_obj = User.model_validate(
@@ -164,3 +167,9 @@ def delete_event_attribute(*, session: Session, attribute: str, event: int) -> N
     db_event_attribute = get_attribute(session=session, attribute=attribute, event_id=event)
     session.delete(db_event_attribute)
     session.commit()
+
+
+def get_document_data_extractor(*, session: Session, name: str) -> DocumentDataExtractor | None:
+    statement = select(DocumentDataExtractor).where(DocumentDataExtractor.name == name)
+    db_document_data_extractor = session.exec(statement).first()
+    return db_document_data_extractor

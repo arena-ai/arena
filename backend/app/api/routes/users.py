@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlmodel import func, select
 
-from app import crud
+from app.services import crud
 from app.api.deps import (
     CurrentUser,
     SessionDep,

@@ -9,7 +9,7 @@ import pyarrow.parquet as pq
 import pyarrow.csv as pc
 
 from app.api.deps import CurrentUser, SessionDep
-from app import crud
+from app.services import crud
 from app.models import Message, Event, EventCreate, EventOut, EventsOut, EventUpdate, EventIdentifier, EventAttribute, EventAttributeCreate
 
 router = APIRouter()

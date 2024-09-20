@@ -7,12 +7,12 @@ from app.lm.models.chat_completion import (
     )
 from app.lm.models.evaluation import Evaluation, Score
 from app.lm.models.settings import LMConfig
-import app.lm.models.openai as oai
-import app.lm.models.mistral as mis
-import app.lm.models.anthropic as ant
+import app.lm.models.openai as openai_models
+import app.lm.models.mistral as mistral_models
+import app.lm.models.anthropic as anthropic_models
 
 
 class ChatCompletionRequestEventResponse(BaseModel):
-    request: ChatCompletionRequest | oai.ChatCompletionRequest | mis.ChatCompletionRequest | ant.ChatCompletionRequest | None = None
+    request: ChatCompletionRequest | openai_models.ChatCompletionRequest | mistral_models.ChatCompletionRequest | anthropic_models.ChatCompletionRequest | None = None
     request_event_id: int
-    response: ChatCompletionResponse | oai.ChatCompletionResponse | mis.ChatCompletionResponse | ant.ChatCompletionResponse
+    response: ChatCompletionResponse | openai_models.ChatCompletionResponse | mistral_models.ChatCompletionResponse | anthropic_models.ChatCompletionResponse

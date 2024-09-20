@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from pydantic import BaseModel
 from rich import print
 
-from app import crud
+from app.services import crud
 from app.models import UserCreate, Event
 from app.ops.events import LogRequest, Request, LogResponse, Response
 from app.ops.session import session as session_op, user as user_op

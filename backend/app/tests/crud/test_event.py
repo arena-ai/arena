@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 
-from app import crud
+from app.services import crud
 from app.models import UserCreate, EventCreate, User, Event
 from app.tests.utils.utils import random_email, random_lower_string
 

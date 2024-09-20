@@ -10,7 +10,7 @@ from app.core.config import settings
 from app.lm.models import openai, mistral, anthropic, ChatCompletionRequest, LMConfig
 
 from openai import OpenAI
-from mistralai.client import MistralClient
+from mistralai import Mistral
 from anthropic import Anthropic
 
 # Open AI
@@ -83,8 +83,8 @@ def test_all_openai_models(
 
 def test_mistral_client(chat_input_gen) -> None:
     """Test the native mistral client"""
-    mistral_client = MistralClient(api_key=os.getenv("ARENA_MISTRAL_API_KEY"))
-    response =  mistral_client.chat(**chat_input_gen("mistral-small"))
+    mistral_client = Mistral(api_key=os.getenv("ARENA_MISTRAL_API_KEY"))
+    response =  mistral_client.chat.complete(**chat_input_gen("mistral-small"))
     assert len(response.choices) == 1
 
 
@@ -98,8 +98,8 @@ def test_mistral_client_arena_endpoint(
         headers=superuser_token_headers,
         json={"name": "MISTRAL_API_KEY", "content": os.getenv("ARENA_MISTRAL_API_KEY")},
     )
-    mistral_client = MistralClient(api_key=superuser_token_headers["Authorization"][7:], endpoint=f"http://localhost/api/v1/lm/mistral")
-    response =  mistral_client.chat(**chat_input_gen("mistral-small"))
+    mistral_client = Mistral(api_key=superuser_token_headers["Authorization"][7:], server_url=f"http://localhost/api/v1/lm/mistral")
+    response =  mistral_client.chat.complete(**chat_input_gen("mistral-small"))
     assert len(response.choices) == 1
 
 
@@ -107,8 +107,8 @@ def test_mistral_models(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     """Test the native mistral client"""
-    mistral_client = MistralClient(api_key=os.getenv("ARENA_MISTRAL_API_KEY"))
-    response =  mistral_client.list_models()
+    mistral_client = Mistral(api_key=os.getenv("ARENA_MISTRAL_API_KEY"))
+    response =  mistral_client.models.list()
     print(sorted([m["id"] for m in response.model_dump()["data"]]))
 
 

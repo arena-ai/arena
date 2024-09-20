@@ -2,7 +2,7 @@ import io
 from anyio import run
 from sqlmodel import Session
 
-from app import crud
+from app.services import crud
 from app.models import UserCreate
 from app.ops.session import session, user
 from app.ops.documents import path, paths, as_text
