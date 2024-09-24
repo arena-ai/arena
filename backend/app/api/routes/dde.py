@@ -214,14 +214,27 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     if upload.content_type != 'application/pdf':
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This endpoint can only process pdfs")
     prompt = pdf_reader.as_text(upload.file.read())
-    # TODO Marta can improve this
-    chat_completion_request = ChatCompletionRequest(
-        model='gpt-3.5-turbo',
-        messages=[ChatCompletionMessage(role="system", content=document_data_extractor.prompt)]+
-            [ChatCompletionMessage(role=role, content=content) for example in await examples.evaluate() for role, content in [("user", example[0]), ("assistant", example[1])]]+
-            [ChatCompletionMessage(role="user", content=prompt)]
-    ).model_dump(exclude_unset=True)
+    system_prompt = document_data_extractor.prompt
+    examples_text = ""
+    for example in await examples.evaluate():
+        input_text = example[0]  
+        output_text = example[1]  
+        examples_text += f"####\nINPUT: {input_text}\n\nOUTPUT: {output_text}\n\n"
+    full_system_content = f"{system_prompt}\n\nHere are some examples of inputs and outputs:\n{examples_text}"
+    messages = [
+            ChatCompletionMessage(role="system", content=full_system_content),  
+            ChatCompletionMessage(role="user", content=f"Here is the next input:\n####\nINPUT:{prompt}")  
+        ]
+    chat_completion_request = ChatCompletionRequest(   
+            model='gpt-4o',
+            messages=messages,
+            max_tokens=2000,
+            temperature=0.1,
+            logprobs=True,
+            top_logprobs= 5
+        ).model_dump(exclude_unset=True)
     print(chat_completion_request)
     chat_completion_response = await ArenaHandler(session, current_user, chat_completion_request).process_request()
     print(chat_completion_response)
     return chat_completion_response
+
