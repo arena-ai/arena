@@ -18,7 +18,7 @@ You are a helpful assistant<|eot_id|><|start_header_id|>user<|end_header_id|>
 
 What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
-I am not sure it is one of the following''',
+I am not sure, it is one of the following''',
 )
 
 print(resp)

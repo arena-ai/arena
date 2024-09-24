@@ -7,10 +7,24 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-huggingface-hub = "^0.24.6"
+huggingface-hub = "^0.25.1"
 python-dotenv = "^1.0.1"
 transformers = "^4.44.2"
+matplotlib = "^3.9.2"
+pydantic = "^2.9.2"
+faker = "^29.0.0"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = [
+    "tests",
+    "integration",
+]
 
 [build-system]
 requires = ["poetry-core"]
