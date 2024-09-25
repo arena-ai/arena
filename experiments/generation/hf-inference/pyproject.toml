@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Nicolas Grislain <Nicolas.Grislain@gmail.com>"]
 readme = "README.md"
+packages = [{include = "hf_inference"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"

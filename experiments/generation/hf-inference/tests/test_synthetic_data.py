@@ -1,4 +1,6 @@
-from synthetic_data import TreatmentData
+import pytest
+
+from hf_inference.synthetic_data import TreatmentData
 import matplotlib.pyplot as plt
 
 
