@@ -209,7 +209,7 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     if not document_data_extractor.owner_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExtractor has no owner")
     # Build examples
-    examples = tup(*(tup(as_text(document_data_extractor.owner, example.document_id), example.data) for example in document_data_extractor.document_data_examples))
+    examples = tup(*(tup(as_text(document_data_extractor.owner, example.document_id, example.start_page, example.end_page), example.data) for example in document_data_extractor.document_data_examples))
     # Pull data from the file
     if upload.content_type != 'application/pdf':
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This endpoint can only process pdfs")
