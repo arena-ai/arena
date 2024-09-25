@@ -254,7 +254,7 @@ class DocumentDataExampleCreate(DocumentDataExampleBase):
 class DocumentDataExampleUpdate(DocumentDataExampleBase):
     document_id: str | None = None
     data: str | None = None
-    start_page:  int | None = None
+    start_page: int | None = None
     end_page: int | None = None
 
 class DocumentDataExample(SQLModel, table=True):

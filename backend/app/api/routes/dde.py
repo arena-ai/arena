@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pyarrow.csv as pc
+import json
 
 from app.api.deps import CurrentUser, SessionDep
 from app.services import crud
@@ -201,7 +202,7 @@ def delete_document_data_example(*, session: SessionDep, current_user: CurrentUs
     session.commit()
     return Message(message="DocumentDataExample deleted successfully")
 
-@router.post("/extract/{name}", response_model=ChatCompletionResponse)
+@router.post("/extract/{name}")
 async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, name: str, upload: UploadFile) -> JSONResponse:
     document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
     if not document_data_extractor:
@@ -214,11 +215,13 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     if upload.content_type != 'application/pdf':
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This endpoint can only process pdfs")
     prompt = pdf_reader.as_text(upload.file.read())
+    if prompt == "":
+        raise HTTPException(status_code=500, detail="The extracted text from the document is empty. Please check if the document is corrupted.") 
     system_prompt = document_data_extractor.prompt
     examples_text = ""
-    for example in await examples.evaluate():
-        input_text = example[0]  
-        output_text = example[1]  
+    for input_text, output_text in await examples.evaluate():
+        if input_text == "":
+            raise HTTPException(status_code=500, detail="The extracted text from the document is empty. Please check if the document is corrupted.") 
         examples_text += f"####\nINPUT: {input_text}\n\nOUTPUT: {output_text}\n\n"
     full_system_content = f"{system_prompt}\n\nHere are some examples of inputs and outputs:\n{examples_text}"
     messages = [
@@ -231,10 +234,13 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
             max_tokens=2000,
             temperature=0.1,
             logprobs=True,
-            top_logprobs= 5
+            top_logprobs= 5,
+            
         ).model_dump(exclude_unset=True)
-    print(chat_completion_request)
     chat_completion_response = await ArenaHandler(session, current_user, chat_completion_request).process_request()
-    print(chat_completion_response)
-    return chat_completion_response
+    extracted_info=chat_completion_response.choices[0].message.content
+    # TODO: Improve the prompt to ensure the output is always a valid JSON
+    json_string = extracted_info[extracted_info.find('{'):extracted_info.rfind('}')+1]
+    return json.loads(json_string)
+
 
