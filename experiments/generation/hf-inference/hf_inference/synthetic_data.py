@@ -3,6 +3,7 @@ from faker import Faker
 fake = Faker()
 import numpy as np
 import matplotlib.pyplot as plt
+from hf_inference.inference import LanguageModel
 
 class TreatmentData(BaseModel):
     name: str
@@ -19,3 +20,7 @@ class TreatmentData(BaseModel):
     @classmethod
     def generate(cls, size: int) -> list['TreatmentData']:
         return [TreatmentData.generate_random_instance() for _ in range(size)]
+    
+    def describe(self, language_model: LanguageModel) -> str:
+        pass
+
