@@ -1,5 +1,5 @@
-from typing import Any, Literal
-
+from typing import Any, Literal,Dict
+from pydantic import create_model,BaseModel
 from fastapi import APIRouter, HTTPException, status, UploadFile
 from fastapi.responses import JSONResponse
 from sqlmodel import func, select
@@ -74,7 +74,11 @@ def create_document_data_extractor(
     """
     Create a new DocumentDataExtractor.
     """
-    document_data_extractor = DocumentDataExtractor.model_validate(document_data_extractor_in, update={"owner_id": current_user.id})
+    try:
+        pyd_model=create_pydantic_model(document_data_extractor_in.pydantic_model)
+    except KeyError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="received incorrect pydantic model")
+    document_data_extractor = DocumentDataExtractor.model_validate(document_data_extractor_in, update={"owner_id": current_user.id,'pydantic_model':pyd_model})
     try:
         session.add(document_data_extractor)
         session.commit()
@@ -98,6 +102,13 @@ def update_document_data_extractor(
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
     update_dict = document_data_extractor_in.model_dump(exclude_unset=True)
+    pdyantic_dict=update_dict.pop('pydantic_model')
+    if pdyantic_dict is not None:
+        try:
+            pyd_str=create_pydantic_model(pdyantic_dict)
+        except KeyError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="received incorrect pydantic model")
+    update_dict['pydantic_model']=pyd_str 
     document_data_extractor.sqlmodel_update(update_dict)
     session.add(document_data_extractor)
     session.commit()
@@ -244,3 +255,17 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     return json.loads(json_string)
 
 
+def create_pydantic_model(schema:dict[str,str])->str:
+     # Convert string type names to actual Python types
+    field_types = {
+        'str': (str, ...),  # ... means the field is required
+        'int': (int, ...),
+        'float': (float, ...),
+        'bool': (bool, ...),
+    }
+
+    # Dynamically create a Pydantic model using create_model
+    fields = {name: field_types[ftype] for name, ftype in schema.items()}
+    dynamic_model = create_model('DataExtractorSchema', **fields)
+    return json.dumps(dynamic_model.model_json_schema())
+    

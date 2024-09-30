@@ -213,17 +213,22 @@ class DocumentDataExtractorBase(SQLModel):
 class DocumentDataExtractorCreate(DocumentDataExtractorBase):
     name: str
     prompt: str
+    pydantic_model:dict[str,str]
+
 
 # Properties to receive on DocumentDataExtractor update
 class DocumentDataExtractorUpdate(DocumentDataExtractorBase):
     name: str | None = None
     prompt: str | None = None
+    pydantic_model: dict[str,str] | None = None
+
 
 class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     timestamp: datetime | None =  Field(default=func.now())
     owner_id: int | None = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), default=None))
     owner: User | None = Relationship(back_populates="document_data_extractors")
+    pydantic_model: str
     document_data_examples: list["DocumentDataExample"] = Relationship(back_populates="document_data_extractor", sa_relationship_kwargs={"cascade": "all, delete"})
 
 
@@ -233,6 +238,7 @@ class DocumentDataExtractorOut(DocumentDataExtractorBase):
     timestamp: datetime
     owner_id: int
     document_data_examples: list["DocumentDataExample"]
+    pydantic_model:str
 
 class DocumentDataExtractorsOut(SQLModel):
     data: list[DocumentDataExtractorOut]
