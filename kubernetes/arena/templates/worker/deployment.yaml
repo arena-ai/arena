@@ -59,7 +59,7 @@ spec:
         - name: EMAILS_FROM_NAME
           value: {{.Values.backend.emailsFromName}}
         - name: MINIO_SERVER
-          value: "{{.Release.Name}}-minio-service.{{.Values.namespace}}.svc.cluster.local"
+          value: "{{.Release.Name}}-minio.{{.Values.namespace}}.svc.cluster.local"
       {{ if .Values.docker.requireAuthentication -}}
       imagePullSecrets:
       - name: arena-docker-registry-secret
