@@ -80,6 +80,8 @@ spec:
           value: "{{.Release.Name}}-presidio-anonymizer-service.{{.Values.namespace}}.svc.cluster.local"
         - name: PRESIDIO_ANONYMIZER_PORT
           value: {{.Values.masking.presidio.anonymizer.service.externalPort | quote}}
+        - name: MINIO_SERVER
+          value: "{{.Release.Name}}-minio-service.{{.Values.namespace}}.svc.cluster.local"
       {{ if .Values.docker.requireAuthentication -}}
       imagePullSecrets:
       - name: arena-docker-registry-secret
