@@ -150,18 +150,18 @@ milvus:
   minio:
     persistence:
       # storageClass: arena-storageclass
-      size: 10Gi
+      size: 5Gi
   etcd:
     persistence:
       # storageClass: arena-storageclass
-      size: 2Gi
+      size: 1Gi
   pulsar:
     bookkeeper:
       volumes:
         journal:
-          size: 5Gi
+          size: 2Gi
         ledgers:
-          size: 10Gi
+          size: 5Gi
       pdb:
         usePolicy: false
     zookeeper:
@@ -177,4 +177,4 @@ milvus:
   kafka:
     persistence:
       # storageClass: arena-storageclass
-      size: 5Gi
+      size: 2Gi

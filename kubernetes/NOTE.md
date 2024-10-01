@@ -14,6 +14,8 @@ Following: https://kubernetes.github.io/ingress-nginx/troubleshooting/
 
 `kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443`
 
+To login you need the token from your `~/.kube/config` file or `aws eks get-token --cluster-name $CLUSTER_NAME --region $REGION` command.
+
 ## Inspect the Database
 
 `kubectl port-forward statefulsets/sarus-postgresql 5432:5432`
