@@ -2,6 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app/
 
+# Install tesseract for perforfing OCR with pytesseract
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    poppler-utils 
+
 # Install Poetry
 RUN pip install poetry
 

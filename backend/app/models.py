@@ -248,10 +248,14 @@ class DocumentDataExampleBase(SQLModel):
 class DocumentDataExampleCreate(DocumentDataExampleBase):
     document_id: str
     data: str
+    start_page: int = 0
+    end_page: int | None = None
 
 class DocumentDataExampleUpdate(DocumentDataExampleBase):
     document_id: str | None = None
     data: str | None = None
+    start_page: int | None = None
+    end_page: int | None = None
 
 class DocumentDataExample(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -259,6 +263,8 @@ class DocumentDataExample(SQLModel, table=True):
     data: str
     document_data_extractor_id: int = Field(sa_column=Column(Integer, ForeignKey("documentdataextractor.id", ondelete="CASCADE")))
     document_data_extractor: DocumentDataExtractor | None = Relationship(back_populates="document_data_examples")
+    start_page: int = 0
+    end_page: int | None = None
 
 class DocumentDataExampleOut(DocumentDataExampleBase):
     id: int
