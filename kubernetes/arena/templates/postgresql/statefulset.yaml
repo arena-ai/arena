@@ -139,4 +139,4 @@ spec:
         storageClassName: arena-storageclass
         resources:
           requests:
-            storage: "10Gi"
+            storage: {{.Values.postgresql.volume}}

@@ -25,12 +25,14 @@ postgresql:
   image: postgres
   user: postgres
   password: ""
+  volume: "5Gi"
   db: app
 
 # Redis configuration
 redis:
   image: redis
   password: ""
+  volume: "5Gi"
 
 # Backend configuration
 backend:
