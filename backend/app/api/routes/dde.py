@@ -1,5 +1,6 @@
-from typing import Any, Literal
-
+from typing import Any, Iterable
+from app.lm.models.chat_completion import TokenLogprob
+from app.lm.models import ChatCompletionResponse
 from fastapi import APIRouter, HTTPException, status, UploadFile
 from fastapi.responses import JSONResponse
 from sqlmodel import func, select
@@ -264,7 +265,7 @@ def is_equal_ignore_sign(a, b) -> bool:
         return False
     return abs(a) == abs(b)      # necessary because logits are associated only with numerical tokens, so here values are considered in their absolute form, ignoring the sign.
 
-def combined_token_in_extracted_data(combined_token, extracted_data) -> bool:  
+def combined_token_in_extracted_data(combined_token: str, extracted_data: Iterable) -> bool: 
     try:
         combined_token = float(combined_token)
     except ValueError:
@@ -272,7 +273,7 @@ def combined_token_in_extracted_data(combined_token, extracted_data) -> bool:
     return any(is_equal_ignore_sign(combined_token, value)  
                 for value in extracted_data if isinstance(value, (int, float)))
 
-def find_key_by_value(combined_token, extracted_data) -> str | None: 
+def find_key_by_value(combined_token: str, extracted_data: dict[str, Any]) -> str | None: 
     try:
         combined_token = float(combined_token)
     except ValueError:
@@ -280,19 +281,19 @@ def find_key_by_value(combined_token, extracted_data) -> str | None:
     return next((k for k, v in extracted_data.items() 
                     if isinstance(v, (int, float)) and is_equal_ignore_sign(combined_token, v)), None)    
 
-def extract_logprobs_from_response(response: Any, extracted_data: dict[str, Any]) -> dict[str, float]:
+def extract_logprobs_from_response(response: ChatCompletionResponse, extracted_data: dict[str, Any]) -> dict[str, float | list[float]]:
     logprob_data = {}
     tokens_info = response.choices[0].logprobs.content
 
-    def process_numeric_values(extracted_data: dict, path=''):
-        i = 0
-        while i < len(tokens_info):    
+    def process_numeric_values(extracted_data: dict[str, Any], path=''):
+
+        for i in range(len(tokens_info)-1):    
             token = tokens_info[i].token
             
             if token.isdigit():          # Only process tokens that are numeric
                 combined_token, combined_logprob = combine_tokens(tokens_info, i)
-                
                 if combined_token_in_extracted_data(combined_token, extracted_data.values()):     #Checks if a combined token matches any numeric values in the extracted data.
+
                     key = find_key_by_value(combined_token, extracted_data)                  #Finds the key in 'extracted_data' corresponding to a numeric value that matches the combined token.
                     if key:
                         full_key = path + key  
@@ -307,28 +308,27 @@ def extract_logprobs_from_response(response: Any, extracted_data: dict[str, Any]
 
                         logprob_data[full_key + '_first_token_toplogprobs'] = logprobs_first
                         logprob_data[full_key + '_second_token_toplogprobs'] = logprobs_second
-            i += 1
 
-    def traverse_and_extract(data, path=''):
+    def traverse_and_extract(data : dict , path=''):
         for key, value in data.items():
             if isinstance(value, dict):
+                print ("value for traverse_and_extract",value )
                 traverse_and_extract(value, path + key + '.')
             elif isinstance(value, (int, float)):
+                print("data for process_numeric_values",data)
                 process_numeric_values(data, path)
-    
     traverse_and_extract(extracted_data)
-    
     return logprob_data
 
 
-def combine_tokens(tokens_info: list[dict[str, Any]], start_index: int) -> tuple[str, float]: 
+def combine_tokens(tokens_info: list[TokenLogprob], start_index: int) -> tuple[str, float]: 
     combined_token = tokens_info[start_index].token
     combined_logprob = tokens_info[start_index].logprob
 
-    i = start_index
     # Keep combining tokens as long as the next token is a digit
-    while i + 1 < len(tokens_info) and tokens_info[i + 1].token.isdigit():
-        i += 1
+    for i in range(start_index + 1, len(tokens_info)):
+        if not tokens_info[i].token.isdigit():
+            break
         combined_token += tokens_info[i].token
         combined_logprob += tokens_info[i].logprob
     
