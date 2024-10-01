@@ -180,3 +180,14 @@ milvus:
     persistence:
       # storageClass: arena-storageclass
       size: 2Gi
+  # In cluster mode use this (see: https://artifacthub.io/packages/helm/milvus-helm/milvus#deploy-milvus-with-cluster-mode)
+  mixCoordinator:
+    enabled: false
+  rootCoordinator:
+    enabled: true
+  indexCoordinator:
+    enabled: true
+  queryCoordinator:
+    enabled: true
+  dataCoordinator:
+    enabled: true
