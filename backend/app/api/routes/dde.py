@@ -8,6 +8,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pyarrow.csv as pc
 import json
+import math
+import io
 
 from app.api.deps import CurrentUser, SessionDep
 from app.services import crud
@@ -214,22 +216,24 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     # Pull data from the file
     if upload.content_type != 'application/pdf':
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This endpoint can only process pdfs")
-    prompt = pdf_reader.as_text(upload.file.read())
-    if prompt == "":
-        raise HTTPException(status_code=500, detail="The extracted text from the document is empty. Please check if the document is corrupted.") 
+    
+    f=io.BytesIO(upload.file.read())
+    prompt = pdf_reader.as_text(f)
+    validate_extracted_text(prompt)
     system_prompt = document_data_extractor.prompt
+    
     examples_text = ""
     for input_text, output_text in await examples.evaluate():
-        if input_text == "":
-            raise HTTPException(status_code=500, detail="The extracted text from the document is empty. Please check if the document is corrupted.") 
+        validate_extracted_text(input_text)
         examples_text += f"####\nINPUT: {input_text}\n\nOUTPUT: {output_text}\n\n"
-    full_system_content = f"{system_prompt}\n\nHere are some examples of inputs and outputs:\n{examples_text}"
+    full_system_content = f"{system_prompt}\n{examples_text}"
+
     messages = [
             ChatCompletionMessage(role="system", content=full_system_content),  
-            ChatCompletionMessage(role="user", content=f"Here is the next input:\n####\nINPUT:{prompt}")  
+            ChatCompletionMessage(role="user", content=f"Maintenant, faites la même extraction sur un nouveau document d'input:\n####\nINPUT:{prompt}")  
         ]
     chat_completion_request = ChatCompletionRequest(   
-            model='gpt-4o',
+            model='gpt-4o-2024-08-06',
             messages=messages,
             max_tokens=2000,
             temperature=0.1,
@@ -237,10 +241,96 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
             top_logprobs= 5,
             
         ).model_dump(exclude_unset=True)
+    
     chat_completion_response = await ArenaHandler(session, current_user, chat_completion_request).process_request()
     extracted_info=chat_completion_response.choices[0].message.content
     # TODO: Improve the prompt to ensure the output is always a valid JSON
     json_string = extracted_info[extracted_info.find('{'):extracted_info.rfind('}')+1]
-    return json.loads(json_string)
+    extracted_data = {k: v for k, v in json.loads(json_string).items() if k not in ('source', 'year')}   
+    logprob_data = extract_logprobs_from_response(chat_completion_response, extracted_data)
+    return {'extracted_info': json.loads(json_string), 'logprob_data': logprob_data}
 
+def validate_extracted_text(text: str):
+    if text == "":
+        raise HTTPException(status_code=500, detail="The extracted text from the document is empty. Please check if the document is corrupted.")
+    
+    
+# TODO: Optimize the entire process of extracting and handling log probabilities from OpenAI for the identified tokens.
+def is_equal_ignore_sign(a, b) -> bool:  
+    try:
+        a = float(a)
+        b = float(b)
+    except ValueError:
+        return False
+    return abs(a) == abs(b)      # necessary because logits are associated only with numerical tokens, so here values are considered in their absolute form, ignoring the sign.
+
+def combined_token_in_extracted_data(combined_token, extracted_data) -> bool:  
+    try:
+        combined_token = float(combined_token)
+    except ValueError:
+        return False
+    return any(is_equal_ignore_sign(combined_token, value)  
+                for value in extracted_data if isinstance(value, (int, float)))
+
+def find_key_by_value(combined_token, extracted_data) -> str | None: 
+    try:
+        combined_token = float(combined_token)
+    except ValueError:
+        return None
+    return next((k for k, v in extracted_data.items() 
+                    if isinstance(v, (int, float)) and is_equal_ignore_sign(combined_token, v)), None)    
+
+def extract_logprobs_from_response(response: Any, extracted_data: dict[str, Any]) -> dict[str, float]:
+    logprob_data = {}
+    tokens_info = response.choices[0].logprobs.content
+
+    def process_numeric_values(extracted_data: dict, path=''):
+        i = 0
+        while i < len(tokens_info):    
+            token = tokens_info[i].token
+            
+            if token.isdigit():          # Only process tokens that are numeric
+                combined_token, combined_logprob = combine_tokens(tokens_info, i)
+                
+                if combined_token_in_extracted_data(combined_token, extracted_data.values()):     #Checks if a combined token matches any numeric values in the extracted data.
+                    key = find_key_by_value(combined_token, extracted_data)                  #Finds the key in 'extracted_data' corresponding to a numeric value that matches the combined token.
+                    if key:
+                        full_key = path + key  
+                        logprob_data[full_key + '_prob_first_token'] = math.exp(tokens_info[i].logprob)
+                        logprob_data[full_key + '_prob_second_token'] = math.exp(tokens_info[i+1].logprob)
+
+                        toplogprobs_firsttoken = tokens_info[i].top_logprobs
+                        toplogprobs_secondtoken = tokens_info[i+1].top_logprobs
+
+                        logprobs_first = [top_logprob.logprob for top_logprob in toplogprobs_firsttoken]
+                        logprobs_second = [top_logprob.logprob for top_logprob in toplogprobs_secondtoken]
+
+                        logprob_data[full_key + '_first_token_toplogprobs'] = logprobs_first
+                        logprob_data[full_key + '_second_token_toplogprobs'] = logprobs_second
+            i += 1
+
+    def traverse_and_extract(data, path=''):
+        for key, value in data.items():
+            if isinstance(value, dict):
+                traverse_and_extract(value, path + key + '.')
+            elif isinstance(value, (int, float)):
+                process_numeric_values(data, path)
+    
+    traverse_and_extract(extracted_data)
+    
+    return logprob_data
+
+
+def combine_tokens(tokens_info: list[dict[str, Any]], start_index: int) -> tuple[str, float]: 
+    combined_token = tokens_info[start_index].token
+    combined_logprob = tokens_info[start_index].logprob
+
+    i = start_index
+    # Keep combining tokens as long as the next token is a digit
+    while i + 1 < len(tokens_info) and tokens_info[i + 1].token.isdigit():
+        i += 1
+        combined_token += tokens_info[i].token
+        combined_logprob += tokens_info[i].logprob
+    
+    return combined_token, combined_logprob
 
