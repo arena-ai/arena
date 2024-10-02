@@ -138,7 +138,7 @@ function Events() {
               Events
             </Heading>
             <Flex py={8} gap={4} minWidth='max-content' alignItems='center'>
-              <Box p='2'>
+              <Box py='2'>
                 <Heading size='sm'>Events</Heading>
               </Box>
               <Spacer />

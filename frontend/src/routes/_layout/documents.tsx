@@ -1,6 +1,7 @@
 import {
   Container,
   Flex,
+  Box,
   Heading,
   Spinner,
   Table,
@@ -13,15 +14,13 @@ import {
   Text,
   Code,
   // useColorModeValue,
-  Box,
-  Spacer,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery, useQueries } from '@tanstack/react-query'
+import { useQueryClient, useQuery, useQueries } from '@tanstack/react-query'
 
 import { ApiError, DocumentsService, Document } from '@app/client'
 import useCustomToast from '@app/hooks/useCustomToast'
-import UploadForm from '@app/components/Documents/UploadForm'
+import FileUploadDropzone from '@app/components/Documents/FileUploadDropzone'
 
 export const Route = createFileRoute('/_layout/documents')({
   component: Documents,
@@ -29,6 +28,8 @@ export const Route = createFileRoute('/_layout/documents')({
 
 function Documents() {
   const showToast = useCustomToast()
+  const queryClient = useQueryClient()
+
   // Pull documents
   const {
     data: documents,
@@ -62,7 +63,7 @@ function Documents() {
     },
   });
   // const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
-
+  
   if (isError) {
     const errDetail = (error as ApiError).body?.detail
     showToast('Something went wrong.', `${errDetail}`, 'error')
@@ -75,7 +76,7 @@ function Documents() {
           <Spinner size="xl" color="ui.main" />
         </Flex>
       ) : (
-        documents && (
+        documents && (            
           <Container maxW="full">
             <Heading
               size="lg"
@@ -84,13 +85,11 @@ function Documents() {
             >
               Documents
             </Heading>
-            <Flex py={8} gap={4} minWidth='max-content' alignItems='center'>
-              <Box p='2'>
-                <Heading size='sm'>Documents</Heading>
-              </Box>
-              <Spacer />
-              <UploadForm />
-            </Flex>
+            <Box py={2}>
+              <Heading size='sm'>Upload New Content</Heading>
+              <FileUploadDropzone onUpload={() => queryClient.invalidateQueries({ queryKey: ['documents'] })}/>
+            </Box>
+            <Heading size='sm'>Documents</Heading>
             <TableContainer>
               <Table size={{ base: 'sm', md: 'md' }} whiteSpace="normal">
                 <Thead>
