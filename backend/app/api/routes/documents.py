@@ -1,6 +1,6 @@
 from uuid import uuid4 as uuid
 from io import BytesIO
-
+from datetime import datetime, UTC
 from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -17,6 +17,7 @@ class Document(BaseModel):
     name: str
     filename: str
     content_type: str
+    timestamp: datetime
 
 
 class Documents(BaseModel):
@@ -27,7 +28,7 @@ class Documents(BaseModel):
 @router.post("/")
 async def create_file(*, current_user: CurrentUser, upload: UploadFile) -> Document:
     name: str = str(uuid())
-    document = Document(name=name, filename=upload.filename, content_type=upload.content_type)
+    document = Document(name=name, filename=upload.filename, content_type=upload.content_type, timestamp=datetime.now(UTC))
     documents.put(f"{current_user.id}/{name}/data", upload.file)
     documents.puts(f"{current_user.id}/{name}/metadata", document.model_dump_json())
     documents.puts(f"{current_user.id}/{name}/content_type", upload.content_type)
@@ -37,7 +38,7 @@ async def create_file(*, current_user: CurrentUser, upload: UploadFile) -> Docum
 @router.get("/")
 async def read_files(*, current_user: CurrentUser) -> Documents:
     document_paths = await paths(current_user).evaluate()
-    return Documents(data=[Document.model_validate_json(documents.gets(f"{path}metadata")) for path in document_paths], count=len(document_paths))
+    return Documents(data=sorted([Document.model_validate_json(documents.gets(f"{path}metadata")) for path in document_paths], key=lambda doc: doc.timestamp), count=len(document_paths))
 
 
 @router.get("/{name}")

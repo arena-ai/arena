@@ -71,18 +71,17 @@ function Documents() {
               <Table size={{ base: 'sm', md: 'md' }} whiteSpace="normal">
                 <Thead>
                   <Tr>
-                    <Th>Id</Th>
-                    <Th>Name</Th>
+                    <Th>Filename</Th>
+                    <Th>Content Type</Th>
                     <Th>Timestamp</Th>
-                    <Th>Content</Th>
-                    <Th>Parent id</Th>
-                    <Th>Owner</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {documents.map((document) => (
-                    <Tr key={document}>
-                      <Td w={32}>{document}</Td>
+                  {documents.data.map((document) => (
+                    <Tr key={document.name}>
+                      <Td w={32}>{document.filename}</Td>
+                      <Td w={32}>{document.content_type}</Td>
+                      <Td w={32}>{document.name}</Td>
                       {/* <Td w={32}>{event.name}</Td>
                       <Td w={64}>{event.timestamp.slice(0, 19)}</Td>
                       <Td color={!event.content ? 'gray.400' : 'inherit'}>

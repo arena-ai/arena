@@ -16,5 +16,10 @@ export const $Document = {
             type: 'string',
             isRequired: true,
         },
+        timestamp: {
+            type: 'string',
+            isRequired: true,
+            format: 'date-time',
+        },
     },
 } as const;

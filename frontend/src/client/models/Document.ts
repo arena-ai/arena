@@ -7,5 +7,6 @@ export type Document = {
     name: string;
     filename: string;
     content_type: string;
+    timestamp: string;
 };
 
