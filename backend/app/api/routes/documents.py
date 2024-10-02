@@ -19,11 +19,6 @@ class Document(BaseModel):
     content_type: str
 
 
-class Documents(BaseModel):
-    data: list[Document]
-    count: int
-
-
 @router.post("/")
 async def create_file(*, current_user: CurrentUser, upload: UploadFile) -> Document:
     name: str = str(uuid())
@@ -33,9 +28,9 @@ async def create_file(*, current_user: CurrentUser, upload: UploadFile) -> Docum
 
 
 @router.get("/")
-async def read_files(*, current_user: CurrentUser) -> Documents:
+async def read_files(*, current_user: CurrentUser) -> list[str]:
     document_paths = await paths(current_user).evaluate()
-    return Documents(data=[path.split('/')[1] for path in document_paths], count=len(document_paths))
+    return [path.split('/')[1] for path in document_paths]
 
 
 @router.get("/{name}")

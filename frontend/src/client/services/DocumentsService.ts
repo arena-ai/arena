@@ -13,10 +13,10 @@ export class DocumentsService {
 
     /**
      * Read Files
-     * @returns any Successful Response
+     * @returns string Successful Response
      * @throws ApiError
      */
-    public static readFiles(): CancelablePromise<any> {
+    public static readFiles(): CancelablePromise<Array<string>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/documents/',
@@ -68,7 +68,7 @@ export class DocumentsService {
 
     /**
      * Read File As Text
-     * @returns any Successful Response
+     * @returns string Successful Response
      * @throws ApiError
      */
     public static readFileAsText({
@@ -79,7 +79,7 @@ export class DocumentsService {
         name: string,
         startPage?: number,
         endPage?: (number | null),
-    }): CancelablePromise<any> {
+    }): CancelablePromise<string> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/documents/{name}/as_text',
