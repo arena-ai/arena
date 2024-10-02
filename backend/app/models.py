@@ -1,6 +1,5 @@
 from typing import Optional, Literal
 from datetime import datetime
-import re
 from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func, Column, Integer, ForeignKey
 
 # Shared properties
