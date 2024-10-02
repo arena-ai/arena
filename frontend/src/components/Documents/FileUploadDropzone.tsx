@@ -34,17 +34,16 @@ const FileUploadDropzone = ({onUpload: onUpload}: {onUpload: (document: Document
             });
           },
         );
-      }
+      },
     });
 
   return (
     <Flex
       {...getRootProps({
         className: 'dropzone',
-        onClick: (event) => event.stopPropagation(),
       })}
       p={4}
-      borderWidth={2}
+      borderWidth={1}
       textColor="gray.400"
       borderColor="gray.400"
       borderRadius="xl"
