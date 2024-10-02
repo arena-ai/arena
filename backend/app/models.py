@@ -1,6 +1,8 @@
 from typing import Optional, Literal
 from datetime import datetime
+import re
 from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func, Column, Integer, ForeignKey
+from pydantic import field_validator
 
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
@@ -200,12 +202,22 @@ class Attribute(SQLModel, table=True):
     name: str = Field(index=True, unique=True)
     events: EventAttribute = Relationship(back_populates="attribute", sa_relationship_kwargs={"cascade": "all, delete"})
 
+    @field_validator('name')
+    @classmethod
+    def name_validator(name: str) -> str:
+        return re.sub(r'[^0-9a-zA-Z_-]', '', name)
+
 # DocumentDataExtractor
 
 # Shared properties
 class DocumentDataExtractorBase(SQLModel):
     name: str = Field(unique=True, index=True)
     prompt: str
+
+    @field_validator('name')
+    @classmethod
+    def name_validator(name: str) -> str:
+        return re.sub(r'[^0-9a-zA-Z_-]', '', name)
 
 class DocumentDataExtractorCreate(DocumentDataExtractorBase):
     name: str
