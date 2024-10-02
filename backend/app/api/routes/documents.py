@@ -38,7 +38,7 @@ async def create_file(*, current_user: CurrentUser, upload: UploadFile) -> Docum
 @router.get("/")
 async def read_files(*, current_user: CurrentUser) -> Documents:
     document_paths = await paths(current_user).evaluate()
-    return Documents(data=sorted([Document.model_validate_json(documents.gets(f"{path}metadata")) for path in document_paths], key=lambda doc: doc.timestamp), count=len(document_paths))
+    return Documents(data=sorted([Document.model_validate_json(documents.gets(f"{path}metadata")) for path in document_paths], key=lambda doc: doc.timestamp, reverse=True), count=len(document_paths))
 
 
 @router.get("/{name}")
