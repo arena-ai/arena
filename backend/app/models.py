@@ -204,7 +204,7 @@ class Attribute(SQLModel, table=True):
 
     @field_validator('name')
     @classmethod
-    def name_validator(name: str) -> str:
+    def name_validator(cls, name: str) -> str:
         return re.sub(r'[^0-9a-zA-Z_-]', '', name)
 
 # DocumentDataExtractor
@@ -216,7 +216,7 @@ class DocumentDataExtractorBase(SQLModel):
 
     @field_validator('name')
     @classmethod
-    def name_validator(name: str) -> str:
+    def name_validator(cls, name: str) -> str:
         return re.sub(r'[^0-9a-zA-Z_-]', '', name)
 
 class DocumentDataExtractorCreate(DocumentDataExtractorBase):
