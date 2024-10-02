@@ -7,7 +7,7 @@ from pydantic import BaseModel
 import pymupdf
 
 from app.api.deps import CurrentUser
-from app.services.object_store import Documents, documents
+from app.services.object_store import documents
 from app.ops.documents import path, paths, as_text
 
 
@@ -19,6 +19,11 @@ class Document(BaseModel):
     content_type: str
 
 
+class Documents(BaseModel):
+    data: list[Document]
+    count: int
+
+
 @router.post("/")
 async def create_file(*, current_user: CurrentUser, upload: UploadFile) -> Document:
     name: str = str(uuid())
@@ -28,13 +33,13 @@ async def create_file(*, current_user: CurrentUser, upload: UploadFile) -> Docum
 
 
 @router.get("/")
-async def read_files(*, current_user: CurrentUser):
+async def read_files(*, current_user: CurrentUser) -> Documents:
     document_paths = await paths(current_user).evaluate()
-    return [path.split('/')[1] for path in document_paths]
+    return Documents(data=[path.split('/')[1] for path in document_paths], count=len(document_paths))
 
 
 @router.get("/{name}")
-async def read_file(*, current_user: CurrentUser, name: str):
+async def read_file(*, current_user: CurrentUser, name: str) -> StreamingResponse:
     document_path = await path(current_user, name).evaluate()
     data = documents.get(f"{document_path}data")
     content_type = documents.gets(f"{document_path}content_type")
@@ -42,5 +47,5 @@ async def read_file(*, current_user: CurrentUser, name: str):
 
 
 @router.get("/{name}/as_text")
-async def read_file_as_text(*, current_user: CurrentUser, name: str, start_page: int = 0, end_page: int | None = None):
+async def read_file_as_text(*, current_user: CurrentUser, name: str, start_page: int = 0, end_page: int | None = None) -> str:
     return await as_text(current_user, name, start_page, end_page).evaluate()
