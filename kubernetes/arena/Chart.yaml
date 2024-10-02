@@ -27,11 +27,11 @@ appVersion: "0.1.0"
 dependencies:
   # Nginx ingress controller
   - name: ingress-nginx
-    version: "4.9"
+    version: "4.11"
     repository: "https://kubernetes.github.io/ingress-nginx"
   # Cert-manager for TLS
   - name: cert-manager
-    version: v1.14.2
+    version: v1.15
     repository: https://charts.jetstack.io
     alias: cert-manager
     condition: cert-manager.enabled
@@ -41,6 +41,6 @@ dependencies:
   #   repository: "https://qdrant.github.io/qdrant-helm"
   # Milvus
   - name: milvus
-    version: "2.4.4"
+    version: "2.4.12"
     repository: https://zilliztech.github.io/milvus-helm/
     alias: milvus

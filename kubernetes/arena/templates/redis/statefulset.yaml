@@ -155,4 +155,4 @@ spec:
         storageClassName: arena-storageclass
         resources:
           requests:
-            storage: "8Gi"
+            storage: {{.Values.redis.volume}}
