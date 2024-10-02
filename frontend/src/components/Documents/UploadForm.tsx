@@ -1,5 +1,9 @@
-// import { Button } from '@chakra-ui/react';
-// import { DocumentsService } from '@app/client'
+import {
+  FileUploadDropzone,
+  FileUploadList,
+  FileUploadRoot,
+} from '@chakra-ui/react';
+import { DocumentsService } from '@app/client'
 // import axios from 'axios';
 
 const UploadForm = () => {
@@ -13,7 +17,13 @@ const UploadForm = () => {
   //   <input type="submit">
   //   </form>
   return (
-    <></>
+    <FileUploadRoot maxW="xl" alignItems="stretch" maxFiles={10}>
+      <FileUploadDropzone
+        label="Drag and drop here to upload"
+        description=".png, .jpg up to 5MB"
+      />
+      <FileUploadList />
+    </FileUploadRoot>
   );
 };
 
