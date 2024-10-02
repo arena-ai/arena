@@ -87,7 +87,9 @@ function Documents() {
             </Heading>
             <Box py={2}>
               <Heading size='sm'>Upload New Content</Heading>
-              <FileUploadDropzone onUpload={() => queryClient.invalidateQueries({ queryKey: ['documents'] })}/>
+              <Box p={8}>
+                <FileUploadDropzone onUpload={() => queryClient.invalidateQueries({ queryKey: ['documents'] })}/>
+              </Box>
             </Box>
             <Heading size='sm'>Documents</Heading>
             <TableContainer>
