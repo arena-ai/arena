@@ -19,25 +19,31 @@ class Document(BaseModel):
     content_type: str
 
 
+class Documents(BaseModel):
+    data: list[Document]
+    count: int
+
+
 @router.post("/")
 async def create_file(*, current_user: CurrentUser, upload: UploadFile) -> Document:
     name: str = str(uuid())
+    document = Document(name=name, filename=upload.filename, content_type=upload.content_type)
     documents.put(f"{current_user.id}/{name}/data", upload.file)
+    documents.puts(f"{current_user.id}/{name}/metadata", document.model_dump_json())
     documents.puts(f"{current_user.id}/{name}/content_type", upload.content_type)
-    return Document(name=name, filename=upload.filename, content_type=upload.content_type)
+    return document
 
 
 @router.get("/")
-async def read_files(*, current_user: CurrentUser) -> list[str]:
+async def read_files(*, current_user: CurrentUser) -> Documents:
     document_paths = await paths(current_user).evaluate()
-    return [path.split('/')[1] for path in document_paths]
+    return Documents(data=[Document.model_validate_json(documents.gets(f"{path}metadata")) for path in document_paths], count=len(document_paths))
 
 
 @router.get("/{name}")
 async def read_file(*, current_user: CurrentUser, name: str) -> StreamingResponse:
     document_path = await path(current_user, name).evaluate()
     data = documents.get(f"{document_path}data")
-    content_type = documents.gets(f"{document_path}content_type")
     return StreamingResponse(content=data.stream(), media_type='application/octet-stream')
 
 

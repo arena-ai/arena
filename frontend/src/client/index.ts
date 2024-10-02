@@ -40,6 +40,7 @@ export type { DocumentDataExtractorCreate } from './models/DocumentDataExtractor
 export type { DocumentDataExtractorOut } from './models/DocumentDataExtractorOut';
 export type { DocumentDataExtractorsOut } from './models/DocumentDataExtractorsOut';
 export type { DocumentDataExtractorUpdate } from './models/DocumentDataExtractorUpdate';
+export type { Documents } from './models/Documents';
 export type { Evaluation } from './models/Evaluation';
 export type { Event } from './models/Event';
 export type { EventAttribute } from './models/EventAttribute';
@@ -107,6 +108,7 @@ export { $DocumentDataExtractorCreate } from './schemas/$DocumentDataExtractorCr
 export { $DocumentDataExtractorOut } from './schemas/$DocumentDataExtractorOut';
 export { $DocumentDataExtractorsOut } from './schemas/$DocumentDataExtractorsOut';
 export { $DocumentDataExtractorUpdate } from './schemas/$DocumentDataExtractorUpdate';
+export { $Documents } from './schemas/$Documents';
 export { $Evaluation } from './schemas/$Evaluation';
 export { $Event } from './schemas/$Event';
 export { $EventAttribute } from './schemas/$EventAttribute';

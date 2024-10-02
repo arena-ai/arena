@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { Body_documents_create_file } from '../models/Body_documents_create_file';
 import type { Document } from '../models/Document';
+import type { Documents } from '../models/Documents';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -13,10 +14,10 @@ export class DocumentsService {
 
     /**
      * Read Files
-     * @returns string Successful Response
+     * @returns Documents Successful Response
      * @throws ApiError
      */
-    public static readFiles(): CancelablePromise<Array<string>> {
+    public static readFiles(): CancelablePromise<Documents> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/documents/',
