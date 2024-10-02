@@ -25,6 +25,60 @@ export const Route = createFileRoute('/_layout/document-data-extractors')({
   component: DocumentDataExtractors,
 })
 
+function DataExtractors() {
+  const showToast = useCustomToast()
+  // Pull document data extractors
+  const {
+    data: documentDataExtractors,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['document_data_extractors'],
+    queryFn: () => DocumentDataExtractorsService.readDocumentDataExtractors({}),
+  })
+  // const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
+  
+  if (isError) {
+    const errDetail = (error as ApiError).body?.detail
+    showToast('Something went wrong.', `${errDetail}`, 'error')
+  }
+
+  return (
+    <>
+      {isLoading ? (
+        <Flex justify="center" align="center" height="100vh" width="full">
+          <Spinner size="xl" color="ui.main" />
+        </Flex>
+      ) : (
+        documentDataExtractors && (            
+          <Box>
+            <Heading size='sm'>Data Extractors</Heading>
+            <TableContainer>
+              <Table size={{ base: 'sm', md: 'md' }} whiteSpace="normal">
+                <Thead>
+                  <Tr>
+                    <Th>Name</Th>
+                    <Th>Prompt</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {documentDataExtractors.data.map((documentDataExtractor) => (
+                    <Tr key={documentDataExtractor.name}>
+                      <Td w={16}><Code>{documentDataExtractor.name}</Code></Td>
+                      <Td w={32}>{documentDataExtractor.prompt}</Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )
+      )}
+    </>
+  )
+}
+
 function DocumentDataExtractors() {
   const showToast = useCustomToast()
 
@@ -83,31 +137,7 @@ function DocumentDataExtractors() {
             >
               Document Data Extractors
             </Heading>
-            <Heading size='sm'>Document Data Extractors</Heading>
-            <TableContainer>
-              <Table size={{ base: 'sm', md: 'md' }} whiteSpace="normal">
-                <Thead>
-                  <Tr>
-                    <Th>Id</Th>
-                    <Th>Filename</Th>
-                    <Th>Content Type</Th>
-                    <Th>Timestamp</Th>
-                    <Th>Content Preview</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {documents.data.map((document) => (
-                    <Tr key={document.name}>
-                      <Td w={16}><Code>{document.name}</Code></Td>
-                      <Td w={32}>{document.filename}</Td>
-                      <Td w={16}>{document.content_type}</Td>
-                      <Td w={16}>{document.timestamp.slice(0, 19)}</Td>
-                      <Td w={32}><Text color='gray.400'>{contents && document.content_type==="application/pdf" ? contents.get(document.name)?.slice(0, 256)+"\n..." : ""}</Text></Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </TableContainer>
+            <DataExtractors />
           </Container>
         )
       )}

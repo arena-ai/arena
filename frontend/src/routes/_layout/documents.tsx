@@ -41,7 +41,7 @@ function Documents() {
     queryFn: () => DocumentsService.readFiles(),
   })
 
-  // Get document content extract
+  // Get document content summaries
   const {
     data: contents,
   } = useQueries({
