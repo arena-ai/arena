@@ -12,14 +12,16 @@ import {
   Th,
   Thead,
   Tr,
-  Text,
+  Input,
+  Textarea,
   Code,
   useColorModeValue,
+  Button,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery, useQueries } from '@tanstack/react-query'
+import { useQueryClient, useQuery, useQueries } from '@tanstack/react-query'
 
-import { ApiError, DocumentsService, Document, DocumentDataExtractorsService, DocumentDataExtractorOut, DocumentDataExtractorsOut } from '@app/client'
+import { ApiError, DocumentsService, Document, DocumentDataExtractorsService, DocumentDataExtractorOut } from '@app/client'
 import useCustomToast from '@app/hooks/useCustomToast'
 
 export const Route = createFileRoute('/_layout/document-data-extractors')({
@@ -27,9 +29,9 @@ export const Route = createFileRoute('/_layout/document-data-extractors')({
 })
 
 function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {documentDataExtractor: DocumentDataExtractorOut, is_selected: boolean, onClick: MouseEventHandler}) {
-  const showToast = useCustomToast()
   // Pull document data examples
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
+  const queryClient = useQueryClient()
 
   return (
     (is_selected ?
@@ -74,6 +76,8 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
 
 function DataExtractors() {
   const [selectedExtractor, selectExtractor] = useState("");
+  const [name, setName] = useState("");
+  const [prompt, setPrompt] = useState("");
   const showToast = useCustomToast()
   // Pull document data extractors
   const {
@@ -85,6 +89,7 @@ function DataExtractors() {
     queryKey: ['document_data_extractors'],
     queryFn: () => DocumentDataExtractorsService.readDocumentDataExtractors({}),
   })
+  const queryClient = useQueryClient()
   
   if (isError) {
     const errDetail = (error as ApiError).body?.detail
@@ -110,6 +115,26 @@ function DataExtractors() {
                   <Th>Timestamp</Th>
                 </Tr>
               </Thead>
+              <Tbody>
+                <Tr>
+                  <Td w={32}>
+                    <Input placeholder="Extractor Name"
+                      onChange={(e)=>setName(e.target.value)}
+                    />
+                  </Td>
+                  <Td w={32}>
+                    <Textarea placeholder="Prompt"
+                      onChange={(e)=>setPrompt(e.target.value)}
+                    />
+                  </Td>
+                  <Td w={32}><Button onClick={()=>{
+                    DocumentDataExtractorsService.createDocumentDataExtractor({
+                      requestBody: {name: name, prompt: prompt}
+                    })
+                    queryClient.invalidateQueries({ queryKey: ['document_data_extractors'] })
+                  }}>Add Extractor</Button></Td>
+                </Tr>
+              </Tbody>
               {documentDataExtractors.data.map((documentDataExtractor) => (
                 <ExtractorExamples
                   documentDataExtractor={documentDataExtractor}
