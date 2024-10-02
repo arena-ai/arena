@@ -62,7 +62,6 @@ function Documents() {
       }
     },
   });
-  // const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
   
   if (isError) {
     const errDetail = (error as ApiError).body?.detail

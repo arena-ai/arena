@@ -16,19 +16,17 @@ import {
   // useColorModeValue,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useQueryClient, useQuery, useQueries } from '@tanstack/react-query'
+import { useQuery, useQueries } from '@tanstack/react-query'
 
-import { ApiError, DocumentsService, Document } from '@app/client'
+import { ApiError, DocumentsService, Document, DocumentDataExtractorsService, DocumentDataExtractorOut, DocumentDataExtractorsOut } from '@app/client'
 import useCustomToast from '@app/hooks/useCustomToast'
-import FileUploadDropzone from '@app/components/Documents/FileUploadDropzone'
 
 export const Route = createFileRoute('/_layout/document-data-extractors')({
-  component: Documents,
+  component: DocumentDataExtractors,
 })
 
-function Documents() {
+function DocumentDataExtractors() {
   const showToast = useCustomToast()
-  const queryClient = useQueryClient()
 
   // Pull documents
   const {
@@ -83,15 +81,9 @@ function Documents() {
               textAlign={{ base: 'center', md: 'left' }}
               pt={12}
             >
-              Documents
+              Document Data Extractors
             </Heading>
-            <Box py={2}>
-              <Heading size='sm'>Upload New Content</Heading>
-              <Box p={8}>
-                <FileUploadDropzone onUpload={() => queryClient.invalidateQueries({ queryKey: ['documents'] })}/>
-              </Box>
-            </Box>
-            <Heading size='sm'>Documents</Heading>
+            <Heading size='sm'>Document Data Extractors</Heading>
             <TableContainer>
               <Table size={{ base: 'sm', md: 'md' }} whiteSpace="normal">
                 <Thead>
@@ -123,4 +115,4 @@ function Documents() {
   )
 }
 
-export default Documents
+export default DocumentDataExtractors

@@ -1,5 +1,6 @@
 from typing import Optional, Literal
 from datetime import datetime
+import re
 from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func, Column, Integer, ForeignKey
 
 # Shared properties
@@ -162,7 +163,6 @@ class EventsOut(SQLModel):
     data: list[EventOut]
     count: int
 
-
 # Database model, database table inferred from class name
 class EventIdentifier(SQLModel, table=True):
     id: str | None = Field(default=None, primary_key=True)
@@ -172,7 +172,6 @@ class EventIdentifier(SQLModel, table=True):
 class EventIdentifierOut(SQLModel):
     id: str
     event_id: int
-
 
 # Shared properties
 class EventAttributeBase(SQLModel):
@@ -202,7 +201,6 @@ class Attribute(SQLModel, table=True):
     name: str = Field(index=True, unique=True)
     events: EventAttribute = Relationship(back_populates="attribute", sa_relationship_kwargs={"cascade": "all, delete"})
 
-
 # DocumentDataExtractor
 
 # Shared properties
@@ -218,6 +216,7 @@ class DocumentDataExtractorCreate(DocumentDataExtractorBase):
 class DocumentDataExtractorUpdate(DocumentDataExtractorBase):
     name: str | None = None
     prompt: str | None = None
+
 
 class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
