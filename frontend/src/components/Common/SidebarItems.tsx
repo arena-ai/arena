@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Flex, Icon, Text, useColorModeValue } from '@chakra-ui/react'
-import { FiActivity, FiHome, FiSettings, FiFile, FiUsers } from 'react-icons/fi'
+import { FiActivity, FiHome, FiSettings, FiFile, FiEye, FiUsers } from 'react-icons/fi'
 import { Link } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -10,6 +10,7 @@ const items = [
   { icon: FiHome, title: 'Dashboard', path: '/' },
   { icon: FiActivity, title: 'Events', path: '/events' },
   { icon: FiFile, title: 'Documents', path: '/documents' },
+  { icon: FiEye, title: 'Data Extractors', path: '/document-data-extractors' },
   { icon: FiSettings, title: 'User Settings', path: '/settings' },
 ]
 
