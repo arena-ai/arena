@@ -10,16 +10,18 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
+  Code,
   // useColorModeValue,
   Box,
   Spacer,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueries } from '@tanstack/react-query'
 
-import { ApiError, DocumentsService } from '@app/client'
+import { ApiError, DocumentsService, Document } from '@app/client'
 import useCustomToast from '@app/hooks/useCustomToast'
-// import UploadForm from '@app/components/Documents/UploadForm'
+import UploadForm from '@app/components/Documents/UploadForm'
 
 export const Route = createFileRoute('/_layout/documents')({
   component: Documents,
@@ -37,6 +39,28 @@ function Documents() {
     queryKey: ['documents'],
     queryFn: () => DocumentsService.readFiles(),
   })
+
+  // Get document content extract
+  const {
+    data: contents,
+  } = useQueries({
+    queries: (documents?.data || []).map(document => ({
+      queryKey: ['document', document.name],
+      queryFn: async (): Promise<[Document, string]> => [document, await DocumentsService.readFileAsText({ name: document.name, startPage: 0, endPage: 1 })],
+    })),
+    combine: (results) => {
+      return {
+        data: results.reduce((map, result) => {
+          if (result.data) {
+            const [doc, content] = result.data;
+            map.set(doc.name, content);
+          }
+          return map;
+        }, new Map<string, string>()),
+        pending: results.some((result) => result.isPending),
+      }
+    },
+  });
   // const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
 
   if (isError) {
@@ -65,30 +89,27 @@ function Documents() {
                 <Heading size='sm'>Documents</Heading>
               </Box>
               <Spacer />
-              {/* Add an umpload zone here */}
+              <UploadForm />
             </Flex>
             <TableContainer>
               <Table size={{ base: 'sm', md: 'md' }} whiteSpace="normal">
                 <Thead>
                   <Tr>
+                    <Th>Id</Th>
                     <Th>Filename</Th>
                     <Th>Content Type</Th>
                     <Th>Timestamp</Th>
+                    <Th>Content Preview</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {documents.data.map((document) => (
                     <Tr key={document.name}>
+                      <Td w={16}><Code>{document.name}</Code></Td>
                       <Td w={32}>{document.filename}</Td>
-                      <Td w={32}>{document.content_type}</Td>
-                      <Td w={32}>{document.name}</Td>
-                      {/* <Td w={32}>{event.name}</Td>
-                      <Td w={64}>{event.timestamp.slice(0, 19)}</Td>
-                      <Td color={!event.content ? 'gray.400' : 'inherit'}>
-                        {format_event(event)}
-                      </Td>
-                      <Td w={32}>{event.parent_id}</Td>
-                      <Td w={32}>{owners.get(event.owner_id) || "Unknown"}</Td> */}
+                      <Td w={16}>{document.content_type}</Td>
+                      <Td w={16}>{document.timestamp.slice(0, 19)}</Td>
+                      <Td w={32}><Text color='gray.400'>{contents && document.content_type==="application/pdf" ? contents.get(document.name)?.slice(0, 256)+"\n..." : ""}</Text></Td>
                     </Tr>
                   ))}
                 </Tbody>
