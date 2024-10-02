@@ -1,3 +1,4 @@
+import { useState, MouseEventHandler } from 'react'
 import {
   Container,
   Flex,
@@ -25,7 +26,7 @@ export const Route = createFileRoute('/_layout/document-data-extractors')({
   component: DocumentDataExtractors,
 })
 
-function ExtractorExamples({documentDataExtractor: documentDataExtractor, is_selected: is_selected}: {documentDataExtractor: DocumentDataExtractorOut, is_selected: boolean}) {
+function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {documentDataExtractor: DocumentDataExtractorOut, is_selected: boolean, onClick: MouseEventHandler}) {
   const showToast = useCustomToast()
   // Pull document data examples
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
@@ -33,7 +34,7 @@ function ExtractorExamples({documentDataExtractor: documentDataExtractor, is_sel
   return (
     (is_selected ?
       <>
-        <Tbody>
+        <Tbody onClick={onClick}>
           <Tr key={documentDataExtractor.name} bgColor={secBgColor}>
             <Td w={32}><Code>{documentDataExtractor.name}</Code></Td>
             <Td w={32}>{documentDataExtractor.prompt}</Td>
@@ -41,7 +42,7 @@ function ExtractorExamples({documentDataExtractor: documentDataExtractor, is_sel
           </Tr>
         </Tbody>
         <Thead>
-          <Tr bgColor={secBgColor} opacity={0.5}>
+          <Tr>
             <Th></Th>
             <Th>Name</Th>
             <Th>Data</Th>
@@ -59,7 +60,7 @@ function ExtractorExamples({documentDataExtractor: documentDataExtractor, is_sel
       </>
       :
       <>
-        <Tbody>
+        <Tbody onClick={onClick}>
           <Tr key={documentDataExtractor.name}>
             <Td w={32}><Code>{documentDataExtractor.name}</Code></Td>
             <Td w={32}>{documentDataExtractor.prompt}</Td>
@@ -72,6 +73,7 @@ function ExtractorExamples({documentDataExtractor: documentDataExtractor, is_sel
 }
 
 function DataExtractors() {
+  const [selectedExtractor, selectExtractor] = useState("");
   const showToast = useCustomToast()
   // Pull document data extractors
   const {
@@ -83,7 +85,6 @@ function DataExtractors() {
     queryKey: ['document_data_extractors'],
     queryFn: () => DocumentDataExtractorsService.readDocumentDataExtractors({}),
   })
-  // const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
   
   if (isError) {
     const errDetail = (error as ApiError).body?.detail
@@ -110,7 +111,10 @@ function DataExtractors() {
                 </Tr>
               </Thead>
               {documentDataExtractors.data.map((documentDataExtractor) => (
-                <ExtractorExamples documentDataExtractor={documentDataExtractor} is_selected={true}/>
+                <ExtractorExamples
+                  documentDataExtractor={documentDataExtractor}
+                  is_selected={documentDataExtractor.name===selectedExtractor}
+                  onClick={()=>{selectExtractor(documentDataExtractor.name)}}/>
               ))}
             </Table>
           </TableContainer>
