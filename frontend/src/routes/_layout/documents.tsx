@@ -104,7 +104,7 @@ function Documents() {
                 </Thead>
                 <Tbody>
                   {documents.data.map((document) => (
-                    <Tr key={document.name}>
+                    <Tr key={document.name} id={document.name}>
                       <Td w={16}><Tag>{document.name}</Tag></Td>
                       <Td w={32}>{document.filename}</Td>
                       <Td w={16}>{document.content_type}</Td>

@@ -16,9 +16,15 @@ import {
   Textarea,
   Select,
   Tag,
+  Link,
   Text,
   useColorModeValue,
   Button,
+  NumberInput,
+  NumberInputStepper,
+  NumberInputField,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
@@ -33,6 +39,8 @@ export const Route = createFileRoute('/_layout/document-data-extractors')({
 function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {documentDataExtractor: DocumentDataExtractorOut, is_selected: boolean, onClick: MouseEventHandler}) {
   // Pull document data examples
   const [documentId, setDocumentId] = useState("");
+  const [startPage, setStartPage] = useState<number>(0);
+  const [endPage, setEndPage] = useState<number | null>(null);
   const [data, setData] = useState("");
   const showToast = useCustomToast()
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
@@ -90,6 +98,28 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
                   <option value={document.name}>{document.filename}</option>
                 ))}
               </Select>
+              <Flex alignItems="center" py={4}>
+                <Text px={4}>From page</Text>
+                <NumberInput defaultValue={0} min={0} max={endPage ? endPage : undefined}
+                  onChange={(n)=>setStartPage(n as unknown as number)}
+                >
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+                <Text px={4}> to page </Text>
+                <NumberInput min={startPage}
+                  onChange={(n)=>setEndPage(n as unknown as (number | null))}
+                >
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+              </Flex>
             </Td>
             <Td>
               <Textarea placeholder="Data to Extract"
@@ -99,7 +129,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
             <Td><Button colorScheme='teal' onClick={()=>{
                 DocumentDataExtractorsService.createDocumentDataExample({
                   name: documentDataExtractor.name,
-                  requestBody: {document_id: documentId, data: data, document_data_extractor_id: documentDataExtractor.id}
+                  requestBody: {document_id: documentId, start_page: startPage, end_page: endPage, data: data, document_data_extractor_id: documentDataExtractor.id}
                 }).then(()=> queryClient.invalidateQueries({ queryKey: ['document_data_extractors'] }));
               }}>Add Example</Button>
             </Td>
@@ -109,7 +139,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
           {documentDataExtractor.document_data_examples.map((documentDataExample) => (
             <Tr key={documentDataExample.id} bgColor={secBgColor}>
               <Td></Td>
-              <Td>{documentDataExample.document_id}</Td>
+              <Td><Tag><Link href={"/documents#"+documentDataExample.document_id}>{documentDataExample.document_id}</Link></Tag></Td>
               <Td><Text whiteSpace="pre">{documentDataExample.data}</Text></Td>
               <Td></Td>
             </Tr>
@@ -198,7 +228,7 @@ function DataExtractors() {
                 <ExtractorExamples
                   documentDataExtractor={documentDataExtractor}
                   is_selected={documentDataExtractor.name===selectedExtractor}
-                  onClick={()=>{selectExtractor(documentDataExtractor.name)}}/>
+                  onClick={()=>{documentDataExtractor.name===selectedExtractor ? selectExtractor("") : selectExtractor(documentDataExtractor.name)}}/>
               ))}
             </Table>
           </TableContainer>
