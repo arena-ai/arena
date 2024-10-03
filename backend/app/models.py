@@ -1,6 +1,8 @@
 from typing import Optional, Literal
 from datetime import datetime
+import re
 from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func, Column, Integer, ForeignKey
+from pydantic import field_validator
 
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
@@ -162,7 +164,6 @@ class EventsOut(SQLModel):
     data: list[EventOut]
     count: int
 
-
 # Database model, database table inferred from class name
 class EventIdentifier(SQLModel, table=True):
     id: str | None = Field(default=None, primary_key=True)
@@ -172,7 +173,6 @@ class EventIdentifier(SQLModel, table=True):
 class EventIdentifierOut(SQLModel):
     id: str
     event_id: int
-
 
 # Shared properties
 class EventAttributeBase(SQLModel):
@@ -202,6 +202,10 @@ class Attribute(SQLModel, table=True):
     name: str = Field(index=True, unique=True)
     events: EventAttribute = Relationship(back_populates="attribute", sa_relationship_kwargs={"cascade": "all, delete"})
 
+    @field_validator('name')
+    @classmethod
+    def name_validator(cls, name: str) -> str:
+        return re.sub(r'[^0-9a-zA-Z_-]', '', name)
 
 # DocumentDataExtractor
 
@@ -209,6 +213,11 @@ class Attribute(SQLModel, table=True):
 class DocumentDataExtractorBase(SQLModel):
     name: str = Field(unique=True, index=True)
     prompt: str
+
+    @field_validator('name')
+    @classmethod
+    def name_validator(cls, name: str) -> str:
+        return re.sub(r'[^0-9a-zA-Z_-]', '', name)
 
 class DocumentDataExtractorCreate(DocumentDataExtractorBase):
     name: str
@@ -218,6 +227,7 @@ class DocumentDataExtractorCreate(DocumentDataExtractorBase):
 class DocumentDataExtractorUpdate(DocumentDataExtractorBase):
     name: str | None = None
     prompt: str | None = None
+
 
 class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
     id: int | None = Field(default=None, primary_key=True)

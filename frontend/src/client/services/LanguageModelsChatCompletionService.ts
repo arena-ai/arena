@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { app__lm__models__anthropic__ChatCompletionResponse } from '../models/app__lm__models__anthropic__ChatCompletionResponse';
-import type { app__lm__models__chat_completion__ChatCompletionRequest } from '../models/app__lm__models__chat_completion__ChatCompletionRequest';
 import type { app__lm__models__chat_completion__ChatCompletionResponse_Output } from '../models/app__lm__models__chat_completion__ChatCompletionResponse_Output';
 import type { app__lm__models__mistral__ChatCompletionResponse_Output } from '../models/app__lm__models__mistral__ChatCompletionResponse_Output';
 import type { app__lm__models__openai__ChatCompletionResponse_Output } from '../models/app__lm__models__openai__ChatCompletionResponse_Output';
@@ -91,7 +90,7 @@ export class LanguageModelsChatCompletionService {
     public static chatCompletion({
         requestBody,
     }: {
-        requestBody: app__lm__models__chat_completion__ChatCompletionRequest,
+        requestBody: Record<string, any>,
     }): CancelablePromise<app__lm__models__chat_completion__ChatCompletionResponse_Output> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -112,7 +111,7 @@ export class LanguageModelsChatCompletionService {
     public static chatCompletionRequest({
         requestBody,
     }: {
-        requestBody: app__lm__models__chat_completion__ChatCompletionRequest,
+        requestBody: Record<string, any>,
     }): CancelablePromise<EventOut> {
         return __request(OpenAPI, {
             method: 'POST',
