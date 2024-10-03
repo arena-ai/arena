@@ -12,6 +12,7 @@ import {
   Thead,
   Tr,
   Text,
+  Tag,
   Code,
   // useColorModeValue,
 } from '@chakra-ui/react'
@@ -105,7 +106,7 @@ function Documents() {
                 <Tbody>
                   {documents.data.map((document) => (
                     <Tr key={document.name}>
-                      <Td w={16}><Code>{document.name}</Code></Td>
+                      <Td w={16}><Tag>{document.name}</Tag></Td>
                       <Td w={32}>{document.filename}</Td>
                       <Td w={16}>{document.content_type}</Td>
                       <Td w={16}>{document.timestamp.slice(0, 19)}</Td>

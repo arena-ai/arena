@@ -14,7 +14,9 @@ import {
   Tr,
   Input,
   Textarea,
-  Code,
+  Select,
+  Tag,
+  Text,
   useColorModeValue,
   Button,
 } from '@chakra-ui/react'
@@ -30,32 +32,87 @@ export const Route = createFileRoute('/_layout/document-data-extractors')({
 
 function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {documentDataExtractor: DocumentDataExtractorOut, is_selected: boolean, onClick: MouseEventHandler}) {
   // Pull document data examples
+  const [documentId, setDocumentId] = useState("");
+  const [data, setData] = useState("");
+  const showToast = useCustomToast()
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
   const queryClient = useQueryClient()
+  // Pull documents
+  const {
+    data: documents,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['documents'],
+    queryFn: () => DocumentsService.readFiles(),
+  })
+
+  if (isError) {
+    const errDetail = (error as ApiError).body?.detail
+    showToast('Something went wrong.', `${errDetail}`, 'error')
+  }
 
   return (
     (is_selected ?
       <>
+        <Thead>
+          <Tr bgColor={secBgColor}>
+            <Th>Name</Th>
+            <Th>Prompt</Th>
+            <Th>Timestamp</Th>
+            <Th></Th>
+          </Tr>
+        </Thead>
         <Tbody onClick={onClick}>
           <Tr key={documentDataExtractor.name} bgColor={secBgColor}>
-            <Td w={32}><Code>{documentDataExtractor.name}</Code></Td>
-            <Td w={32}>{documentDataExtractor.prompt}</Td>
-            <Td w={32}>{documentDataExtractor.timestamp}</Td>
+            <Td><Tag bgColor="teal">{documentDataExtractor.name}</Tag></Td>
+            <Td><Text whiteSpace="pre">{documentDataExtractor.prompt}</Text></Td>
+            <Td>{documentDataExtractor.timestamp}</Td>
+            <Td></Td>
           </Tr>
         </Tbody>
         <Thead>
-          <Tr>
-            <Th></Th>
-            <Th>Name</Th>
+          <Tr bgColor={secBgColor}>
+            <Th>Examples</Th>
+            <Th>Document</Th>
             <Th>Data</Th>
+            <Th></Th>
           </Tr>
         </Thead>
         <Tbody>
+          <Tr bgColor={secBgColor}>
+            <Td></Td>
+            <Td>
+              <Select placeholder="Select Document"
+                onChange={(e)=>setDocumentId(e.target.value)}
+              >
+                {documents?.data.map((document) => (
+                  <option value={document.name}>{document.filename}</option>
+                ))}
+              </Select>
+            </Td>
+            <Td>
+              <Textarea placeholder="Data to Extract"
+                onChange={(e)=>setData(e.target.value)}
+              />
+            </Td>
+            <Td><Button colorScheme='teal' onClick={()=>{
+                DocumentDataExtractorsService.createDocumentDataExample({
+                  name: documentDataExtractor.name,
+                  requestBody: {document_id: documentId, data: data, document_data_extractor_id: documentDataExtractor.id}
+                }).then(()=> queryClient.invalidateQueries({ queryKey: ['document_data_extractors'] }));
+              }}>Add Example</Button>
+            </Td>
+          </Tr>
+        </Tbody>
+        <Tbody>
           {documentDataExtractor.document_data_examples.map((documentDataExample) => (
-            <Tr key={documentDataExample.id} bgColor={secBgColor} opacity={0.5}>
-              <Td w={32}></Td>
-              <Td w={32}>{documentDataExample.document_id}</Td>
-              <Td w={32}>{documentDataExample.data}</Td>
+            <Tr key={documentDataExample.id} bgColor={secBgColor}>
+              <Td></Td>
+              <Td>{documentDataExample.document_id}</Td>
+              <Td><Text whiteSpace="pre">{documentDataExample.data}</Text></Td>
+              <Td></Td>
             </Tr>
           ))}
         </Tbody>
@@ -64,9 +121,10 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
       <>
         <Tbody onClick={onClick}>
           <Tr key={documentDataExtractor.name}>
-            <Td w={32}><Code>{documentDataExtractor.name}</Code></Td>
-            <Td w={32}>{documentDataExtractor.prompt}</Td>
-            <Td w={32}>{documentDataExtractor.timestamp}</Td>
+            <Td><Tag>{documentDataExtractor.name}</Tag></Td>
+            <Td><Text whiteSpace="pre">{documentDataExtractor.prompt}</Text></Td>
+            <Td>{documentDataExtractor.timestamp}</Td>
+            <Td></Td>
           </Tr>
         </Tbody>
       </>
@@ -113,26 +171,28 @@ function DataExtractors() {
                   <Th>Name</Th>
                   <Th>Prompt</Th>
                   <Th>Timestamp</Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
                 <Tr>
-                  <Td w={32}>
+                  <Td>
                     <Input placeholder="Extractor Name"
                       onChange={(e)=>setName(e.target.value)}
                     />
                   </Td>
-                  <Td w={32}>
+                  <Td>
                     <Textarea placeholder="Prompt"
                       onChange={(e)=>setPrompt(e.target.value)}
                     />
                   </Td>
-                  <Td w={32}><Button onClick={()=>{
-                    DocumentDataExtractorsService.createDocumentDataExtractor({
-                      requestBody: {name: name, prompt: prompt}
-                    })
-                    queryClient.invalidateQueries({ queryKey: ['document_data_extractors'] })
-                  }}>Add Extractor</Button></Td>
+                  <Td></Td>
+                  <Td><Button colorScheme='teal' onClick={()=>{
+                      DocumentDataExtractorsService.createDocumentDataExtractor({
+                        requestBody: {name: name, prompt: prompt}
+                      }).then(()=> queryClient.invalidateQueries({ queryKey: ['document_data_extractors'] }));
+                    }}>Add Extractor</Button>
+                  </Td>
                 </Tr>
               </Tbody>
               {documentDataExtractors.data.map((documentDataExtractor) => (
