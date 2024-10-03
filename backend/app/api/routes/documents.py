@@ -9,6 +9,7 @@ import pymupdf
 from app.api.deps import CurrentUser
 from app.services.object_store import documents
 from app.ops.documents import path, paths, as_text
+from app.models import Message
 
 
 router = APIRouter()
@@ -46,6 +47,16 @@ async def read_file(*, current_user: CurrentUser, name: str) -> StreamingRespons
     document_path = await path(current_user, name).evaluate()
     data = documents.get(f"{document_path}data")
     return StreamingResponse(content=data.stream(), media_type='application/octet-stream')
+
+
+@router.delete("/{name}")
+async def delete_file(*, current_user: CurrentUser, name: str) -> Message:
+    """
+    Delete a file.
+    """
+    document_path = await path(current_user, name).evaluate()
+    documents.remove_all(f"{document_path}")
+    return Message(message="Document deleted successfully")
 
 
 @router.get("/{name}/as_text")
