@@ -21,9 +21,9 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useQueryClient, useQuery, useQueries } from '@tanstack/react-query'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
 
-import { ApiError, DocumentsService, Document, DocumentDataExtractorsService, DocumentDataExtractorOut } from '@app/client'
+import { ApiError, DocumentsService, DocumentDataExtractorsService, DocumentDataExtractorOut } from '@app/client'
 import useCustomToast from '@app/hooks/useCustomToast'
 
 export const Route = createFileRoute('/_layout/document-data-extractors')({
@@ -40,7 +40,6 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
   // Pull documents
   const {
     data: documents,
-    isLoading,
     isError,
     error,
   } = useQuery({
@@ -223,29 +222,6 @@ function DocumentDataExtractors() {
     queryKey: ['documents'],
     queryFn: () => DocumentsService.readFiles(),
   })
-
-  // Get document content extract
-  const {
-    data: contents,
-  } = useQueries({
-    queries: (documents?.data || []).map(document => ({
-      queryKey: ['document', document.name],
-      queryFn: async (): Promise<[Document, string]> => [document, await DocumentsService.readFileAsText({ name: document.name, startPage: 0, endPage: 1 })],
-    })),
-    combine: (results) => {
-      return {
-        data: results.reduce((map, result) => {
-          if (result.data) {
-            const [doc, content] = result.data;
-            map.set(doc.name, content);
-          }
-          return map;
-        }, new Map<string, string>()),
-        pending: results.some((result) => result.isPending),
-      }
-    },
-  });
-  // const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
   
   if (isError) {
     const errDetail = (error as ApiError).body?.detail

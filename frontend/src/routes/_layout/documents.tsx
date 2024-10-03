@@ -13,7 +13,6 @@ import {
   Tr,
   Text,
   Tag,
-  Code,
   // useColorModeValue,
 } from '@chakra-ui/react'
 import { createFileRoute } from '@tanstack/react-router'

@@ -6,7 +6,6 @@ const DownloadButton = ({ format: format }: { format: 'parquet' | 'csv' }) => {
   const downloadFile = async () => {
     try {
       axios.defaults.responseType = 'blob'
-      // @ts-expect-error: It's a hack
       const response: Blob = await EventsService.downloadEvents({ format: format })
       const url = window.URL.createObjectURL(response)
       const link = document.createElement('a')
