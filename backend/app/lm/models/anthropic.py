@@ -3,7 +3,7 @@ from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel
 
 from app.lm import models
-from app.lm.models import Function, ChatCompletionToolParam, Message, ResponseFormat, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice
+from app.lm.models import Function, ChatCompletionToolParam, Message, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice
 """
 ChatCompletionCreate -> anthropic MessageCreateParams -> anthropic Message -> ChatCompletion
 """

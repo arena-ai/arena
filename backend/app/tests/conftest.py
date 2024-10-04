@@ -168,7 +168,7 @@ def chat_completion_create_mistral() -> mistral.ChatCompletionRequest:
         ],
         model="mistral-medium-2312",
         max_tokens=100,
-        response_format=mistral.ResponseFormat(type="text"),
+        response_format=mistral.ResponseFormatBase(type="text"),
         safe_prompt=True,
         random_seed=0,
         temperature=1.0,

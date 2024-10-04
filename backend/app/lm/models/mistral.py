@@ -3,7 +3,7 @@ from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel
 
 from app.lm import models
-from app.lm.models import Function, FunctionDefinition, ChatCompletionToolParam, Message, ResponseFormat, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage
+from app.lm.models import Function, FunctionDefinition, ChatCompletionToolParam, Message, ResponseFormatBase, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage
 
 """
 models.ChatCompletionCreate -> ChatCompletionCreate -> ChatCompletion -> models.ChatCompletion
@@ -21,7 +21,7 @@ class ChatCompletionRequest(BaseModel):
     messages: Sequence[Message]
     model: str | Literal[*MODELS]
     max_tokens: int | None = None
-    response_format: ResponseFormat | None = None
+    response_format: ResponseFormatBase | None = None
     safe_prompt: bool | None = None
     random_seed: int | None = None
     temperature: float | None = None
