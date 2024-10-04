@@ -1,6 +1,7 @@
-from typing import Optional, Literal
+from typing import Optional, Literal,Any
 from datetime import datetime
 from sqlmodel import Field, Relationship, UniqueConstraint, SQLModel, func, Column, Integer, ForeignKey
+from pydantic import BaseModel
 
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
@@ -213,14 +214,14 @@ class DocumentDataExtractorBase(SQLModel):
 class DocumentDataExtractorCreate(DocumentDataExtractorBase):
     name: str
     prompt: str
-    pydantic_model:dict[str,str]
+    response_template:dict[str,tuple[Literal['str','int','bool','float'],Literal['required','optional']]]
 
 
 # Properties to receive on DocumentDataExtractor update
 class DocumentDataExtractorUpdate(DocumentDataExtractorBase):
     name: str | None = None
     prompt: str | None = None
-    pydantic_model: dict[str,str] | None = None
+    response_template: dict[str,tuple[Literal['str','int','bool','float'],Literal['required','optional']]] | None = None
 
 
 class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
@@ -228,7 +229,7 @@ class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
     timestamp: datetime | None =  Field(default=func.now())
     owner_id: int | None = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), default=None))
     owner: User | None = Relationship(back_populates="document_data_extractors")
-    pydantic_model: str
+    response_template: str
     document_data_examples: list["DocumentDataExample"] = Relationship(back_populates="document_data_extractor", sa_relationship_kwargs={"cascade": "all, delete"})
 
 
@@ -238,7 +239,7 @@ class DocumentDataExtractorOut(DocumentDataExtractorBase):
     timestamp: datetime
     owner_id: int
     document_data_examples: list["DocumentDataExample"]
-    pydantic_model:str
+    response_template:str
 
 class DocumentDataExtractorsOut(SQLModel):
     data: list[DocumentDataExtractorOut]
@@ -248,18 +249,18 @@ class DocumentDataExtractorsOut(SQLModel):
 # Examples
 class DocumentDataExampleBase(SQLModel):
     document_id: str
-    data: str
+    data: dict[str,str]
     document_data_extractor_id: int | None = None
 
 class DocumentDataExampleCreate(DocumentDataExampleBase):
     document_id: str
-    data: str
+    data: dict[str,str]
     start_page: int = 0
     end_page: int | None = None
 
 class DocumentDataExampleUpdate(DocumentDataExampleBase):
     document_id: str | None = None
-    data: str | None = None
+    data: dict[str,str] | None = None
     start_page: int | None = None
     end_page: int | None = None
 
@@ -274,3 +275,5 @@ class DocumentDataExample(SQLModel, table=True):
 
 class DocumentDataExampleOut(DocumentDataExampleBase):
     id: int
+    data: str
+    

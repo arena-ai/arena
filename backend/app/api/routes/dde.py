@@ -1,17 +1,14 @@
-from typing import Any, Iterable
+from typing import Any, Iterable,Literal
 from app.lm.models.chat_completion import TokenLogprob
 from app.lm.models import ChatCompletionResponse
 from fastapi import APIRouter, HTTPException, status, UploadFile
 from fastapi.responses import JSONResponse
 from sqlmodel import func, select
 from sqlalchemy.exc import IntegrityError
-import pyarrow as pa
-import pyarrow.parquet as pq
-import pyarrow.csv as pc
 import json
 import math
 import io
-from pydantic import create_model
+from pydantic import create_model,ValidationError
 from app.api.deps import CurrentUser, SessionDep
 from app.services import crud
 from app.lm.models import ChatCompletionResponse, ChatCompletionRequest, Message as ChatCompletionMessage
@@ -22,7 +19,7 @@ from app.ops import tup
 from app.ops.documents import as_text
 from app.models import (Message, DocumentDataExtractorCreate, DocumentDataExtractorUpdate, DocumentDataExtractor, DocumentDataExtractorOut, DocumentDataExtractorsOut,
                         DocumentDataExampleCreate, DocumentDataExampleUpdate, DocumentDataExample, DocumentDataExampleOut)
-
+from openai.lib._pydantic import to_strict_json_schema
 router = APIRouter()
 
 
@@ -78,10 +75,10 @@ def create_document_data_extractor(
     Create a new DocumentDataExtractor.
     """
     try:
-        pyd_model=create_pydantic_model(document_data_extractor_in.pydantic_model)
+        create_pydantic_model(document_data_extractor_in.response_template)
     except KeyError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="received incorrect pydantic model")
-    document_data_extractor = DocumentDataExtractor.model_validate(document_data_extractor_in, update={"owner_id": current_user.id,'pydantic_model':pyd_model})
+    document_data_extractor = DocumentDataExtractor.model_validate(document_data_extractor_in, update={"owner_id": current_user.id,"response_template":json.dumps(document_data_extractor_in.response_template)})
     try:
         session.add(document_data_extractor)
         session.commit()
@@ -105,13 +102,13 @@ def update_document_data_extractor(
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
     update_dict = document_data_extractor_in.model_dump(exclude_unset=True)
-    pdyantic_dict=update_dict.pop('pydantic_model')
+    pdyantic_dict=update_dict.pop('response_template')
     if pdyantic_dict is not None:
         try:
-            pyd_str=create_pydantic_model(pdyantic_dict)
+            create_pydantic_model(pdyantic_dict)
         except KeyError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="received incorrect pydantic model")
-    update_dict['pydantic_model']=pyd_str 
+    update_dict['response_template']=json.dumps(pdyantic_dict)
     document_data_extractor.sqlmodel_update(update_dict)
     session.add(document_data_extractor)
     session.commit()
@@ -163,7 +160,13 @@ def create_document_data_example(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="DocumentDataExtractor not found")
     if not current_user.is_superuser and (document_data_extractor.owner_id != current_user.id):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not enough permissions")
-    document_data_example = DocumentDataExample.model_validate(document_data_example_in, update={"document_data_extractor_id": document_data_extractor.id})
+    #verify the example matches the template of the document data extractor
+    pyd_model=create_pydantic_model(json.loads(document_data_extractor.response_template))
+    try:
+        pyd_model.model_validate(document_data_example_in.data)
+    except ValidationError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Example data does match DocumentDataExtractor Template")
+    document_data_example = DocumentDataExample.model_validate(document_data_example_in, update={"document_data_extractor_id": document_data_extractor.id,'data':json.dumps(document_data_example_in.data)})
     session.add(document_data_example)
     session.commit()
     session.refresh(document_data_example)
@@ -190,6 +193,15 @@ def update_document_data_example(
     if document_data_example.document_data_extractor_id != document_data_extractor.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExample not found in this DocumentDataExtractor")
     update_dict = document_data_example_in.model_dump(exclude_unset=True)
+    data=update_dict.pop('data')
+    if data is not None:
+        pyd_model=create_pydantic_model(json.loads(document_data_extractor.response_template))
+        try:
+            pyd_model.model_validate(document_data_example_in.data)
+        except ValidationError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Example data does match DocumentDataExtractor Template")
+        else:
+            update_dict['data']=json.dumps(data)
     document_data_example.sqlmodel_update(update_dict)
     session.add(document_data_example)
     session.commit()
@@ -244,6 +256,13 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
             ChatCompletionMessage(role="system", content=full_system_content),  
             ChatCompletionMessage(role="user", content=f"Maintenant, faites la même extraction sur un nouveau document d'input:\n####\nINPUT:{prompt}")  
         ]
+    pydantic_reponse=create_pydantic_model(json.loads(document_data_extractor.response_template))
+    format_response={"type": "json_schema",         
+        "json_schema":{
+            "schema":to_strict_json_schema(pydantic_reponse),
+            "name":'response',
+            'strict':True}}
+    
     chat_completion_request = ChatCompletionRequest(   
             model='gpt-4o-2024-08-06',
             messages=messages,
@@ -251,11 +270,13 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
             temperature=0.1,
             logprobs=True,
             top_logprobs= 5,
+            response_format=format_response
             
         ).model_dump(exclude_unset=True)
     
     chat_completion_response = await ArenaHandler(session, current_user, chat_completion_request).process_request()
     extracted_info=chat_completion_response.choices[0].message.content
+    print(extracted_info)
     # TODO: Improve the prompt to ensure the output is always a valid JSON
     json_string = extracted_info[extracted_info.find('{'):extracted_info.rfind('}')+1]
     extracted_data = {k: v for k, v in json.loads(json_string).items() if k not in ('source', 'year')}   
@@ -263,7 +284,10 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     return {'extracted_info': json.loads(json_string), 'logprob_data': logprob_data}
 
 
-def create_pydantic_model(schema:dict[str,str])->str:
+def create_pydantic_model(schema:dict[str,tuple[Literal['str','int','bool','float'],Literal['required','optional']]])->Any:
+    """Creates a pydantic model from an input dictionary where
+    keys are names of entities to be retrieved, each value is a tuple specifying
+    the type of the entity and whether it is required or optional"""
      # Convert string type names to actual Python types
     field_types = {
         'str': (str, ...),  # ... means the field is required
@@ -271,11 +295,15 @@ def create_pydantic_model(schema:dict[str,str])->str:
         'float': (float, ...),
         'bool': (bool, ...),
     }
-
+    optional_field_types={ 'str': (str|None, ...),  # ... means the field is required
+        'int': (int|None, ...),
+        'float': (float|None, ...),
+        'bool': (bool|None, ...),}
+    
     # Dynamically create a Pydantic model using create_model
-    fields = {name: field_types[ftype] for name, ftype in schema.items()}
+    fields = {name: field_types[ftype[0]] if ftype[1]=='required' else optional_field_types[ftype[0]] for name, ftype in schema.items()}
     dynamic_model = create_model('DataExtractorSchema', **fields)
-    return json.dumps(dynamic_model.model_json_schema())
+    return dynamic_model
 
 
 def validate_extracted_text(text: str):

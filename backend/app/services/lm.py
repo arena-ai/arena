@@ -40,7 +40,9 @@ class OpenAI(Service[openai.ChatCompletionRequest, openai.ChatCompletionResponse
         return await self.call(ccc)
 
     async def chat_completion(self, ccc: ChatCompletionRequest) -> Response[ChatCompletionResponse]:
+        #print(cc)
         response = await self.openai_chat_completion(openai.ChatCompletionRequest.from_chat_completion_request(ccc))
+        print(response)
         return Response(
             status_code=response.status_code,
             headers=response.headers,
