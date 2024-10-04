@@ -77,7 +77,7 @@ def create_document_data_extractor(
     try:
         create_pydantic_model(document_data_extractor_in.response_template)
     except KeyError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="received incorrect pydantic model")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="received incorrect response template")
     document_data_extractor = DocumentDataExtractor.model_validate(document_data_extractor_in, update={"owner_id": current_user.id,"response_template":json.dumps(document_data_extractor_in.response_template)})
     try:
         session.add(document_data_extractor)
@@ -107,7 +107,7 @@ def update_document_data_extractor(
         try:
             create_pydantic_model(pdyantic_dict)
         except KeyError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="received incorrect pydantic model")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="received incorrect response template")
     update_dict['response_template']=json.dumps(pdyantic_dict)
     document_data_extractor.sqlmodel_update(update_dict)
     session.add(document_data_extractor)
@@ -276,7 +276,7 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     
     chat_completion_response = await ArenaHandler(session, current_user, chat_completion_request).process_request()
     extracted_info=chat_completion_response.choices[0].message.content
-    print(extracted_info)
+    #TODO: handle refusal or case in which content was not correctly done
     # TODO: Improve the prompt to ensure the output is always a valid JSON
     json_string = extracted_info[extracted_info.find('{'):extracted_info.rfind('}')+1]
     extracted_data = {k: v for k, v in json.loads(json_string).items() if k not in ('source', 'year')}   
@@ -295,7 +295,8 @@ def create_pydantic_model(schema:dict[str,tuple[Literal['str','int','bool','floa
         'float': (float, ...),
         'bool': (bool, ...),
     }
-    optional_field_types={ 'str': (str|None, ...),  # ... means the field is required
+    optional_field_types={ 
+        'str': (str|None, ...),  # ... means the field is required
         'int': (int|None, ...),
         'float': (float|None, ...),
         'bool': (bool|None, ...),}
