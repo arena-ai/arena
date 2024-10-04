@@ -51,7 +51,7 @@ def read_document_data_extractors(
         )
         document_data_extractors = session.exec(statement).all()
 
-    return DocumentDataExtractorsOut(data=document_data_extractors, count=count)
+    return DocumentDataExtractorsOut(data=sorted(document_data_extractors, key=lambda dde: dde.timestamp, reverse=True), count=count)
 
 
 @router.get("/{id}", response_model=DocumentDataExtractorOut)

@@ -44,9 +44,9 @@ class Bucket:
     def remove(self, name: str) -> None:
         store.remove_object(bucket_name=self.name, object_name=name)
     
-    def remove_all(self, name: str) -> None:
-        for obj in store.list_objects(bucket_name=self.name, recursive=True):
-            store.remove_object(bucket_name=self.name, object_name=obj.object_name)
+    def remove_all(self, prefix: str | None = None) -> None:
+        for name in self.list(prefix=prefix, recursive=True):
+            self.remove(name)
 
 @dataclass
 class Documents(Bucket):

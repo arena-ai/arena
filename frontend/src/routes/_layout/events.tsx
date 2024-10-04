@@ -84,12 +84,15 @@ function Events() {
     queryKey: ['events'],
     queryFn: () => EventsService.readEvents({ limit: 10000 }),
   })
+  
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
+
   // Collect owner ids
   const ownerIds = useMemo(() => {
     const ownerIds = events ? events!.data.map(event => event.owner_id) : [];
     return [...new Set(ownerIds)];
   }, [events]);
+  
   // Get owners names
   const {
     data: owners,
@@ -135,7 +138,7 @@ function Events() {
               Events
             </Heading>
             <Flex py={8} gap={4} minWidth='max-content' alignItems='center'>
-              <Box p='2'>
+              <Box py='2'>
                 <Heading size='sm'>Events</Heading>
               </Box>
               <Spacer />

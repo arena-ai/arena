@@ -13,6 +13,7 @@ import {
   InputRightElement,
   Link,
   useBoolean,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import {
   Link as RouterLink,
@@ -21,7 +22,8 @@ import {
 } from '@tanstack/react-router'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
-import Logo from '../assets/images/logo.svg'
+import LogoLight from '@app/assets/images/logo-light.svg'
+import LogoDark from '@app/assets/images/logo-dark.svg'
 import { ApiError } from '../client'
 import { Body_login_login_access_token as AccessToken } from '../client/models/Body_login_login_access_token'
 import useAuth, { isLoggedIn } from '../hooks/useAuth'
@@ -38,6 +40,7 @@ export const Route = createFileRoute('/login')({
 })
 
 function Login() {
+  const logo = useColorModeValue(LogoLight, LogoDark)
   const [show, setShow] = useBoolean()
   const { login } = useAuth()
   const [error, setError] = React.useState<string | null>(null)
@@ -76,7 +79,7 @@ function Login() {
         centerContent
       >
         <Image
-          src={Logo}
+          src={logo}
           alt="Logo"
           height="auto"
           maxW="2xs"

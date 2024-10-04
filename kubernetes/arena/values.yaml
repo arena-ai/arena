@@ -91,6 +91,8 @@ ingress-nginx:
     service:
       externalTrafficPolicy: Local
       loadBalancerIP: ""
+    config:
+      proxy-body-size: "1000m"
 
 cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
   namespace: default
