@@ -259,18 +259,18 @@ class DocumentDataExtractorsOut(SQLModel):
 # Examples
 class DocumentDataExampleBase(SQLModel):
     document_id: str
-    data: dict[str,str]
+    data: dict[str,str|None]
     document_data_extractor_id: int | None = None
 
 class DocumentDataExampleCreate(DocumentDataExampleBase):
     document_id: str
-    data: dict[str,str]
+    data: dict[str,str|None]
     start_page: int = 0
     end_page: int | None = None
 
 class DocumentDataExampleUpdate(DocumentDataExampleBase):
     document_id: str | None = None
-    data: dict[str,str] | None = None
+    data: dict[str,str|None] | None = None
     start_page: int | None = None
     end_page: int | None = None
 
