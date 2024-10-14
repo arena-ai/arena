@@ -180,6 +180,7 @@ The [Arena](https://github.com/arena-ai/arena) app can be deployed with:
 
 ```sh
 helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+--set gitlab.password=${SARUS_GITLAB_DOCKER_REGISTRY_PASSWORD} \
 --set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
 --set cluster.host=${CLUSTER_HOST} \
 --set postgresql.user=${POSTGRES_USER} \

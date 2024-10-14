@@ -1,35 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{.Release.Name}}-presidio-analyser-deployment
+  name: {{.Release.Name}}-presidio-analyzer-deployment
   namespace: {{.Values.namespace}}
   labels:
     app.kubernetes.io/instance: {{.Release.Name}}
     app.kubernetes.io/name: {{.Chart.Name}}
     app.kubernetes.io/version: {{.Chart.AppVersion}}
     app.kubernetes.io/managed-by: {{.Release.Service}}
-    app.kubernetes.io/component: presidio-analyser
+    app.kubernetes.io/component: presidio-analyzer
 spec:
   replicas: {{.Values.masking.presidio.analyzer.replicas}}
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{.Release.Name}}
       app.kubernetes.io/name: {{.Chart.Name}}
-      app.kubernetes.io/component: presidio-analyser
+      app.kubernetes.io/component: presidio-analyzer
   template:
     metadata:
-      name: {{.Release.Name}}-presidio-analyser
+      name: {{.Release.Name}}-presidio-analyzer
       namespace: {{.Values.namespace}}
       labels:
         app.kubernetes.io/instance: {{.Release.Name}}
         app.kubernetes.io/name: {{.Chart.Name}}
         app.kubernetes.io/version: {{.Chart.AppVersion}}
         app.kubernetes.io/managed-by: {{.Release.Service}}
-        app.kubernetes.io/component: presidio-analyser
+        app.kubernetes.io/component: presidio-analyzer
     spec:
       containers:
-      - name: presidio-analyser
-        image: "{{.Values.masking.presidio.registry}}/{{.Values.masking.presidio.analyzer.image}}:{{.Values.masking.presidio.analyzer.tag}}"
+      - name: presidio-analyzer
+        # image: "{{.Values.masking.presidio.registry}}/{{.Values.masking.presidio.anonymizer.image}}:{{.Values.masking.presidio.anonymizer.tag}}"
+        image: "{{.Values.gitlab.registry}}/sarus-tech/lab/pii-removal/presidio-analyzer:latest"
         imagePullPolicy: {{ default "IfNotPresent" .Values.masking.presidio.analyzer.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.masking.presidio.analyzer.service.internalPort }}
@@ -43,3 +44,5 @@ spec:
         env:
           - name: PORT
             value: {{ .Values.masking.presidio.analyzer.service.internalPort | quote }}
+      imagePullSecrets:
+      - name: arena-gitlab-registry-secret

@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{.Release.Name}}-presidio-analyser-service
+  name: {{.Release.Name}}-presidio-analyzer-service
   namespace: {{.Values.namespace}}
   labels:
     app.kubernetes.io/instance: {{.Release.Name}}
     app.kubernetes.io/name: {{.Chart.Name}}
     app.kubernetes.io/version: {{.Chart.AppVersion}}
     app.kubernetes.io/managed-by: {{.Release.Service}}
-    app.kubernetes.io/component: presidio-analyser
+    app.kubernetes.io/component: presidio-analyzer
 spec:
   type: {{.Values.masking.presidio.analyzer.service.type}}
   ports:
@@ -19,4 +19,4 @@ spec:
   selector:
     app.kubernetes.io/instance: {{.Release.Name}}
     app.kubernetes.io/name: {{.Chart.Name}}
-    app.kubernetes.io/component: presidio-analyser
+    app.kubernetes.io/component: presidio-analyzer

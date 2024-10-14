@@ -73,7 +73,7 @@ spec:
         - name: REDIS_SERVER
           value: "{{.Release.Name}}-redis-service.{{.Values.namespace}}.svc.cluster.local"
         - name: PRESIDIO_ANALYZER_SERVER
-          value: "{{.Release.Name}}-presidio-analyser-service.{{.Values.namespace}}.svc.cluster.local"
+          value: "{{.Release.Name}}-presidio-analyzer-service.{{.Values.namespace}}.svc.cluster.local"
         - name: PRESIDIO_ANALYZER_PORT
           value: {{.Values.masking.presidio.anonymizer.service.externalPort | quote}}
         - name: PRESIDIO_ANONYMIZER_SERVER

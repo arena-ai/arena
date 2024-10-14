@@ -45,7 +45,7 @@ services:
       - traefik.http.services.${STACK_NAME?Variable not set}-adminer.loadbalancer.server.port=8080
 
   presidio-analyzer:
-    image: mcr.microsoft.com/presidio-analyzer:latest
+    image: registry.gitlab.com/sarus-tech/lab/pii-removal/presidio-analyzer:latest
     restart: always
     deploy:
       resources:

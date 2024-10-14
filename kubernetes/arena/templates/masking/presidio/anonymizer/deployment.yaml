@@ -28,7 +28,7 @@ spec:
         app.kubernetes.io/component: presidio-anonymizer
     spec:
       containers:
-      - name: presidio-analyser
+      - name: presidio-analyzer
         image: "{{.Values.masking.presidio.registry}}/{{.Values.masking.presidio.anonymizer.image}}:{{.Values.masking.presidio.anonymizer.tag}}"
         imagePullPolicy: {{ default "IfNotPresent" .Values.masking.presidio.analyzer.imagePullPolicy }}
         ports:
