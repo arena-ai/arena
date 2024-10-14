@@ -2,7 +2,13 @@ namespace: default
 
 docker:
   registry: ghcr.io/arena-ai
-  requireAuthentication: False
+  requireAuthentication: false
+  username: arena
+  password: ""
+
+gitlab:
+  registry: registry.gitlab.com
+  requireAuthentication: true
   username: arena
   password: ""
 

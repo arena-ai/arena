@@ -9,6 +9,7 @@ Then deploy the app:
 
 ```sh
 helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+--set gitlab.password=${SARUS_GITLAB_DOCKER_REGISTRY_PASSWORD} \
 --set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
 --set cluster.host=${CLUSTER_HOST} \
 --set postgresql.user=${POSTGRES_USER} \
@@ -27,6 +28,7 @@ Or if you use a `.env` file:
 
 ```sh
 source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+--set gitlab.password=${SARUS_GITLAB_DOCKER_REGISTRY_PASSWORD} \
 --set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
 --set cluster.host=${CLUSTER_HOST} \
 --set postgresql.user=${POSTGRES_USER} \
@@ -57,6 +59,7 @@ To install a staging version (e.g. if it runs on EKS)
 
 ```sh
 source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+--set gitlab.password=${SARUS_GITLAB_DOCKER_REGISTRY_PASSWORD} \
 --set cluster.provider=EKS \
 --set cluster.host=${STAGING_CLUSTER_HOST} \
 --set postgresql.user=${POSTGRES_USER} \

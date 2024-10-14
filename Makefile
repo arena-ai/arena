@@ -45,6 +45,7 @@ dev:
 # Deploy the helm app
 kubernetes:
 	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+	--set gitlab.password=${SARUS_GITLAB_DOCKER_REGISTRY_PASSWORD} \
 	--set ingress-nginx.controller.service.loadBalancerIP=${PUBLIC_IP} \
 	--set cluster.host=${CLUSTER_HOST} \
 	--set postgresql.user=${POSTGRES_USER} \
@@ -61,6 +62,7 @@ kubernetes:
 # Deploy the helm app
 kubernetes-staging:
 	helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
+	--set gitlab.password=${SARUS_GITLAB_DOCKER_REGISTRY_PASSWORD} \
 	--set cluster.host=${STAGING_CLUSTER_HOST} \
 	--set postgresql.user=${POSTGRES_USER} \
 	--set postgresql.password=${POSTGRES_PASSWORD} \
