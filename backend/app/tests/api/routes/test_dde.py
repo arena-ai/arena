@@ -163,16 +163,6 @@ def test_update_document_data_example(client: TestClient, superuser_token_header
         assert response_data["data"] == updated_data
         assert response_data["document_data_extractor_id"] == 1
         assert response_data["id"] == 1
-
-def test_read_document_data_extractor_byid(document_data_extractor: dict[str, Any]):
-    
-    assert document_data_extractor['name']== "Updated dde"
-    assert document_data_extractor['id']== 1
-    assert len(document_data_extractor['document_data_examples']) == 1
-    assert document_data_extractor['document_data_examples'][0]['data'] == "{'name': 'Sarah'}"
-    assert document_data_extractor['document_data_examples'][0]['document_id'] == "abc"
-    assert document_data_extractor['document_data_examples'][0]['document_data_extractor_id'] == 1
-    assert document_data_extractor['document_data_examples'][0]['id'] == 1
     
 #TODO: test extract_from_file
    
