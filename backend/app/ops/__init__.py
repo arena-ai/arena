@@ -7,5 +7,17 @@ You should use Ops:
 * For long tasks you want to delegate to the worker
 * Ideal case = LLM calling
 """
-from app.ops.utils import Var, var, Tup, tup, Const, cst, Rand, rnd, RandInt, rndi
+
+from app.ops.utils import (
+    Var,
+    var,
+    Tup,
+    tup,
+    Const,
+    cst,
+    Rand,
+    rnd,
+    RandInt,
+    rndi,
+)
 from app.ops.computation import Op, Computation

@@ -10,7 +10,9 @@ def test_get_access_token(client: TestClient) -> None:
         "username": settings.FIRST_SUPERUSER,
         "password": settings.FIRST_SUPERUSER_PASSWORD,
     }
-    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    r = client.post(
+        f"{settings.API_V1_STR}/login/access-token", data=login_data
+    )
     tokens = r.json()
     assert r.status_code == 200
     assert "access_token" in tokens
@@ -22,7 +24,9 @@ def test_get_access_token_incorrect_password(client: TestClient) -> None:
         "username": settings.FIRST_SUPERUSER,
         "password": "incorrect",
     }
-    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    r = client.post(
+        f"{settings.API_V1_STR}/login/access-token", data=login_data
+    )
     assert r.status_code == 400
 
 
@@ -39,7 +43,9 @@ def test_use_access_token(
 
 
 def test_recovery_password(
-    client: TestClient, normal_user_token_headers: dict[str, str], mocker: MockerFixture
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    mocker: MockerFixture,
 ) -> None:
     mocker.patch("app.utils.send_email", return_value=None)
     mocker.patch("app.core.config.settings.SMTP_HOST", "smtp.example.com")

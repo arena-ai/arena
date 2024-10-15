@@ -2,7 +2,8 @@ from dataclasses import dataclass
 
 from anyio import run
 
-from app.ops import Op, Const, cst, rnd, rndi, Computation
+from app.ops import Op, cst, rnd, rndi, Computation
+
 
 def test_const_op() -> None:
     c = cst(4).op
@@ -11,12 +12,13 @@ def test_const_op() -> None:
     print(f"d.call() = {run(d.call)}")
     print(f"d() = {d()}")
 
+
 def test_basic_op_def() -> None:
     class Sum(Op[tuple[float, float], float]):
         name: str = "sum"
-        
+
         async def call(self, a: float, b: float) -> float:
-            return a+b
+            return a + b
 
     s = Sum()
     print(f"Sum = {s.model_dump_json()}")
@@ -31,10 +33,10 @@ def test_basic_op_def() -> None:
 def test_random() -> None:
     class Sum(Op[tuple[float, float], float]):
         name: str = "sum"
-        
+
         async def call(self, a: float, b: float) -> float:
-            return a+b
-    
+            return a + b
+
     s = Sum()
     a = cst(20)
     r = rnd()
@@ -49,10 +51,10 @@ def test_random() -> None:
 def test_randint() -> None:
     class Diff(Op[tuple[float, float], float]):
         name: str = "diff"
-        
+
         async def call(self, a: float, b: float) -> float:
-            return a-b
-    
+            return a - b
+
     d = Diff()
     r = rndi(0, 20)
     c = cst(5.5)
@@ -71,13 +73,13 @@ def test_access() -> None:
     class A:
         rep: int
         txt: str
-    
+
     @dataclass
     class B:
         a: list[A]
         b: str
         c: int
-    
+
     class AToB(Op[A, B]):
         name: str = "atob"
 
@@ -94,32 +96,36 @@ def test_access() -> None:
 def test_from_json() -> None:
     from app.ops.settings import LMConfigSetting
     from app.ops.session import session, user
+
     s = LMConfigSetting()(session(), user())
-    print(f'BEFORE {s}')
+    print(f"BEFORE {s}")
     value = s.to_json()
     s = Computation.from_json(value)
-    print(f'AFTER {s}')
+    print(f"AFTER {s}")
 
 
 def test_to_json() -> None:
     class Sum(Op[tuple[float, float], float]):
         name: str = "sum"
-        
+
         async def call(self, a: float, b: float) -> float:
-            return a+b
+            return a + b
 
     s = Sum()
     s12 = s(cst(1), cst(2))
     print(s12.to_json())
 
+
 def test_from_json() -> None:
     from app.ops.settings import LMConfigSetting
     from app.ops.session import session, user
+
     s = LMConfigSetting()(session(), user())
-    print(f'BEFORE {s}')
+    print(f"BEFORE {s}")
     value = s.to_json()
     s = Computation.from_json(value)
-    print(f'AFTER {s}')
+    print(f"AFTER {s}")
+
 
 def test_flatten() -> None:
     pass

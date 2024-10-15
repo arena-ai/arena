@@ -3,12 +3,24 @@ from typing import Literal, Mapping, Sequence, Any
 from pydantic import BaseModel
 
 from app.lm import models
-from app.lm.models import Function, ChatCompletionToolParam, Message, TopLogprob, TokenLogprob, ChoiceLogprobs, Choice
+from app.lm.models import (
+    Message,
+    Choice,
+)
+
 """
 ChatCompletionCreate -> anthropic MessageCreateParams -> anthropic Message -> ChatCompletion
 """
 
-MODELS = ("claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-2.1", "claude-2.0", "claude-instant-1.2")
+MODELS = (
+    "claude-3-opus-20240229",
+    "claude-3-sonnet-20240229",
+    "claude-3-haiku-20240307",
+    "claude-2.1",
+    "claude-2.0",
+    "claude-instant-1.2",
+)
+
 
 class Metadata(BaseModel):
     user_id: str
@@ -26,6 +38,7 @@ class ChatCompletionRequest(BaseModel):
     https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message_create_params.py#L13
     https://docs.anthropic.com/claude/reference/messages_post
     """
+
     max_tokens: int = 1
     messages: Sequence[Message]
     model: str | Literal[*MODELS]
@@ -39,19 +52,27 @@ class ChatCompletionRequest(BaseModel):
     stream: bool | None = None
 
     @classmethod
-    def from_chat_completion_request(cls, ccc: models.ChatCompletionRequest) -> "ChatCompletionRequest":
-        messages: Sequence[Message] = [msg.model_dump() for msg in ccc.messages if not msg.role == "system"]
-        system: Sequence[str] = [msg.content for msg in ccc.messages if msg.role == "system"]
+    def from_chat_completion_request(
+        cls, ccc: models.ChatCompletionRequest
+    ) -> "ChatCompletionRequest":
+        messages: Sequence[Message] = [
+            msg.model_dump()
+            for msg in ccc.messages
+            if not msg.role == "system"
+        ]
+        system: Sequence[str] = [
+            msg.content for msg in ccc.messages if msg.role == "system"
+        ]
         ccc = ccc.model_dump(exclude_none=True)
         if "max_tokens" not in ccc:
             ccc["max_tokens"] = 100
         if "user" in ccc:
             ccc["metadata"] = {"user_id": ccc["user"]}
             del ccc["user"]
-        if "stop" in ccc:   
+        if "stop" in ccc:
             ccc["stop_sequences"] = ccc["stop"]
             del ccc["stop"]
-        if len(system)==0:
+        if len(system) == 0:
             ccc["system"] = None
         else:
             ccc["system"] = system[0]
@@ -72,6 +93,7 @@ class TextBlock(BaseModel):
     text: str = ""
     type: Literal["text"] = "text"
 
+
 class CompletionUsage(BaseModel):
     input_tokens: int | None = None
     output_tokens: int | None = None
@@ -81,11 +103,14 @@ class ChatCompletionResponse(BaseModel):
     """
     https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message.py#L14
     """
+
     id: str
     content: Sequence[TextBlock]
     model: str
     role: Literal["assistant"] = "assistant"
-    stop_reason: Literal["end_turn", "max_tokens", "stop_sequence"] | None = None
+    stop_reason: Literal["end_turn", "max_tokens", "stop_sequence"] | None = (
+        None
+    )
     stop_sequence: str | None = None
     type: Literal["message"] = "message"
     usage: CompletionUsage | None = None
@@ -98,20 +123,24 @@ class ChatCompletionResponse(BaseModel):
         finish_reasons = {
             "end_turn": "tool_calls",
             "max_tokens": "length",
-            "stop_sequence": "stop"
+            "stop_sequence": "stop",
         }
         return models.ChatCompletionResponse(
             id=self.id,
-            choices=[Choice(
-                finish_reason=finish_reasons.get(self.stop_reason, None),
-                index=i,
-                logprobs=None,
-                message=Message(role="assistant", content=cb.text)
-            ) for i,cb in enumerate(self.content)],
+            choices=[
+                Choice(
+                    finish_reason=finish_reasons.get(self.stop_reason, None),
+                    index=i,
+                    logprobs=None,
+                    message=Message(role="assistant", content=cb.text),
+                )
+                for i, cb in enumerate(self.content)
+            ],
             model=self.model,
             usage=models.CompletionUsage(
                 prompt_tokens=self.usage.input_tokens,
                 completion_tokens=self.usage.output_tokens,
-                total_tokens=self.usage.input_tokens + self.usage.output_tokens,
+                total_tokens=self.usage.input_tokens
+                + self.usage.output_tokens,
             ),
         )
