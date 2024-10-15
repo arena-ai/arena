@@ -167,7 +167,7 @@ milvus:
   etcd:
     persistence:
       # storageClass: arena-storageclass
-      size: 1Gi
+      size: 2Gi
   pulsar:
     bookkeeper:
       volumes:
