@@ -64,13 +64,13 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
             if config.pii_removal == "masking":
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
-                        async def set_content():
+                        async def set_content(message=message):
                             message.content = await masking(message.content).evaluate(session=self.session)
                         tg.start_soon(set_content)
             if config.pii_removal == "replace":
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
-                        async def set_content():
+                        async def set_content(message=message):
                             message.content, _ = await replace_masking(message.content).evaluate(session=self.session)
                         tg.start_soon(set_content)
             # Log the request event
