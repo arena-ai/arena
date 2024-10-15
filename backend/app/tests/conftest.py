@@ -21,7 +21,7 @@ from app.models import (
     Event,
     EventIdentifier,
     Attribute,
-    EventAttribute,
+    EventAttribute
 )
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
@@ -29,7 +29,7 @@ from app.lm.models import (
     LMApiKeys,
     openai,
     mistral,
-    anthropic,
+    anthropic,Choice,TokenLogprob,ChoiceLogprobs,TopLogprob,CompletionUsage,Message
 )
 
 
@@ -145,18 +145,18 @@ def chat_completion_openai() -> openai.ChatCompletionResponse:
     return openai.ChatCompletionResponse(
         id="cmpl-123",
         choices=[
-            openai.Choice(
+            Choice(
                 finish_reason="stop",
                 index=0,
-                logprobs=openai.ChoiceLogprobs(
+                logprobs=ChoiceLogprobs(
                     content=[
-                        openai.TokenLogprob(
+                        TokenLogprob(
                             token="Hello",
                             logprob=-1.34,
                             top_logprobs=[],
                             text_offset=None,
                         ),
-                        openai.TokenLogprob(
+                        TokenLogprob(
                             token="world!",
                             logprob=-1.19,
                             top_logprobs=[],
@@ -164,7 +164,7 @@ def chat_completion_openai() -> openai.ChatCompletionResponse:
                         ),
                     ]
                 ),
-                message=openai.Message(
+                message=Message(
                     role="assistant", content="Hello world!"
                 ),
             )
@@ -173,7 +173,7 @@ def chat_completion_openai() -> openai.ChatCompletionResponse:
         model="gpt-3.5-turbo",
         object="chat.completion",
         system_fingerprint="0x1234abcd",
-        usage=openai.CompletionUsage(
+        usage=CompletionUsage(
             prompt_tokens=5,
             completion_tokens=10,
             total_tokens=15,
@@ -209,20 +209,20 @@ def chat_completion_mistral() -> mistral.ChatCompletionResponse:
     return mistral.ChatCompletionResponse(
         id="cmpl-3o4Mn05jW6S9Zu2DLt2g3t0aFgU",
         choices=[
-            mistral.Choice(
+            Choice(
                 index=0,
                 message=mistral.Message(
                     role="assistant",
                     content="Hello, how can I assist you today?",
                 ),
                 finish_reason="stop",
-                logprobs=mistral.ChoiceLogprobs(
+                logprobs=ChoiceLogprobs(
                     content=[
-                        mistral.TokenLogprob(
+                        TokenLogprob(
                             token=".",
                             logprob=-0.100103,
                             top_logprobs=[
-                                mistral.TopLogprob(
+                                TopLogprob(
                                     token=".", logprob=-0.100103
                                 )
                             ],
@@ -234,7 +234,7 @@ def chat_completion_mistral() -> mistral.ChatCompletionResponse:
         model="gpt-3.0-turbo",
         object="chat.completion",
         created=1661535393,
-        usage=mistral.CompletionUsage(
+        usage=CompletionUsage(
             completion_tokens=11, prompt_tokens=3, total_tokens=14
         ),
     )
