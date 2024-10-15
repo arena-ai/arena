@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from app.lm.models.chat_completion import (
     LMApiKeys,
     Function, FunctionDefinition,
-    ChatCompletionToolParam, Message, ResponseFormat, ChatCompletionRequest,
+    ChatCompletionToolParam, Message, ResponseFormatBase,ResponseFormat, ChatCompletionRequest,
     TopLogprob, TokenLogprob, ChoiceLogprobs, Choice, CompletionUsage, ChatCompletionResponse,
     )
 from app.lm.models.evaluation import Evaluation, Score
