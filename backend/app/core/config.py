@@ -69,7 +69,7 @@ class Settings(BaseSettings):
 
     REDIS_SERVER: str
     REDIS_PASSWORD: str
-    
+
     @computed_field  # type: ignore[misc]
     @property
     def CELERY_STORE_URI(self) -> RedisDsn:

@@ -3,19 +3,25 @@ from asyncio import sleep
 from anyio import run
 from pytest import fixture
 
-from app.ops.computation import Op, Computation, FlatComputation, FlatComputations
-from app.ops.events import LogRequest, Request
+from app.ops.computation import (
+    Op,
+    Computation,
+    FlatComputations,
+)
 from app.ops.dot import dot
 
 T = time()
 
+
 class SleepConst(Op):
     value: str
+
     async def call(self) -> str:
         print(f"\n{time()-T} start const")
         await sleep(1)
         print(f"\n{time()-T} stop const")
         return self.value
+
 
 class SleepPipe(Op):
     async def call(self, value: str) -> str:
@@ -24,6 +30,7 @@ class SleepPipe(Op):
         print(f"\n{time()-T} stop pipe")
         return f"{value}."
 
+
 class SleepPipeMany(Op):
     async def call(self, *args: str) -> str:
         print(f"\n{time()-T} start pipe many")
@@ -31,17 +38,21 @@ class SleepPipeMany(Op):
         print(f"\n{time()-T} stop pipe many")
         return f"{'.'.join(args)}."
 
+
 @fixture
 def sleep_hello() -> SleepConst:
     return SleepConst(value="Hello")
+
 
 @fixture
 def sleep_world() -> SleepConst:
     return SleepConst(value="World")
 
+
 @fixture
 def sleep_pipe() -> SleepPipe:
     return SleepPipe()
+
 
 @fixture
 def sleep_pipe_many() -> SleepPipeMany:
@@ -73,29 +84,31 @@ def test_to_json(sleep_hello, sleep_pipe):
 
 def test_from_json(sleep_hello, sleep_pipe):
     comp = sleep_pipe(sleep_pipe(sleep_hello()))
-    print(f'BEFORE {comp}')
-    print(f'comp = {dot(comp)}')
+    print(f"BEFORE {comp}")
+    print(f"comp = {dot(comp)}")
     value = comp.to_json()
     comp = Computation.from_json(value)
-    print(f'AFTER {comp}')
-    print(f'comp = {dot(comp)}')
+    print(f"AFTER {comp}")
+    print(f"comp = {dot(comp)}")
 
 
-def test_flat_computations(sleep_hello, sleep_world, sleep_pipe, sleep_pipe_many):
+def test_flat_computations(
+    sleep_hello, sleep_world, sleep_pipe, sleep_pipe_many
+):
     init_comp = sleep_pipe_many(sleep_hello(), sleep_world())
     comp = sleep_pipe_many(init_comp, sleep_pipe(init_comp))
-    print(f'comp = {dot(comp)}')
-    print(f'comps = {[c.op.__class__.__name__ for c in comp.computations()]}')
+    print(f"comp = {dot(comp)}")
+    print(f"comps = {[c.op.__class__.__name__ for c in comp.computations()]}")
     flat_comps = FlatComputations.from_computation(comp)
-    print(f'flat_comps = {flat_comps}')
+    print(f"flat_comps = {flat_comps}")
     unflatten_comp = FlatComputations.to_computation(flat_comps)
-    print(f'unflatten_comp = {dot(unflatten_comp)}')
+    print(f"unflatten_comp = {dot(unflatten_comp)}")
 
 
 def test_to_immutable(sleep_hello, sleep_world, sleep_pipe, sleep_pipe_many):
     init_comp = sleep_pipe_many(sleep_hello(), sleep_world())
     comp = sleep_pipe_many(init_comp, sleep_pipe(init_comp))
-    print(f'comp = {dot(comp)}')
-    print(f'comps = {[c.op.__class__.__name__ for c in comp.computations()]}')
+    print(f"comp = {dot(comp)}")
+    print(f"comps = {[c.op.__class__.__name__ for c in comp.computations()]}")
     immutable_comp = Computation.to_immutable(comp)
-    print(f'immutable_comp = {immutable_comp}')
+    print(f"immutable_comp = {immutable_comp}")

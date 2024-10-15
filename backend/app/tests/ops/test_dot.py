@@ -1,11 +1,13 @@
-from app.ops.dot import nodes, edges, dot
-from app.ops.computation import Op, Computation
-from app.ops.utils import cst, var, tup, rnd, rndi
+from app.ops.dot import dot
+from app.ops.computation import Op
+from app.ops.utils import cst, rndi
+
 
 def test_basic() -> None:
     class Diff(Op[tuple[float, float], float]):
         async def call(self, a: float, b: float) -> float:
-            return a-b
+            return a - b
+
     d = Diff()
     r = rndi(0, 20)
     c = cst(5.5)

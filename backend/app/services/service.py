@@ -1,7 +1,6 @@
-from typing import Mapping, Sequence, Any, TypeVar, Generic
+from typing import Any, TypeVar, Generic
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from functools import cached_property
 
 from pydantic import BaseModel
 import httpx
@@ -9,12 +8,15 @@ import httpx
 from app.services.models import Request, Response
 
 
-Req = TypeVar('Req', bound=BaseModel)
-Res = TypeVar('Res', bound=BaseModel)
+Req = TypeVar("Req", bound=BaseModel)
+Res = TypeVar("Res", bound=BaseModel)
+
 
 @dataclass
 class Service(ABC, Generic[Req, Res]):
-    timeout: httpx.Timeout = field(default_factory=lambda: httpx.Timeout(30., read=None))
+    timeout: httpx.Timeout = field(
+        default_factory=lambda: httpx.Timeout(30.0, read=None)
+    )
 
     @abstractmethod
     def request(self, req: Req) -> Request[Req]:
@@ -35,7 +37,7 @@ class Service(ABC, Generic[Req, Res]):
                 headers=request.headers,
                 json=request.content.model_dump(exclude_none=True),
             )
-            if response.status_code==200:
+            if response.status_code == 200:
                 return Response(
                     status_code=response.status_code,
                     headers=response.headers,

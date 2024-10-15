@@ -5,14 +5,17 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.services import crud
-from app.models import Message, SettingCreate, Setting, SettingsOut, SettingOut
+from app.models import SettingCreate, Setting, SettingsOut, SettingOut
 
 router = APIRouter()
 
 
 @router.get("/", response_model=SettingsOut)
 def read_settings(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
 ) -> Any:
     """
     Retrieve Settings.
@@ -42,11 +45,15 @@ def read_settings(
 
 
 @router.get("/{name}", response_model=SettingOut)
-def read_setting(session: SessionDep, current_user: CurrentUser, name: str) -> Any:
+def read_setting(
+    session: SessionDep, current_user: CurrentUser, name: str
+) -> Any:
     """
     Get setting by name.
     """
-    setting = crud.get_setting(session=session, setting_name=name, owner_id=current_user.id)
+    setting = crud.get_setting(
+        session=session, setting_name=name, owner_id=current_user.id
+    )
     if not setting:
         raise HTTPException(status_code=404, detail="Setting not found")
     if not current_user.is_superuser and (setting.owner_id != current_user.id):
@@ -56,12 +63,17 @@ def read_setting(session: SessionDep, current_user: CurrentUser, name: str) -> A
 
 @router.post("/", response_model=SettingOut)
 def create_setting(
-    *, session: SessionDep, current_user: CurrentUser, setting_in: SettingCreate
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    setting_in: SettingCreate,
 ) -> Any:
     """
     Create new setting.
     """
-    setting = Setting.model_validate(setting_in, update={"owner_id": current_user.id})
+    setting = Setting.model_validate(
+        setting_in, update={"owner_id": current_user.id}
+    )
     session.add(setting)
     session.commit()
     session.refresh(setting)
