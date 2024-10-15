@@ -173,7 +173,7 @@ def test_mistral(
         json=chat_input_gen("mistral-small"),
     )
     assert response.status_code == 200
-    content = response.json()
+    _ = response.json()
 
 
 @pytest.mark.skip(reason="Too costly")
@@ -266,7 +266,7 @@ def test_anthropic(
         json=ccc.to_dict(),
     )
     assert response.status_code == 200
-    content = response.json()
+    _ = response.json()
 
 
 @pytest.mark.skip(reason="Too costly")

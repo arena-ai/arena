@@ -44,7 +44,7 @@ class Hashable:
         elif isinstance(obj, list | tuple | set):
             return tuple(cls.to_immutable(o) for o in obj)
         elif hasattr(obj, "__dict__"):
-            return cls.to_immutable(getattr(obj, "__dict__"))
+            return cls.to_immutable(obj.__dict__())
         elif isinstance(obj, str | int | float | NoneType):
             return obj
         else:
@@ -69,7 +69,7 @@ class JsonSerializable:
         elif isinstance(obj, list | tuple | set):
             return [cls.to_json_dict(o) for o in obj]
         elif hasattr(obj, "__dict__"):
-            return cls.to_json_dict(getattr(obj, "__dict__"))
+            return cls.to_json_dict(obj.__dict__())
         elif isinstance(obj, str | int | float | NoneType):
             return obj
         else:

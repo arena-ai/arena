@@ -111,7 +111,7 @@ def test_delete_event(db: Session) -> None:
         event_in=EventCreate(name="parent", content=random_lower_string()),
         owner_id=alice.id,
     )
-    children = [
+    _ = [
         crud.create_event(
             session=db,
             event_in=EventCreate(
@@ -121,7 +121,7 @@ def test_delete_event(db: Session) -> None:
             ),
             owner_id=alice.id,
         )
-        for i in range(10)
+        for _ in range(10)
     ]
     assert len(db.exec(select(User)).all()) == 3  # Superuser, Alice and Bob
     assert len(db.exec(select(Event)).all()) == 11  # parent and children
@@ -153,7 +153,7 @@ def test_delete_owner(db: Session) -> None:
         event_in=EventCreate(name="parent", content=random_lower_string()),
         owner_id=alice.id,
     )
-    children = [
+    _ = [
         crud.create_event(
             session=db,
             event_in=EventCreate(
@@ -163,7 +163,7 @@ def test_delete_owner(db: Session) -> None:
             ),
             owner_id=alice.id,
         )
-        for i in range(10)
+        for _ in range(10)
     ]
     assert len(db.exec(select(User)).all()) == 3  # Superuser, Alice and Bob
     assert len(db.exec(select(Event)).all()) == 11  # parent and children
