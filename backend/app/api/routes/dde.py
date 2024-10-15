@@ -207,9 +207,12 @@ def delete_document_data_example(*, session: SessionDep, current_user: CurrentUs
 
 @router.post("/extract/{name}")
 async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, name: str, upload: UploadFile) -> JSONResponse:
+    if not current_user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You should be an active user")
     document_data_extractor = crud.get_document_data_extractor(session=session, name=name)
     if not document_data_extractor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExtractor not found")
+
     if not document_data_extractor.owner_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DocumentDataExtractor has no owner")
     # Build examples
@@ -243,7 +246,7 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
             
         ).model_dump(exclude_unset=True)
     
-    chat_completion_response = await ArenaHandler(session, current_user, chat_completion_request).process_request()
+    chat_completion_response = await ArenaHandler(session, document_data_extractor.owner, chat_completion_request).process_request()
     extracted_info=chat_completion_response.choices[0].message.content
     # TODO: Improve the prompt to ensure the output is always a valid JSON
     json_string = extracted_info[extracted_info.find('{'):extracted_info.rfind('}')+1]
