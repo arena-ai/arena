@@ -99,9 +99,9 @@ ingress-nginx:
       loadBalancerIP: ""
     config:
       proxy-body-size: "1000m"
-      proxy-connect-timeout: "1200s"
-      proxy-send-timeout: "1200s"
-      proxy-read-timeout: "1200s"
+      proxy-connect-timeout: 1200
+      proxy-send-timeout: 1200
+      proxy-read-timeout: 1200
 
 cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
   namespace: default
