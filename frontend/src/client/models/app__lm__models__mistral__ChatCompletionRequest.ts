@@ -5,7 +5,7 @@
 
 import type { ChatCompletionToolParam } from './ChatCompletionToolParam';
 import type { Message_Input } from './Message_Input';
-import type { ResponseFormat } from './ResponseFormat';
+import type { ResponseFormatBase } from './ResponseFormatBase';
 
 /**
  * Maps to:
@@ -17,7 +17,7 @@ export type app__lm__models__mistral__ChatCompletionRequest = {
     messages: Array<Message_Input>;
     model: (string | 'mistral-large-latest' | 'mistral-medium' | 'mistral-medium-latest' | 'mistral-small' | 'mistral-small-latest' | 'mistral-tiny' | 'open-mistral-7b' | 'open-mixtral-8x7b');
     max_tokens?: (number | null);
-    response_format?: (ResponseFormat | null);
+    response_format?: (ResponseFormatBase | null);
     safe_prompt?: (boolean | null);
     random_seed?: (number | null);
     temperature?: (number | null);

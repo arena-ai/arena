@@ -9,7 +9,15 @@ export const $DocumentDataExampleCreate = {
             isRequired: true,
         },
         data: {
-            type: 'string',
+            type: 'dictionary',
+            contains: {
+                type: 'any-of',
+                contains: [{
+                    type: 'string',
+                }, {
+                    type: 'null',
+                }],
+            },
             isRequired: true,
         },
         document_data_extractor_id: {

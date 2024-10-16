@@ -32,5 +32,9 @@ export const $DocumentDataExtractorOut = {
             },
             isRequired: true,
         },
+        response_template: {
+            type: 'string',
+            isRequired: true,
+        },
     },
 } as const;

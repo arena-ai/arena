@@ -6,7 +6,8 @@
 import type { ChatCompletionToolParam } from './ChatCompletionToolParam';
 import type { LMConfig } from './LMConfig';
 import type { Message_Input } from './Message_Input';
-import type { ResponseFormat } from './ResponseFormat';
+import type { ResponseFormatBase } from './ResponseFormatBase';
+import type { ResponseFormatJSONSchema } from './ResponseFormatJSONSchema';
 
 /**
  * Maps to:
@@ -24,7 +25,7 @@ export type app__lm__models__chat_completion__ChatCompletionRequest = {
     max_tokens?: (number | null);
     'n'?: (number | null);
     presence_penalty?: (number | null);
-    response_format?: (ResponseFormat | null);
+    response_format?: (ResponseFormatJSONSchema | ResponseFormatBase | null);
     safe_prompt?: (boolean | null);
     seed?: (number | null);
     stop?: (string | Array<string> | null);
