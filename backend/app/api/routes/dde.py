@@ -280,13 +280,10 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     chat_completion_response = await ArenaHandler(session, document_data_extractor.owner, chat_completion_request).process_request()
     extracted_info=chat_completion_response.choices[0].message.content
     token_info = chat_completion_response.choices[0].logprobs.content
-    print("token_info", token_info) 
     #TODO: handle refusal or case in which content was not correctly done
     # TODO: Improve the prompt to ensure the output is always a valid JSON
     json_string = extracted_info[extracted_info.find('{'):extracted_info.rfind('}')+1]
     keys = list(json.loads(json_string).keys())
-    #logprob_data = extract_logprobs_from_response(chat_completion_response, extracted_data)
-    #token_list = token_info[0]['attribute']['token_info']
     value_indices = find_indices_for_keys(keys, token_info)
     logprob_data = extract_logprobs_from_indices(value_indices, token_info)
     return {'extracted_info': json.loads(json_string), 'logprob_data': logprob_data}
