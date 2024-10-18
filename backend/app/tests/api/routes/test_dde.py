@@ -5,6 +5,7 @@ from app.models import DocumentDataExtractorOut
 from app.services.object_store import Documents
 import pytest
 from typing import Generator, Any
+from app.api.routes.dde import find_indices_for_keys, extract_logprobs_from_indices
 
 @pytest.fixture(scope="module")
 def document_data_extractor(client: TestClient, superuser_token_headers: dict[str, str]) ->  Generator[dict[str, Any], None, None]:
@@ -100,7 +101,7 @@ def test_read_document_data_extractor(document_data_extractor: dict[str, Any]):
     assert document_data_extractor["prompt"] == "Extract the name from document"
     assert document_data_extractor["owner_id"] == 1
 
-
+    
 def test_create_document_data_example(client: TestClient, superuser_token_headers: dict[str, str], document_data_extractor: dict[str, Any]):
     
     name = document_data_extractor["name"]
@@ -163,6 +164,57 @@ def test_update_document_data_example(client: TestClient, superuser_token_header
         assert response_data["data"] == updated_data
         assert response_data["document_data_extractor_id"] == 1
         assert response_data["id"] == 1
+
+class TopLogprob:
+    def __init__(self, logprob: float):
+        self.logprob = logprob
+
+class Token:
+    def __init__(self, token: str, top_logprobs: list[TopLogprob]):
+        self.token = token
+        self.top_logprobs = top_logprobs 
+        
+@pytest.fixture()
+def token_list() -> list[Token]:
+    tokens = ['{', 'na', 'me', '":"', 'Mart', 'a', '","', 'cer', 'ri', '","', 'age', '":', '25', ',"' , 'natio', 'nality', '":"', 'italy', '}']
+    token_list = [Token(token, []) for token in tokens]
+    return token_list
+
+@pytest.fixture()
+def token_logprobs_list() -> list[Token]:
+    tokens = ['{', 'na', 'me', '":"', 'Mart', 'a', '","', 'cer', 'ri', '","', 'age', '":', '25', ',"' , 'natio', 'nality', '":"', 'italy', '}']
+    logprobs = [-5.42e-05, -10.50, -11.50, -12.50, -13.750]
+    logprobs_list = [TopLogprob(logprob) for logprob in logprobs]
+    token_list = [Token(token, logprobs_list) for token in tokens]
+
+    return token_list
+    
+def test_find_indices_for_keys(token_list: list[Token]):
+    keys = ['name', 'age', 'nationality']
+    expected_result = {
+        'name': [4, 8],
+        'age': [12, 12],
+        'nationality': [17]
+    }
+    result = find_indices_for_keys(keys, token_list)
+    
+    assert result == expected_result
+
+def test_extract_logprobs_from_indices(token_logprobs_list: list[Token]):
+    expected_value_indices = {
+        'name': [4, 8],
+        'age': [12, 12],
+        'nationality': [17]
+    }
+    expected_logprobs = [-5.42e-05, -10.50, -11.50, -12.50, -13.750]
+    expected_result = {
+        'name': [expected_logprobs] * 5,    
+        'age': [expected_logprobs],         
+        'nationality': [expected_logprobs]  
+    }
+    result = extract_logprobs_from_indices(expected_value_indices, token_logprobs_list)
+
+    assert result == expected_result
     
 #TODO: test extract_from_file
    

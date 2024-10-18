@@ -279,13 +279,64 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     
     chat_completion_response = await ArenaHandler(session, document_data_extractor.owner, chat_completion_request).process_request()
     extracted_info=chat_completion_response.choices[0].message.content
+    token_info = chat_completion_response.choices[0].logprobs.content
+    print("token_info", token_info) 
     #TODO: handle refusal or case in which content was not correctly done
     # TODO: Improve the prompt to ensure the output is always a valid JSON
     json_string = extracted_info[extracted_info.find('{'):extracted_info.rfind('}')+1]
-    extracted_data = {k: v for k, v in json.loads(json_string).items() if k not in ('source', 'year')}   
-    logprob_data = extract_logprobs_from_response(chat_completion_response, extracted_data)
+    keys = list(json.loads(json_string).keys())
+    #logprob_data = extract_logprobs_from_response(chat_completion_response, extracted_data)
+    #token_list = token_info[0]['attribute']['token_info']
+    value_indices = find_indices_for_keys(keys, token_info)
+    logprob_data = extract_logprobs_from_indices(value_indices, token_info)
     return {'extracted_info': json.loads(json_string), 'logprob_data': logprob_data}
 
+def find_indices_for_keys(keys: list[str], token_list) -> dict[str, list[int]]:
+    value_indices = {key: [] for key in keys}
+    current_key = ""
+    matched_key = None
+    remaining_keys = keys.copy()
+    saving_indices = False 
+    for i, token_info in enumerate(token_list):
+        token = token_info.token
+        if matched_key:
+            if saving_indices:
+                if token == '","' or token == ',"' or len(token_list) - 1 == i:
+                    next_token = token_list[i + 1].token if i + 1 < len(token_list) else None
+                    if next_token and (next_token == '}' or any(key.startswith(next_token) for key in remaining_keys)):
+                        value_indices[matched_key].append(i - 1)  #stop saving indices when token is "," and the next token is the start of one of the keys or when the next token is '}'
+                        matched_key = None  
+                        saving_indices = False
+                        current_key = ""  
+                        continue 
+                else:
+                    continue
+            elif token == '":' or token == '":"':
+                value_indices[matched_key].append(i + 1)  #start saving indices after tokens '":' or '":"'
+                saving_indices = True
+        else:
+            current_key += token
+            for key in remaining_keys:
+                if key.startswith(current_key):
+                    if current_key == key:
+                        matched_key = key      #full key matched
+                        remaining_keys.remove(key)
+                    break
+            else:
+                current_key = ""
+    return value_indices
+
+def extract_logprobs_from_indices(value_indices: dict[str, list[int]], token_list) -> dict[str, list[Any]]:
+    logprobs = {key: [] for key in value_indices}
+    for key, indices in value_indices.items():
+            start_idx = indices[0]
+            end_idx = indices[-1]
+            for i in range(start_idx, end_idx + 1):
+                top_logprobs=[]
+                for logprob in token_list[i].top_logprobs:
+                    top_logprobs.append(logprob.logprob)
+                logprobs[key].append(top_logprobs)  
+    return logprobs
 
 def create_pydantic_model(schema:dict[str,tuple[Literal['str','int','bool','float'],Literal['required','optional']]])->Any:
     """Creates a pydantic model from an input dictionary where
@@ -312,8 +363,7 @@ def create_pydantic_model(schema:dict[str,tuple[Literal['str','int','bool','floa
 
 def validate_extracted_text(text: str):
     if text == "":
-        raise HTTPException(status_code=500, detail="The extracted text from the document is empty. Please check if the document is corrupted.")
-    
+        raise HTTPException(status_code=500, detail="The extracted text from the document is empty. Please check if the document is corrupted.") 
     
 # TODO: Optimize the entire process of extracting and handling log probabilities from OpenAI for the identified tokens.
 def is_equal_ignore_sign(a, b) -> bool:  
