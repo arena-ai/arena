@@ -1,4 +1,4 @@
-from typing import Any, Iterable,Literal
+from typing import Any, Iterable,Literal, TypedDict
 from app.lm.models.chat_completion import TokenLogprob
 from app.lm.models import ChatCompletionResponse
 from fastapi import APIRouter, HTTPException, status, UploadFile
@@ -20,6 +20,7 @@ from app.ops.documents import as_text
 from app.models import (Message, DocumentDataExtractorCreate, DocumentDataExtractorUpdate, DocumentDataExtractor, DocumentDataExtractorOut, DocumentDataExtractorsOut,
                         DocumentDataExampleCreate, DocumentDataExampleUpdate, DocumentDataExample, DocumentDataExampleOut)
 from openai.lib._pydantic import to_strict_json_schema
+
 router = APIRouter()
 
 
@@ -259,6 +260,7 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
             ChatCompletionMessage(role="system", content=full_system_content),  
             ChatCompletionMessage(role="user", content=f"Maintenant, faites la même extraction sur un nouveau document d'input:\n####\nINPUT:{prompt}")  
         ]
+    
     pydantic_reponse=create_pydantic_model(json.loads(document_data_extractor.response_template))
     format_response={"type": "json_schema",         
         "json_schema":{
@@ -283,12 +285,31 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
     #TODO: handle refusal or case in which content was not correctly done
     # TODO: Improve the prompt to ensure the output is always a valid JSON
     json_string = extracted_info[extracted_info.find('{'):extracted_info.rfind('}')+1]
-    keys = list(json.loads(json_string).keys())
-    value_indices = find_indices_for_keys(keys, token_info)
+    keys = list(pydantic_reponse.__fields__.keys())
+    value_indices = extract_tokens_indices_for_each_key(keys, token_info)
     logprob_data = extract_logprobs_from_indices(value_indices, token_info)
     return {'extracted_info': json.loads(json_string), 'logprob_data': logprob_data}
 
-def find_indices_for_keys(keys: list[str], token_list) -> dict[str, list[int]]:
+class Token(TypedDict):
+    token: str
+    
+def extract_tokens_indices_for_each_key(keys: list[str], token_list:list[Token]) -> dict[str, list[int]]:
+    """
+    Extracts the indices of tokens corresponding to extracted information related to a list of specified keys.
+
+    The extraction criteria are based on the following:
+    - The function looks for tokens that match the specified keys.
+    - It saves the indices of the tokens that correspond to the values extracted by the model for each key.
+    - Tokens' indices are saved if they follow the pattern '":' or '":"'.
+    - It stops saving indices if it encounters a token that indicates the start of a new key or the end of the object.
+
+    Args:
+        keys (list[str]): A list of keys for which to find corresponding token indices.
+        token_list (list[Token]): A list of Token objects, each containing a token.
+
+    Returns:
+        dict[str, list[int]]: A dictionary mapping each key to the corresponding indices of the tokens representing the values extracted by the model.
+    """
     value_indices = {key: [] for key in keys}
     current_key = ""
     matched_key = None
@@ -296,18 +317,23 @@ def find_indices_for_keys(keys: list[str], token_list) -> dict[str, list[int]]:
     saving_indices = False 
     for i, token_info in enumerate(token_list):
         token = token_info.token
-        if matched_key:
+        if matched_key is not None:
             if saving_indices:
-                if token == '","' or token == ',"' or len(token_list) - 1 == i:
+                if token == '","' or token == ',"':
                     next_token = token_list[i + 1].token if i + 1 < len(token_list) else None
-                    if next_token and (next_token == '}' or any(key.startswith(next_token) for key in remaining_keys)):
-                        value_indices[matched_key].append(i - 1)  #stop saving indices when token is "," and the next token is the start of one of the keys or when the next token is '}'
+                    if next_token is not None and any(key.startswith(next_token) for key in remaining_keys):
+                        value_indices[matched_key].append(i - 1)  #stop saving indices when token is "," and the next token is the start of one of the keys
                         matched_key = None  
                         saving_indices = False
                         current_key = ""  
                         continue 
-                else:
-                    continue
+                elif token_list[i + 1].token == '}':
+                        value_indices[matched_key].append(i)  #stop saving indices when the next token is '}'
+                        matched_key = None  
+                        saving_indices = False
+                        current_key = ""  
+                        continue        
+                continue
             elif token == '":' or token == '":"':
                 value_indices[matched_key].append(i + 1)  #start saving indices after tokens '":' or '":"'
                 saving_indices = True
@@ -322,17 +348,14 @@ def find_indices_for_keys(keys: list[str], token_list) -> dict[str, list[int]]:
             else:
                 current_key = ""
     return value_indices
-
-def extract_logprobs_from_indices(value_indices: dict[str, list[int]], token_list) -> dict[str, list[Any]]:
+        
+def extract_logprobs_from_indices(value_indices: dict[str, list[int]], token_list: list[Token]) -> dict[str, list[Any]]:
     logprobs = {key: [] for key in value_indices}
     for key, indices in value_indices.items():
             start_idx = indices[0]
             end_idx = indices[-1]
             for i in range(start_idx, end_idx + 1):
-                top_logprobs=[]
-                for logprob in token_list[i].top_logprobs:
-                    top_logprobs.append(logprob.logprob)
-                logprobs[key].append(top_logprobs)  
+                logprobs[key].append(token_list[i].top_logprobs[0].logprob)  
     return logprobs
 
 def create_pydantic_model(schema:dict[str,tuple[Literal['str','int','bool','float'],Literal['required','optional']]])->Any:
