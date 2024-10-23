@@ -59,6 +59,7 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         # Build the request
         lm_request = await self.lm_request().evaluate(session=self.session)
         lm_request_event = arena_request_event
+        mapping_dict = {}   
         # Do the masking
         if config.pii_removal:# TODO an IF op could be added to build conditional delayed computations if needed
             if config.pii_removal == "masking":
@@ -71,18 +72,23 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
                         async def set_content(message=message):
-                            message.content, _ = await replace_masking(message.content).evaluate(session=self.session)
+                            message.content, mapping = await replace_masking(message.content).evaluate(session=self.session)
+                            mapping_dict[message.content] = mapping
                         tg.start_soon(set_content)
             # Log the request event
             lm_request_event = LogRequest(name="modified_request")(ses, usr, arena_request_event, lm_request)
+        print ("mapping_dict", mapping_dict)
         # compute the response
         lm_response = self.lm_response(ses, usr, lm_request)
         lm_response_event = log_response(ses, usr, arena_request_event, lm_response)
         chat_completion_response = lm_response.content
+        print("chat_completion_response", chat_completion_response)
         event_identifier = create_event_identifier(ses, usr, arena_request_event, chat_completion_response.id)
         # Evaluate before post-processing
         arena_request_event, config_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response = await tup(arena_request_event, config_event, lm_request_event, lm_response_event, event_identifier, chat_completion_response).evaluate(session=self.session)
         # post-process the (request, response) pair
+        #if  config.pii_removal == "replace":
+         #   lm_response.content
         if config.judge_evaluation:
             judge_score = judge(
                 language_models_api_keys(ses, usr),
