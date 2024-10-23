@@ -4,6 +4,7 @@ from app.core.config import settings
 from app.models import DocumentDataExtractorOut
 from app.services.object_store import Documents
 import pytest
+import json
 from typing import Generator, Any
 from app.api.routes.dde import extract_tokens_indices_for_each_key, extract_logprobs_from_indices
 
@@ -12,12 +13,24 @@ from app.api.routes.dde import extract_tokens_indices_for_each_key, extract_logp
 def document_data_extractor(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> Generator[dict[str, Any], None, None]:
-    fake_name = "Test dde"
-    fake_prompt = "Extract the name from document"
+    fake_name = "Test_dde"
+    fake_prompt = "Extract the adresse from document"
+    response_template = {
+        "adresse": [
+            "str",
+            "required"
+        ]
+    }
 
-    payload = {"name": fake_name, "prompt": fake_prompt}
+    payload = {"name": fake_name, "prompt": fake_prompt, 'response_template':response_template}
 
     headers = superuser_token_headers
+    
+    response = client.post(
+        f"{settings.API_V1_STR}/dde",
+        headers=headers,
+        json=payload,
+    )
 
     fake_dde = DocumentDataExtractorOut(
         id=1,
@@ -26,11 +39,7 @@ def document_data_extractor(
         timestamp="2024-10-03T09:31:33.748765",
         owner_id=1,
         document_data_examples=[],
-    )
-    response = client.post(
-        f"{settings.API_V1_STR}/dde",
-        headers=headers,
-        json=payload,
+        response_template = json.dumps(response_template)
     )
 
     assert response.status_code == 200
@@ -39,6 +48,7 @@ def document_data_extractor(
     assert response_data["name"] == fake_dde.name
     assert response_data["prompt"] == fake_dde.prompt
     assert response_data["owner_id"] == fake_dde.owner_id
+    assert response_data["response_template"] == fake_dde.response_template
     assert len(response_data["document_data_examples"]) == 0
 
     yield response_data
@@ -73,7 +83,7 @@ def test_update_document_data_extractor(
     superuser_token_headers: dict[str, str],
     document_data_extractor: dict[str, Any],
 ):
-    updated_name = "Updated dde"
+    updated_name = "Updated_dde"
     dde_id = document_data_extractor["id"]
 
     document_data_extractor["name"] = updated_name
@@ -81,6 +91,7 @@ def test_update_document_data_extractor(
     update_payload = {
         "name": updated_name,
         "prompt": document_data_extractor["prompt"],
+        "response_template": json.loads(document_data_extractor["response_template"])
     }
 
     response = client.put(
@@ -97,6 +108,7 @@ def test_update_document_data_extractor(
     assert response_data["prompt"] == document_data_extractor["prompt"]
     assert response_data["timestamp"] == document_data_extractor["timestamp"]
     assert response_data["owner_id"] == document_data_extractor["owner_id"]
+    assert response_data["response_template"] == document_data_extractor["response_template"]
     assert len(response_data["document_data_examples"]) == 0
 
     
@@ -106,11 +118,11 @@ def test_create_document_data_example(client: TestClient, superuser_token_header
     with patch.object(Documents, "exists", return_value=True):
         start_page = 0
         end_page = 2
-        info_to_extract = {"name": "Marta"}
+        info_to_extract = {"adresse": "3 RUE DE ROUVRAY"}
 
         data_doc = {
             "document_id": "abc",
-            "data": str(info_to_extract),
+            "data": info_to_extract,
             "document_data_extractor_id": document_data_extractor["id"],
             "start_page": start_page,
             "end_page": end_page,
@@ -128,7 +140,7 @@ def test_create_document_data_example(client: TestClient, superuser_token_header
         assert response.status_code == 200
         response_data = response.json()
         assert response_data["document_id"] == data_doc["document_id"]
-        assert response_data["data"] == data_doc["data"]
+        assert response_data["data"] == json.dumps(data_doc["data"])
         assert (
             response_data["document_data_extractor_id"]
             == data_doc["document_data_extractor_id"]
@@ -143,7 +155,7 @@ def test_update_document_data_example(
 ):
     name_dde = document_data_extractor["name"]
     id_example = document_data_extractor["document_data_examples"][0]["id"]
-    updated_data = "{'name': 'Sarah'}"
+    updated_data = {'adresse': '2 ALLEE DES HORTENSIAS'}
 
     update_payload = {
         "document_id": document_data_extractor["document_data_examples"][0][
@@ -153,6 +165,8 @@ def test_update_document_data_example(
         "document_data_extractor_id": document_data_extractor[
             "document_data_examples"
         ][0]["document_data_extractor_id"],
+        "start_page":document_data_extractor["document_data_examples"][0]['start_page'],
+        "end_page":document_data_extractor["document_data_examples"][0]['end_page']
     }
 
     document_data_extractor["document_data_examples"][0]["data"] = updated_data
@@ -168,7 +182,7 @@ def test_update_document_data_example(
 
         response_data = response.json()
         assert response_data["document_id"] == "abc"
-        assert response_data["data"] == updated_data
+        assert response_data["data"] == json.dumps(updated_data)
         assert response_data["document_data_extractor_id"] == 1
         assert response_data["id"] == 1
 
