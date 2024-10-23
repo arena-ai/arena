@@ -2,24 +2,26 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $DocumentDataExtractorCreate = {
+export const $JSONSchema = {
     properties: {
         name: {
             type: 'string',
             isRequired: true,
         },
-        prompt: {
-            type: 'string',
-            isRequired: true,
-        },
-        response_template: {
+        schema: {
             type: 'dictionary',
             contains: {
-                type: 'any[]',
-                maxItems: 2,
-                minItems: 2,
+                properties: {
+                },
             },
-            isRequired: true,
+        },
+        strict: {
+            type: 'any-of',
+            contains: [{
+                type: 'boolean',
+            }, {
+                type: 'null',
+            }],
         },
     },
 } as const;

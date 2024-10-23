@@ -1,8 +1,15 @@
 from typing import Mapping
 from pydantic import Field, ConfigDict
 from faker import Faker
-from app.lm.models import LMApiKeys, ChatCompletionResponse, ChatCompletionRequest, Message, openai, mistral, anthropic, Score
-from app.services.masking import Analyzer, AnalyzerRequest, Anonymizer, AnonymizerRequest, Anonymizers, Replace, Redact, Mask, Hash, Encrypt, Keep
+from app.services.masking import (
+    Analyzer,
+    AnalyzerRequest,
+    Anonymizer,
+    AnonymizerRequest,
+    Anonymizers,
+    Replace,
+    Keep,
+)
 from app.ops import Op
 
 
@@ -11,60 +18,66 @@ class Masking(Op[str, str]):
         analyzer = Analyzer()
         anonymizer = Anonymizer()
         analysis = await analyzer.analyze(AnalyzerRequest(text=input))
-        anonymized = await anonymizer.anonymize(AnonymizerRequest(
-            text=input,
-            anonymizers=Anonymizers(DEFAULT=Replace()),
-            analyzer_results=analysis,
-        ))
+        anonymized = await anonymizer.anonymize(
+            AnonymizerRequest(
+                text=input,
+                anonymizers=Anonymizers(DEFAULT=Replace()),
+                analyzer_results=analysis,
+            )
+        )
         return anonymized.text
 
+
 masking = Masking()
+
 
 class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     fake: Faker = Field(exclude=True, default_factory=lambda: Faker())
 
     def replace_person(self, person: str, salt: str = "") -> str:
-        self.fake.seed_instance(hash(person+salt))
+        self.fake.seed_instance(hash(person + salt))
         return self.fake.name()
 
     def replace_phone_number(self, phone_number: str, salt: str = "") -> str:
-        self.fake.seed_instance(hash(phone_number+salt))
+        self.fake.seed_instance(hash(phone_number + salt))
         return self.fake.phone_number()
 
     def replace_address(self, address: str, salt: str = "") -> str:
-        self.fake.seed_instance(hash(address+salt))
+        self.fake.seed_instance(hash(address + salt))
         return self.fake.address()
 
     def replace_credit_card(self, credit_card: str, salt: str = "") -> str:
-        self.fake.seed_instance(hash(credit_card+salt))
+        self.fake.seed_instance(hash(credit_card + salt))
         return self.fake.credit_card_number()
 
     def replace_email_address(self, email_address: str, salt: str = "") -> str:
-        self.fake.seed_instance(hash(email_address+salt))
+        self.fake.seed_instance(hash(email_address + salt))
         return self.fake.email()
 
     def replace_iban_code(self, iban_code: str, salt: str = "") -> str:
-        self.fake.seed_instance(hash(iban_code+salt))
+        self.fake.seed_instance(hash(iban_code + salt))
         return self.fake.iban()
 
     async def call(self, input: str) -> tuple[str, Mapping[str, str]]:
         analyzer = Analyzer()
         anonymizer = Anonymizer()
         analysis = await analyzer.analyze(AnalyzerRequest(text=input))
-        anonymized = await anonymizer.anonymize(AnonymizerRequest(
-            text=input,
-            anonymizers=Anonymizers(
-                PERSON=Keep(),
-                PHONE_NUMBER=Keep(),
-                LOCATION=Keep(),
-                CREDIT_CARD=Keep(),
-                EMAIL_ADDRESS=Keep(),
-                IBAN_CODE=Keep(),
-                DEFAULT=Replace()
+        anonymized = await anonymizer.anonymize(
+            AnonymizerRequest(
+                text=input,
+                anonymizers=Anonymizers(
+                    PERSON=Keep(),
+                    PHONE_NUMBER=Keep(),
+                    LOCATION=Keep(),
+                    CREDIT_CARD=Keep(),
+                    EMAIL_ADDRESS=Keep(),
+                    IBAN_CODE=Keep(),
+                    DEFAULT=Replace(),
                 ),
-            analyzer_results=analysis,
-        ))
+                analyzer_results=analysis,
+            )
+        )
         mapping = {}
         for item in anonymized.items:
             # Compute a replacement value
@@ -87,5 +100,6 @@ class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
                 mapping[replacement] = item.text
             anonymized.text = f"{anonymized.text[:item.start]}{replacement}{anonymized.text[item.end:]}"
         return (anonymized.text, mapping)
+
 
 replace_masking = ReplaceMasking()

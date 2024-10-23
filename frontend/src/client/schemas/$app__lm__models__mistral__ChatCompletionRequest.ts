@@ -35,7 +35,7 @@ export const $app__lm__models__mistral__ChatCompletionRequest = {
         response_format: {
             type: 'any-of',
             contains: [{
-                type: 'ResponseFormat',
+                type: 'ResponseFormatBase',
             }, {
                 type: 'null',
             }],

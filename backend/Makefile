@@ -26,4 +26,12 @@ clean:
 	docker rmi $(IMAGE_NAME):$(TAG)
 	docker rmi $(REGISTRY)/$(IMAGE_NAME):$(TAG)
 
+ruff_check:
+	ruff format --config .tools-cfg/ruff.toml app 
+	ruff check --fix --config .tools-cfg/ruff.toml app 
+
+ruff_fix:
+	ruff format --config .tools-cfg/ruff.toml app 
+	ruff check --fix --config .tools-cfg/ruff.toml app 
+
 .PHONY: all build push up test clean

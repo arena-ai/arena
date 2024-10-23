@@ -76,7 +76,9 @@ export const $app__lm__models__openai__ChatCompletionRequest = {
         response_format: {
             type: 'any-of',
             contains: [{
-                type: 'ResponseFormat',
+                type: 'ResponseFormatJSONSchema',
+            }, {
+                type: 'ResponseFormatBase',
             }, {
                 type: 'null',
             }],

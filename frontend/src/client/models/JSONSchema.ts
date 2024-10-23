@@ -3,9 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type DocumentDataExtractorCreate = {
+export type JSONSchema = {
     name: string;
-    prompt: string;
-    response_template: Record<string, any[]>;
+    schema?: Record<string, any>;
+    strict?: (boolean | null);
 };
 

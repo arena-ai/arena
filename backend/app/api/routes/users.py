@@ -29,7 +29,9 @@ router = APIRouter()
 
 
 @router.get(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UsersOut
+    "/",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UsersOut,
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
@@ -46,7 +48,9 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 
 @router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserOut
+    "/",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserOut,
 )
 def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     """
@@ -62,7 +66,9 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     user = crud.create_user(session=session, user_create=user_in)
     if settings.emails_enabled and user_in.email:
         email_data = generate_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
+            email_to=user_in.email,
+            username=user_in.email,
+            password=user_in.password,
         )
         send_email(
             email_to=user_in.email,
@@ -81,7 +87,9 @@ def update_user_me(
     """
 
     if user_in.email:
-        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
+        existing_user = crud.get_user_by_email(
+            session=session, email=user_in.email
+        )
         if existing_user and existing_user.id != current_user.id:
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
@@ -101,11 +109,14 @@ def update_password_me(
     """
     Update own password.
     """
-    if not verify_password(body.current_password, current_user.hashed_password):
+    if not verify_password(
+        body.current_password, current_user.hashed_password
+    ):
         raise HTTPException(status_code=400, detail="Incorrect password")
     if body.current_password == body.new_password:
         raise HTTPException(
-            status_code=400, detail="New password cannot be the same as the current one"
+            status_code=400,
+            detail="New password cannot be the same as the current one",
         )
     hashed_password = get_password_hash(body.new_password)
     current_user.hashed_password = hashed_password
@@ -144,7 +155,9 @@ def create_user_open(session: SessionDep, user_in: UserCreateOpen) -> Any:
 
 
 @router.get("/open", response_class=RedirectResponse)
-def create_user_open_get(session: SessionDep, email: str, password: str, full_name: str | None) -> Any:
+def create_user_open_get(
+    session: SessionDep, email: str, password: str, full_name: str | None
+) -> Any:
     """
     Create new user without the need to be logged in.
     """
@@ -159,7 +172,9 @@ def create_user_open_get(session: SessionDep, email: str, password: str, full_na
             status_code=400,
             detail="The user with this email already exists in the system",
         )
-    user_create = UserCreate.model_validate(UserCreateOpen(email=email, password=password, full_name=full_name))
+    user_create = UserCreate.model_validate(
+        UserCreateOpen(email=email, password=password, full_name=full_name)
+    )
     user = crud.create_user(session=session, user_create=user_create)
     return "/"
 
@@ -204,13 +219,17 @@ def update_user(
             detail="The user with this id does not exist in the system",
         )
     if user_in.email:
-        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
+        existing_user = crud.get_user_by_email(
+            session=session, email=user_in.email
+        )
         if existing_user and existing_user.id != user_id:
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
 
-    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
+    db_user = crud.update_user(
+        session=session, db_user=db_user, user_in=user_in
+    )
     return db_user
 
 
@@ -230,7 +249,8 @@ def delete_user(
         )
     elif user == current_user and current_user.is_superuser:
         raise HTTPException(
-            status_code=403, detail="Super users are not allowed to delete themselves"
+            status_code=403,
+            detail="Super users are not allowed to delete themselves",
         )
     session.delete(user)
     session.commit()
