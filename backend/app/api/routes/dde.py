@@ -280,22 +280,22 @@ async def extract_from_file(*, session: SessionDep, current_user: CurrentUser, n
         ).model_dump(exclude_unset=True)
     
     chat_completion_response = await ArenaHandler(session, document_data_extractor.owner, chat_completion_request).process_request()
-    extracted_info=chat_completion_response.choices[0].message.content
-    token_info = chat_completion_response.choices[0].logprobs.content
+    extracted_data=chat_completion_response.choices[0].message.content
+    extracted_data_token = chat_completion_response.choices[0].logprobs.content
     #TODO: handle refusal or case in which content was not correctly done
     # TODO: Improve the prompt to ensure the output is always a valid JSON
-    json_string = extracted_info[extracted_info.find('{'):extracted_info.rfind('}')+1]
+    json_string = extracted_data[extracted_data.find('{'):extracted_data.rfind('}')+1]
     keys = list(pydantic_reponse.__fields__.keys())
-    value_indices = extract_tokens_indices_for_each_key(keys, token_info)
-    logprob_data = extract_logprobs_from_indices(value_indices, token_info)
-    return {'extracted_info': json.loads(json_string), 'logprob_data': logprob_data}
+    value_indices = extract_tokens_indices_for_each_key(keys, extracted_data_token)
+    logprobs = extract_logprobs_from_indices(value_indices, extracted_data_token)
+    return {'extracted_data': json.loads(json_string), 'logprobs': logprobs}
 
 class Token(TypedDict):
     token: str
     
 def extract_tokens_indices_for_each_key(keys: list[str], token_list:list[Token]) -> dict[str, list[int]]:
     """
-    Extracts the indices of tokens corresponding to extracted information related to a list of specified keys.
+    Extracts the indices of tokens corresponding to extracted data related to a list of specified keys.
 
     The extraction criteria are based on the following:
     - The function looks for tokens that match the specified keys.
@@ -315,8 +315,8 @@ def extract_tokens_indices_for_each_key(keys: list[str], token_list:list[Token])
     matched_key = None
     remaining_keys = keys.copy()
     saving_indices = False 
-    for i, token_info in enumerate(token_list):
-        token = token_info.token
+    for i, token_object in enumerate(token_list):
+        token = token_object.token
         if matched_key is not None:
             if saving_indices:
                 if token == '","' or token == ',"':
@@ -412,25 +412,25 @@ def find_key_by_value(combined_token: str, extracted_data: dict[str, Any]) -> st
 
 def extract_logprobs_from_response(response: ChatCompletionResponse, extracted_data: dict[str, Any]) -> dict[str, float | list[float]]:
     logprob_data = {}
-    tokens_info = response.choices[0].logprobs.content
+    extracted_data_token = response.choices[0].logprobs.content
 
     def process_numeric_values(extracted_data: dict[str, Any], path=''):
 
-        for i in range(len(tokens_info)-1):    
-            token = tokens_info[i].token
+        for i in range(len(extracted_data_token)-1):    
+            token = extracted_data_token[i].token
             
             if token.isdigit():          # Only process tokens that are numeric
-                combined_token, combined_logprob = combine_tokens(tokens_info, i)
+                combined_token, combined_logprob = combine_tokens(extracted_data_token, i)
                 if combined_token_in_extracted_data(combined_token, extracted_data.values()):     #Checks if a combined token matches any numeric values in the extracted data.
 
                     key = find_key_by_value(combined_token, extracted_data)                  #Finds the key in 'extracted_data' corresponding to a numeric value that matches the combined token.
                     if key:
                         full_key = path + key  
-                        logprob_data[full_key + '_prob_first_token'] = math.exp(tokens_info[i].logprob)
-                        logprob_data[full_key + '_prob_second_token'] = math.exp(tokens_info[i+1].logprob)
+                        logprob_data[full_key + '_prob_first_token'] = math.exp(extracted_data_token[i].logprob)
+                        logprob_data[full_key + '_prob_second_token'] = math.exp(extracted_data_token[i+1].logprob)
 
-                        toplogprobs_firsttoken = tokens_info[i].top_logprobs
-                        toplogprobs_secondtoken = tokens_info[i+1].top_logprobs
+                        toplogprobs_firsttoken = extracted_data_token[i].top_logprobs
+                        toplogprobs_secondtoken = extracted_data_token[i+1].top_logprobs
 
                         logprobs_first = [top_logprob.logprob for top_logprob in toplogprobs_firsttoken]
                         logprobs_second = [top_logprob.logprob for top_logprob in toplogprobs_secondtoken]
@@ -450,15 +450,15 @@ def extract_logprobs_from_response(response: ChatCompletionResponse, extracted_d
     return logprob_data
 
 
-def combine_tokens(tokens_info: list[TokenLogprob], start_index: int) -> tuple[str, float]: 
-    combined_token = tokens_info[start_index].token
-    combined_logprob = tokens_info[start_index].logprob
+def combine_tokens(extracted_data_token: list[TokenLogprob], start_index: int) -> tuple[str, float]: 
+    combined_token = extracted_data_token[start_index].token
+    combined_logprob = extracted_data_token[start_index].logprob
 
     # Keep combining tokens as long as the next token is a digit
-    for i in range(start_index + 1, len(tokens_info)):
-        if not tokens_info[i].token.isdigit():
+    for i in range(start_index + 1, len(extracted_data_token)):
+        if not extracted_data_token[i].token.isdigit():
             break
-        combined_token += tokens_info[i].token
-        combined_logprob += tokens_info[i].logprob
+        combined_token += extracted_data_token[i].token
+        combined_logprob += extracted_data_token[i].logprob
     
     return combined_token, combined_logprob
