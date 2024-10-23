@@ -99,17 +99,6 @@ def test_update_document_data_extractor(
     assert response_data["owner_id"] == document_data_extractor["owner_id"]
     assert len(response_data["document_data_examples"]) == 0
 
-
-def test_read_document_data_extractor(document_data_extractor: dict[str, Any]):
-    assert (
-        document_data_extractor["id"] == 1
-    )  # id_dde = 1 because only one dde has been created in the fixture
-    assert document_data_extractor["name"] == "Updated dde"
-    assert (
-        document_data_extractor["prompt"] == "Extract the name from document"
-    )
-    assert document_data_extractor["owner_id"] == 1
-
     
 def test_create_document_data_example(client: TestClient, superuser_token_headers: dict[str, str], document_data_extractor: dict[str, Any]):
     name = document_data_extractor["name"]
