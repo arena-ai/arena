@@ -51,12 +51,10 @@ class Analyzer:
                 json=req.model_dump(exclude_none=True),
                 timeout=1000,
             )
-            try:
-                return analyzer_response.validate_python(
-                    response.raise_for_status().json()
-                )
-            except httpx.HTTPStatusError:
-                return None
+        
+            return analyzer_response.validate_python(
+                response.raise_for_status().json()
+            )
 
 
 class Replace(BaseModel):
@@ -154,10 +152,8 @@ class Anonymizer:
                 url=f"{self.url}",
                 json=req.model_dump(exclude_none=True),
                 timeout=1000,
+            )        
+            return AnonymizerResponse.model_validate(
+                response.raise_for_status().json()
             )
-            try:
-                return AnonymizerResponse.model_validate(
-                    response.raise_for_status().json()
-                )
-            except httpx.HTTPStatusError:
-                return None
+
