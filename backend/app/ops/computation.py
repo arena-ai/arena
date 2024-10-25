@@ -1,4 +1,5 @@
 from typing import Any, Generic, TypeVar, TypeVarTuple
+import logging
 from types import NoneType
 from abc import ABC, abstractmethod
 from time import time
@@ -15,6 +16,8 @@ from pydantic import (
 As = TypeVarTuple("As")
 A = TypeVar("A")
 B = TypeVar("B")
+
+logger = logging.getLogger("uvicorn.error")
 
 
 # A mixin class to add hashability to pydantic models
@@ -197,6 +200,9 @@ class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
         All tasks should have been created
         """
         args = [await arg.task for arg in self.args]
+        logger.info(
+            f"Executing op {type(self.op)} with arguments of type {[type(el) for el in args]}"
+        )
         return await self.op.call(*args)
 
     def tasks(self, task_group: TaskGroup):
