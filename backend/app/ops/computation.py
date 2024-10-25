@@ -7,7 +7,6 @@ from asyncio import TaskGroup, Task
 import json
 import importlib
 import base64
-import sys
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -200,7 +199,7 @@ class Computation(Hashable, JsonSerializable, BaseModel, Generic[B]):
         All tasks should have been created
         """
         args = [await arg.task for arg in self.args]
-        logger.info(f'Executing op {self.op} with arguments {args}')
+        logger.info(f'Executing op {type(self.op)} with arguments of type {[type(el) for el in args]}')
         return await self.op.call(*args)
 
     def tasks(self, task_group: TaskGroup):
