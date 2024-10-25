@@ -490,11 +490,12 @@ async def extract_from_file(
     extracted_data_token = chat_completion_response.choices[0].logprobs.content
     #TODO: handle refusal or case in which content was not correctly done
     # TODO: Improve the prompt to ensure the output is always a valid JSON
+    #
     json_string = extracted_data[extracted_data.find('{'):extracted_data.rfind('}')+1]
-    keys = list(pydantic_reponse.__fields__.keys())
-    value_indices = extract_tokens_indices_for_each_key(keys, extracted_data_token)
-    logprobs = extract_logprobs_from_indices(value_indices, extracted_data_token)
-    return {'extracted_data': json.loads(json_string), 'logprobs': logprobs}
+    #keys = list(pydantic_reponse.__fields__.keys())
+    #value_indices = extract_tokens_indices_for_each_key(keys, extracted_data_token)
+    #logprobs = extract_logprobs_from_indices(value_indices, extracted_data_token)
+    return {'extracted_data': json.loads(json_string)}
 
 class Token(TypedDict):
     token: str
