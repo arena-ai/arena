@@ -6,7 +6,10 @@ from app.services.object_store import Documents
 import pytest
 import json
 from typing import Generator, Any
-from app.api.routes.dde import extract_tokens_indices_for_each_key, extract_logprobs_from_indices
+from app.api.routes.dde import (
+    extract_tokens_indices_for_each_key,
+    extract_logprobs_from_indices,
+)
 
 
 @pytest.fixture(scope="module")
@@ -15,17 +18,16 @@ def document_data_extractor(
 ) -> Generator[dict[str, Any], None, None]:
     fake_name = "Test_dde"
     fake_prompt = "Extract the adresse from document"
-    response_template = {
-        "adresse": [
-            "str",
-            "required"
-        ]
+    response_template = {"adresse": ["str", "required"]}
+
+    payload = {
+        "name": fake_name,
+        "prompt": fake_prompt,
+        "response_template": response_template,
     }
 
-    payload = {"name": fake_name, "prompt": fake_prompt, 'response_template':response_template}
-
     headers = superuser_token_headers
-    
+
     response = client.post(
         f"{settings.API_V1_STR}/dde",
         headers=headers,
@@ -39,7 +41,7 @@ def document_data_extractor(
         timestamp="2024-10-03T09:31:33.748765",
         owner_id=1,
         document_data_examples=[],
-        response_template = json.dumps(response_template)
+        response_template=json.dumps(response_template),
     )
 
     assert response.status_code == 200
@@ -91,7 +93,9 @@ def test_update_document_data_extractor(
     update_payload = {
         "name": updated_name,
         "prompt": document_data_extractor["prompt"],
-        "response_template": json.loads(document_data_extractor["response_template"])
+        "response_template": json.loads(
+            document_data_extractor["response_template"]
+        ),
     }
 
     response = client.put(
@@ -108,11 +112,18 @@ def test_update_document_data_extractor(
     assert response_data["prompt"] == document_data_extractor["prompt"]
     assert response_data["timestamp"] == document_data_extractor["timestamp"]
     assert response_data["owner_id"] == document_data_extractor["owner_id"]
-    assert response_data["response_template"] == document_data_extractor["response_template"]
+    assert (
+        response_data["response_template"]
+        == document_data_extractor["response_template"]
+    )
     assert len(response_data["document_data_examples"]) == 0
 
-    
-def test_create_document_data_example(client: TestClient, superuser_token_headers: dict[str, str], document_data_extractor: dict[str, Any]):
+
+def test_create_document_data_example(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    document_data_extractor: dict[str, Any],
+):
     name = document_data_extractor["name"]
 
     with patch.object(Documents, "exists", return_value=True):
@@ -155,7 +166,7 @@ def test_update_document_data_example(
 ):
     name_dde = document_data_extractor["name"]
     id_example = document_data_extractor["document_data_examples"][0]["id"]
-    updated_data = {'adresse': '2 ALLEE DES HORTENSIAS'}
+    updated_data = {"adresse": "2 ALLEE DES HORTENSIAS"}
 
     update_payload = {
         "document_id": document_data_extractor["document_data_examples"][0][
@@ -165,8 +176,12 @@ def test_update_document_data_example(
         "document_data_extractor_id": document_data_extractor[
             "document_data_examples"
         ][0]["document_data_extractor_id"],
-        "start_page":document_data_extractor["document_data_examples"][0]['start_page'],
-        "end_page":document_data_extractor["document_data_examples"][0]['end_page']
+        "start_page": document_data_extractor["document_data_examples"][0][
+            "start_page"
+        ],
+        "end_page": document_data_extractor["document_data_examples"][0][
+            "end_page"
+        ],
     }
 
     document_data_extractor["document_data_examples"][0]["data"] = updated_data
@@ -186,59 +201,111 @@ def test_update_document_data_example(
         assert response_data["document_data_extractor_id"] == 1
         assert response_data["id"] == 1
 
+
 class TopLogprob:
     def __init__(self, logprob: float):
         self.logprob = logprob
 
+
 class Token:
     def __init__(self, token: str, top_logprobs: list[TopLogprob]):
         self.token = token
-        self.top_logprobs = top_logprobs 
-        
+        self.top_logprobs = top_logprobs
+
+
 @pytest.fixture()
 def token_list() -> list[Token]:
-    tokens = ['{', 'na', 'me', '":"', 'Mi', 'cha', 'el', '","', 'smi', 'th', '","', 'age', '":', '35', ',"' , 'natio', 'nality', '":"', 'Eng', 'lish', '}']
+    tokens = [
+        "{",
+        "na",
+        "me",
+        '":"',
+        "Mi",
+        "cha",
+        "el",
+        '","',
+        "smi",
+        "th",
+        '","',
+        "age",
+        '":',
+        "35",
+        ',"',
+        "natio",
+        "nality",
+        '":"',
+        "Eng",
+        "lish",
+        "}",
+    ]
     token_list = [Token(token, []) for token in tokens]
     return token_list
 
+
 @pytest.fixture()
 def token_logprobs_list() -> list[Token]:
-    tokens = ['{', 'na', 'me', '":"', 'Mi', 'cha', 'el', '","', 'smi', 'th', '","', 'age', '":', '35', ',"' , 'natio', 'nality', '":"', 'Eng', 'lish', '}']
+    tokens = [
+        "{",
+        "na",
+        "me",
+        '":"',
+        "Mi",
+        "cha",
+        "el",
+        '","',
+        "smi",
+        "th",
+        '","',
+        "age",
+        '":',
+        "35",
+        ',"',
+        "natio",
+        "nality",
+        '":"',
+        "Eng",
+        "lish",
+        "}",
+    ]
     logprobs = [-5.42e-05, -10.50, -11.50, -12.50, -13.750]
     logprobs_list = [TopLogprob(logprob) for logprob in logprobs]
     token_list = [Token(token, logprobs_list) for token in tokens]
 
     return token_list
-    
+
+
 def test_extract_tokens_indices_for_each_key(token_list: list[Token]):
-    keys = ['name', 'age', 'nationality']
+    keys = ["name", "age", "nationality"]
     expected_result = {
-        'name': [4, 9],
-        'age': [13, 13],
-        'nationality': [18, 19]
+        "name": [4, 9],
+        "age": [13, 13],
+        "nationality": [18, 19],
     }
     result = extract_tokens_indices_for_each_key(keys, token_list)
-    
+
     assert result == expected_result
+
 
 def test_extract_logprobs_from_indices(token_logprobs_list: list[Token]):
     expected_value_indices = {
-        'name': [4, 9],
-        'age': [13, 13],
-        'nationality': [18, 19]
+        "name": [4, 9],
+        "age": [13, 13],
+        "nationality": [18, 19],
     }
     expected_logprobs = -5.42e-05
     expected_result = {
-        'name': [expected_logprobs] * 6,    
-        'age': [expected_logprobs],         
-        'nationality': [expected_logprobs] * 2  
+        "name": [expected_logprobs] * 6,
+        "age": [expected_logprobs],
+        "nationality": [expected_logprobs] * 2,
     }
-    result = extract_logprobs_from_indices(expected_value_indices, token_logprobs_list)
+    result = extract_logprobs_from_indices(
+        expected_value_indices, token_logprobs_list
+    )
 
     assert result == expected_result
-    
-#TODO: test extract_from_file
-   
+
+
+# TODO: test extract_from_file
 
 
 # TODO: test extract_from_file
