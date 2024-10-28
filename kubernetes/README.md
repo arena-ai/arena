@@ -22,6 +22,7 @@ helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set backend.smtp.user=${SMTP_USER} \
 --set backend.smtp.password="${SMTP_PASSWORD}" \
 --set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
+--namespace arena --create-namespace
 ```
 
 Or if you use a `.env` file:
@@ -41,6 +42,7 @@ source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set backend.smtp.user=${SMTP_USER} \
 --set backend.smtp.password="${SMTP_PASSWORD}" \
 --set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
+--namespace arena --create-namespace
 ```
 
 To uninstall:
@@ -72,4 +74,5 @@ source .env; helm upgrade --install ${RELEASE_NAME} kubernetes/arena \
 --set backend.smtp.user=${SMTP_USER} \
 --set backend.smtp.password="${SMTP_PASSWORD}" \
 --set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
+--namespace arena --create-namespace
 ```

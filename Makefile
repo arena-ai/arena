@@ -58,6 +58,7 @@ kubernetes:
 	--set backend.smtp.user=${SMTP_USER} \
 	--set backend.smtp.password="${SMTP_PASSWORD}" \
 	--set backend.usersOpenRegistration=${USERS_OPEN_REGISTRATION}
+#	--namespace arena --create-namespace
 
 # Deploy the helm app
 kubernetes-staging:
@@ -74,6 +75,7 @@ kubernetes-staging:
 	--set cluster.tls.enabled=True \
 	# --set cluster.tls.issuer.name=letsencrypt-staging \
 	# --set cluster.tls.issuer.privateKeySecretRef=letsencrypt-staging
+	--namespace arena --create-namespace
 
 
 # Deploy the k8s dashboard
