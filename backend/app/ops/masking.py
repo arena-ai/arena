@@ -61,17 +61,19 @@ class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
                 CREDIT_CARD=Keep(),
                 EMAIL_ADDRESS=Keep(),
                 IBAN_CODE=Keep(),
-                DEFAULT=Replace()
+                DEFAULT=Keep()          #modificato  
                 ),
             analyzer_results=analysis,
         ))
         mapping = {}
+        print("anonymized",anonymized)
+        print("anonymized.items",anonymized.items)
         for item in anonymized.items:
             # Compute a replacement value
             if item.entity_type == "PERSON":
                 replacement = self.replace_person(item.text, input)
             elif item.entity_type == "PHONE_NUMBER":
-                replacement = self.replace_person(item.text, input)
+                replacement = self.replace_phone_number(item.text, input)    #ho modificato
             elif item.entity_type == "LOCATION":
                 replacement = self.replace_address(item.text, input)
             elif item.entity_type == "CREDIT_CARD":
@@ -83,9 +85,14 @@ class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
             else:
                 replacement = item.text
             # keeps track of the replacement
-            if replacement != item.text:
-                mapping[replacement] = item.text
-            anonymized.text = f"{anonymized.text[:item.start]}{replacement}{anonymized.text[item.end:]}"
+            print("replacement", replacement)
+            if replacement != item.text and item.entity_type != "PHONE_NUMBER":
+                mapping[replacement] = {
+                    "text": item.text,
+                    "start": item.start,  
+                    "end": item.end       
+                }
+                anonymized.text = f"{anonymized.text[:item.start]}{replacement}{anonymized.text[item.end:]}"   #non deve rientrare nell'if?
         return (anonymized.text, mapping)
 
 replace_masking = ReplaceMasking()
