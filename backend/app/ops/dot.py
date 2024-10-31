@@ -1,6 +1,7 @@
-from app.ops import Op, Computation
-from app.ops.computation import FlatComputation, FlatComputations
+from app.ops import Computation
+from app.ops.computation import FlatComputations
 from pydot import Node, Edge, Dot
+
 
 def dot(computation: Computation) -> Dot:
     graph = Dot("computation", graph_type="digraph")

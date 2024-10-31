@@ -1,7 +1,7 @@
-from sqlmodel import Session
 from anyio import run
 
 from app.ops.masking import Masking, ReplaceMasking
+
 
 def test_masking(text_with_pii) -> None:
     masking = Masking()

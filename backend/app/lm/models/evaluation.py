@@ -15,4 +15,3 @@ class Score(Value):
 class Evaluation(BaseModel):
     identifier: str
     value: Score
-

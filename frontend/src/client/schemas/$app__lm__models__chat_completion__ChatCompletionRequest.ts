@@ -79,7 +79,9 @@ export const $app__lm__models__chat_completion__ChatCompletionRequest = {
         response_format: {
             type: 'any-of',
             contains: [{
-                type: 'ResponseFormat',
+                type: 'ResponseFormatJSONSchema',
+            }, {
+                type: 'ResponseFormatBase',
             }, {
                 type: 'null',
             }],

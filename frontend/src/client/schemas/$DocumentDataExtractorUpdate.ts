@@ -20,5 +20,18 @@ export const $DocumentDataExtractorUpdate = {
                 type: 'null',
             }],
         },
+        response_template: {
+            type: 'any-of',
+            contains: [{
+                type: 'dictionary',
+                contains: {
+                    type: 'any[]',
+                    maxItems: 2,
+                    minItems: 2,
+                },
+            }, {
+                type: 'null',
+            }],
+        },
     },
 } as const;

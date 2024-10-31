@@ -8,6 +8,7 @@ store = Minio(
     secure=False,
 )
 
+
 def init_store(object_storage: Minio) -> None:
     for bucket in [
         settings.MINIO_DOCUMENT_BUCKET,

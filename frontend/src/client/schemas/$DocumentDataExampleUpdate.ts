@@ -15,7 +15,15 @@ export const $DocumentDataExampleUpdate = {
         data: {
             type: 'any-of',
             contains: [{
-                type: 'string',
+                type: 'dictionary',
+                contains: {
+                    type: 'any-of',
+                    contains: [{
+                        type: 'string',
+                    }, {
+                        type: 'null',
+                    }],
+                },
             }, {
                 type: 'null',
             }],

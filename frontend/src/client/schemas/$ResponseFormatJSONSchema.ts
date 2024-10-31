@@ -2,15 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ResponseFormat = {
+export const $ResponseFormatJSONSchema = {
     properties: {
+        json_schema: {
+            type: 'JSONSchema',
+            isRequired: true,
+        },
         type: {
-            type: 'any-of',
-            contains: [{
-                type: 'Enum',
-            }, {
-                type: 'null',
-            }],
+            type: 'Enum',
+            isRequired: true,
         },
     },
 } as const;

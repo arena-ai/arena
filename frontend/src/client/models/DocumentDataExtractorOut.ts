@@ -12,5 +12,6 @@ export type DocumentDataExtractorOut = {
     timestamp: string;
     owner_id: number;
     document_data_examples: Array<DocumentDataExample>;
+    response_template: string;
 };
 
