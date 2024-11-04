@@ -62,44 +62,29 @@ class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
     async def call(self, input: str) -> tuple[str, Mapping[str, str]]:
         analyzer = Analyzer()
         anonymizer = Anonymizer()
-        analysis = await analyzer.analyze(AnalyzerRequest(text=input))
+        #Passing only the relevant entities to the analyzer so the model searches for these specifically.
+        entities = ["LOCATION","PERSON"]
+        analysis = await analyzer.analyze(AnalyzerRequest(text=input, entities=entities))
         anonymized = await anonymizer.anonymize(AnonymizerRequest(
             text=input,
             anonymizers=Anonymizers(
                 PERSON=Keep(),
                 LOCATION=Keep(),
-                EMAIL_ADDRESS=Keep(),
-                DEFAULT=Keep(),                                    
+                EMAIL_ADDRESS=Keep()                                   
                 ),
                 analyzer_results=analysis,
             )
         )
         mapping = {}
-        print("anonymized",anonymized)
-        for item in anonymized.items:
-            if item.entity_type in ["PERSON", "LOCATION", "EMAIL_ADDRESS"]:
-                print(f"{item.entity_type}: {item.text}")
         for item in anonymized.items:
             # Compute a replacement value
             if item.entity_type == "PERSON":
                 replacement = self.replace_person(item.text, input)
-                print("PERSON", replacement, item.text)
-            #elif item.entity_type == "PHONE_NUMBER":
-             #   replacement = self.replace_phone_number(item.text, input)   
             elif item.entity_type == "LOCATION":
                 replacement = self.replace_address(item.text, input)
-            #elif item.entity_type == "CREDIT_CARD":
-             #   replacement = self.replace_credit_card(item.text, input)
-            elif item.entity_type == "EMAIL_ADDRESS":
-                replacement = self.replace_email_address(item.text, input)
-            #elif item.entity_type == "IBAN_CODE":
-             #   replacement = self.replace_iban_code(item.text, input)
-            else:
-                replacement = item.text                      
-            # keeps track of the replacement
-            if replacement != item.text:
-                mapping[replacement] = item.text
-                anonymized.text = f"{anonymized.text[:item.start]}{replacement}{anonymized.text[item.end:]}"   
+  
+            mapping[replacement] = item.text
+            anonymized.text = f"{anonymized.text[:item.start]}{replacement}{anonymized.text[item.end:]}"   
         return (anonymized.text, mapping)
 
 

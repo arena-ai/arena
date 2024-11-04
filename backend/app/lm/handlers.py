@@ -103,10 +103,8 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         config_event = log_lm_config(ses, usr, arena_request_event, config)
         # Build the request
         lm_request = await self.lm_request().evaluate(session=self.session)
-        print('messagges_prompt',lm_request.content.messages[0])
-        print('messagges_doc',lm_request.content.messages[1])
         lm_request_event = arena_request_event
-        mapping_list = []   
+        mapping_dict = {}   
         # Do the masking
         if config.pii_removal:  # TODO an IF op could be added to build conditional delayed computations if needed
             if config.pii_removal == "masking":
@@ -119,10 +117,12 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
                         async def set_content(message=message):
-                            message.content, _ = await replace_masking(message.content).evaluate(session=self.session)
-                            print("mapping", _)
-                            print("message.content", message.content)
-                            mapping_list.append(_)
+                            message.content, mapping = await replace_masking(message.content).evaluate(session=self.session)
+                            if message.role == 'user':    
+                                # Update the mapping dictionary only with mappings from messages whose role is user
+                                # since the content needs to be replaced back only for these messages.
+                                # For system messages, we want to anonymyze but we do not want to replace back as we may leak some info of the examples to the user.
+                                mapping_dict.update(mapping)
                         tg.start_soon(set_content)
             # Log the request event
             lm_request_event = LogRequest(name="modified_request")(ses, usr, arena_request_event, lm_request)
@@ -154,9 +154,7 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         # post-process the (request, response) pair
 
         if  config.pii_removal == "replace":
-            chat_completion_data = chat_completion_response.choices[0].message.content
-#should I pass the entire mapping_list to replace_back, or is there a consistent position (like first or second) for the mapping of the response?
-            chat_completion_with_real_entities = replace_back(chat_completion_data, mapping_list[1])
+            chat_completion_with_real_entities = replace_back(chat_completion_response, mapping_dict)
 
         if config.judge_evaluation:
             judge_score = judge(
@@ -172,12 +170,14 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
             evaluate.delay(judge_score.then(judge_score_event))
         return chat_completion_with_real_entities
 
-def replace_back(text: str, mapping: list[dict[str,str]]) -> str:
-        for fake_entity, real_entity in mapping.items():
-            print("text",text)
-            text = text.replace(real_entity, fake_entity)
-            print("text",text)
-        return text
+
+def replace_back(chat_completion_response: ChatCompletionResponse, mapping: dict[str,str]) -> str:
+#Replacing entities in the chat response text with the actual entities specified in the `mapping` dictionary to ensure that the JSON response contains the real information.
+    chat_completion_text = chat_completion_response.choices[0].message.content
+    for fake_entity, real_entity in mapping.items():
+        chat_completion_text = chat_completion_text.replace(fake_entity, real_entity)
+    chat_completion_response.choices[0].message.content=chat_completion_text
+    return chat_completion_response
 
 class OpenAIHandler(
     ChatCompletionHandler[
