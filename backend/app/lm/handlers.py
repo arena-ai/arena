@@ -153,9 +153,6 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
         ).evaluate(session=self.session)
         # post-process the (request, response) pair
 
-        if  config.pii_removal == "replace":
-            chat_completion_with_real_entities = replace_back(chat_completion_response, mapping_dict)
-
         if config.judge_evaluation:
             judge_score = judge(
                 language_models_api_keys(ses, usr),
@@ -168,7 +165,12 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
                 ses, usr, event(ses, arena_request_event.id), judge_score
             )
             evaluate.delay(judge_score.then(judge_score_event))
-        return chat_completion_with_real_entities
+        
+        if  config.pii_removal == "replace":
+            chat_completion_with_real_entities = replace_back(chat_completion_response, mapping_dict)
+            return chat_completion_with_real_entities
+        
+        return chat_completion_response
 
 
 def replace_back(chat_completion_response: ChatCompletionResponse, mapping: dict[str,str]) -> str:
