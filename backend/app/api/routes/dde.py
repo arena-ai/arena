@@ -1,16 +1,18 @@
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal
 from fastapi import APIRouter, HTTPException, status, UploadFile
 from fastapi.responses import JSONResponse
 from sqlmodel import func, select
 from sqlalchemy.exc import IntegrityError
 import json
 import io
+import re
 from pydantic import create_model, ValidationError
 from app.api.deps import CurrentUser, SessionDep
 from app.services import crud
 from app.lm.models import (
     ChatCompletionRequest,
     Message as ChatCompletionMessage,
+    TokenLogprob,
 )
 from app.services.object_store import documents
 from app.services.pdf_reader import pdf_reader
@@ -500,97 +502,109 @@ async def extract_from_file(
     json_string = extracted_data[
         extracted_data.find("{") : extracted_data.rfind("}") + 1
     ]
-    # keys = list(pydantic_reponse.__fields__.keys())
-    # value_indices = extract_tokens_indices_for_each_key(keys, extracted_data_token)
-    # logprobs = extract_logprobs_from_indices(value_indices, extracted_data_token)
-    return {"extracted_data": json.loads(json_string)}
+    token_indices=map_characters_to_token_indices(extracted_data_token)
+    regex_spans=find_value_spans(extracted_data)
+    logprobs_sum=get_token_spans_and_logprobs(token_indices, regex_spans, extracted_data_token)
+    return {"extracted_data": json.loads(json_string), "extracted_logprobs":logprobs_sum}
 
 
-class Token(TypedDict):
-    token: str
-
-
-def extract_tokens_indices_for_each_key(
-    keys: list[str], token_list: list[Token]
-) -> dict[str, list[int]]:
+def map_characters_to_token_indices(extracted_data_token: list[TokenLogprob]) -> list[int]:
     """
-    Extracts the indices of tokens corresponding to extracted data related to a list of specified keys.
-
-    The extraction criteria are based on the following:
-    - The function looks for tokens that match the specified keys.
-    - It saves the indices of the tokens that correspond to the values extracted by the model for each key.
-    - Tokens' indices are saved if they follow the pattern '":' or '":"'.
-    - It stops saving indices if it encounters a token that indicates the start of a new key or the end of the object.
-
+    Maps each character in the JSON string output to its corresponding token index.
+    
     Args:
-        keys (list[str]): A list of keys for which to find corresponding token indices.
-        token_list (list[Token]): A list of Token objects, each containing a token.
+    extracted_data_token : A list of `TokenLogprob` objects, where each object represents a token and its data (such as the logprobs)
 
     Returns:
-        dict[str, list[int]]: A dictionary mapping each key to the corresponding indices of the tokens representing the values extracted by the model.
+    A list of integers where each position corresponds to a character in the concatenated JSON string,
+    and the integer at each position is the index of the token responsible for generating that specific character in the JSON string.
+    
+    Example:
+    --------
+    Given `extracted_data_token = [TokenLogprob(token='{'), TokenLogprob(token='"key1"'), TokenLogprob(token=': '), TokenLogprob(token='"value1"'), TokenLogprob(token='}')]`
+    the JSON output is : '{"key1": "value1"}' and the function will return the list [0, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4]
+    
     """
-    value_indices = {key: [] for key in keys}
-    current_key = ""
-    matched_key = None
-    remaining_keys = keys.copy()
-    saving_indices = False
-    for i, token_object in enumerate(token_list):
-        token = token_object.token
-        if matched_key is not None:
-            if saving_indices:
-                if token == '","' or token == ',"':
-                    next_token = (
-                        token_list[i + 1].token
-                        if i + 1 < len(token_list)
-                        else None
-                    )
-                    if next_token is not None and any(
-                        key.startswith(next_token) for key in remaining_keys
-                    ):
-                        value_indices[matched_key].append(
-                            i - 1
-                        )  # stop saving indices when token is "," and the next token is the start of one of the keys
-                        matched_key = None
-                        saving_indices = False
-                        current_key = ""
-                        continue
-                elif token_list[i + 1].token == "}":
-                    value_indices[matched_key].append(
-                        i
-                    )  # stop saving indices when the next token is '}'
-                    matched_key = None
-                    saving_indices = False
-                    current_key = ""
-                    continue
-                continue
-            elif token == '":' or token == '":"':
-                value_indices[matched_key].append(
-                    i + 1
-                )  # start saving indices after tokens '":' or '":"'
-                saving_indices = True
-        else:
-            current_key += token
-            for key in remaining_keys:
-                if key.startswith(current_key):
-                    if current_key == key:
-                        matched_key = key  # full key matched
-                        remaining_keys.remove(key)
-                    break
-            else:
-                current_key = ""
-    return value_indices
+
+    json_output = "".join(token_data.token for token_data in extracted_data_token)
+                    
+    token_indices = [None] * len(json_output)
+    current_char_pos = 0
+
+    for token_idx, token_data in enumerate(extracted_data_token):
+        token_text = token_data.token
+        for char_pos in range(len(token_text)):
+            token_indices[current_char_pos] = token_idx
+            current_char_pos += 1
+
+    return token_indices
+
+def find_value_spans(json_string: str) -> list[tuple[str, tuple[int, int]]]:
+    """
+    Extracts spans (start and end positions) of values (both strings or numbers) within a JSON-formatted string.
+
+    Args:
+    json_string : A JSON-formatted string where values are paired with keys and separated by colons.
+    
+    Returns:
+    A list of tuples, where each tuple contains the matched value of the key and a tuple with two integers (start, end), representing the character span of the respective value within `json_string`.
+
+    Example:
+    --------
+    Given `json_string = '{"key1": "value1"}'`, the function will return:
+        [("key1", (9, 17))]
+    """
+ 
+    pattern = r'"([^"\n}]+)"\s*:\s*("[^"\n]+"|[-0-9.eE]+)\s*'
+
+    matches = []
+    for match in re.finditer(pattern, json_string):
+        value = match.group(1)
+        start = match.start(2)  
+        end = match.end(2)      
+        matches.append((value, (start, end)))
+    return matches
 
 
-def extract_logprobs_from_indices(
-    value_indices: dict[str, list[int]], token_list: list[Token]
-) -> dict[str, list[Any]]:
-    logprobs = {key: [] for key in value_indices}
-    for key, indices in value_indices.items():
-        start_idx = indices[0]
-        end_idx = indices[-1]
-        for i in range(start_idx, end_idx + 1):
-            logprobs[key].append(token_list[i].top_logprobs[0].logprob)
-    return logprobs
+def get_token_spans_and_logprobs(
+    token_indices: list[int], 
+    value_spans: list[tuple[str, tuple[int, int]]], 
+    extracted_data_token: list[TokenLogprob]
+) -> dict[str,float]:
+    """
+    Identifies the token indices for each value span and extracts the log probabilities for these tokens, summing them to provide an overall log probability for each value span. 
+
+    Args:
+        token_indices : A list mapping each character in the json string to a token index
+        value_spans : A list of tuples, each containing the value of the key and the character sapn within the JSON string
+        extracted_data_token : A list of `TokenLogprob` objects, each containing a token and its log probability data, where the index of each item corresponds to its token index.
+
+    Returns:
+    A dictionary mapping each key to the summed log probability of all the tokens that cotntains part of its value.
+
+
+    Example:
+    --------
+    Given:
+      - `token_indices = [0, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4]`, which maps each character to a token index.
+      - `value_spans = [("key1", (9, 17))]`.
+      - `extracted_data_token = [TokenLogprob(token="{", logprob=-1.5), TokenLogprob(token="key1", logprob=-1), TokenLogprob(token=": ", logprob=-1), TokenLogprob(token="value1", logprob=-1.5), TokenLogprob(token="}", logprob=-0.8)]`
+   
+    The function will return:
+      {"key1": -1.5} 
+    """
+    logprobs_for_values = {}
+
+    for value, (start, end) in value_spans:
+        token_start = token_indices[start]
+        token_end = token_indices[end] 
+        logprobs = [
+            extracted_data_token[token_idx].logprob
+            for token_idx in range(token_start, token_end)
+        ]
+        logprobs_for_values[value] = sum(logprobs)
+
+    return logprobs_for_values
 
 
 def create_pydantic_model(
