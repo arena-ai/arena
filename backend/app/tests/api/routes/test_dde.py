@@ -7,8 +7,9 @@ import pytest
 import json
 from typing import Generator, Any
 from app.api.routes.dde import (
-    extract_tokens_indices_for_each_key,
-    extract_logprobs_from_indices,
+    map_characters_to_token_indices,
+    find_value_spans,
+    get_token_spans_and_logprobs,
 )
 
 
@@ -202,110 +203,67 @@ def test_update_document_data_example(
         assert response_data["id"] == 1
 
 
-class TopLogprob:
-    def __init__(self, logprob: float):
+class TokenLogprob:
+    def __init__(self, token: str, logprob: float):
+        self.token = token
         self.logprob = logprob
 
-
-class Token:
-    def __init__(self, token: str, top_logprobs: list[TopLogprob]):
-        self.token = token
-        self.top_logprobs = top_logprobs
-
-
-@pytest.fixture()
-def token_list() -> list[Token]:
-    tokens = [
-        "{",
-        "na",
-        "me",
-        '":"',
-        "Mi",
-        "cha",
-        "el",
-        '","',
-        "smi",
-        "th",
-        '","',
-        "age",
-        '":',
-        "35",
-        ',"',
-        "natio",
-        "nality",
-        '":"',
-        "Eng",
-        "lish",
-        "}",
+@pytest.fixture
+def data_token():
+    return [
+        TokenLogprob(token='{',  logprob = -1.9365e-07),          # Token index 0
+        TokenLogprob(token='"key1"',  logprob =  -0.01117),       # Token index 1
+        TokenLogprob(token=': "',  logprob = -0.00279),            # Token index 2
+        TokenLogprob(token='val', logprob = -1.1472e-06),        # Token index 3
+        TokenLogprob(token='ue1"', logprob = -0.00851),           # Token index 4
+        TokenLogprob(token=', "', logprob = -0.00851),            # Token index 5
+        TokenLogprob(token='key2', logprob = -0.00851),           # Token index 6
+        TokenLogprob(token='": ', logprob = -0.00851),            # Token index 7
+        TokenLogprob(token='42', logprob = -0.00851),             # Token index 8
+        TokenLogprob(token='}', logprob = -1.265e-07)             # Token index 9
     ]
-    token_list = [Token(token, []) for token in tokens]
-    return token_list
 
+@pytest.fixture
+def token_indices():
+    return [0,             
+            1, 1, 1, 1, 1, 1,  
+            2, 2, 2,           
+            3, 3, 3, 
+            4, 4, 4, 4,  
+            5, 5, 5,
+            6, 6, 6, 6,
+            7, 7, 7,
+            8, 8,
+            9] 
+    
+@pytest.fixture
+def sample_json_string():
+    return '{"key1": "value1", "key2": 42}'
 
-@pytest.fixture()
-def token_logprobs_list() -> list[Token]:
-    tokens = [
-        "{",
-        "na",
-        "me",
-        '":"',
-        "Mi",
-        "cha",
-        "el",
-        '","',
-        "smi",
-        "th",
-        '","',
-        "age",
-        '":',
-        "35",
-        ',"',
-        "natio",
-        "nality",
-        '":"',
-        "Eng",
-        "lish",
-        "}",
+@pytest.fixture
+def value_spans():
+    return [
+        ("key1", (9, 17)),   
+        ("key2", (27, 29))        
     ]
-    logprobs = [-5.42e-05, -10.50, -11.50, -12.50, -13.750]
-    logprobs_list = [TopLogprob(logprob) for logprob in logprobs]
-    token_list = [Token(token, logprobs_list) for token in tokens]
 
-    return token_list
+def test_map_characters_to_token_indices(data_token, token_indices):             
+    result = map_characters_to_token_indices(data_token)
 
+    assert result == token_indices
+    assert result.count(1) == len(data_token[1].token)
 
-def test_extract_tokens_indices_for_each_key(token_list: list[Token]):
-    keys = ["name", "age", "nationality"]
-    expected_result = {
-        "name": [4, 9],
-        "age": [13, 13],
-        "nationality": [18, 19],
-    }
-    result = extract_tokens_indices_for_each_key(keys, token_list)
+def test_find_value_spans(sample_json_string, value_spans):
+    result = find_value_spans(sample_json_string)
 
-    assert result == expected_result
+    assert result == value_spans
+    assert sample_json_string[9:17] == '"value1"'
+    assert sample_json_string[27:29] == '42'
 
+def test_get_token_spans_and_logprobs(token_indices, value_spans, data_token):
+    expected_output = {"key1": -0.0113011472, "key2": -0.00851}
+    result = get_token_spans_and_logprobs(token_indices, value_spans, data_token)
 
-def test_extract_logprobs_from_indices(token_logprobs_list: list[Token]):
-    expected_value_indices = {
-        "name": [4, 9],
-        "age": [13, 13],
-        "nationality": [18, 19],
-    }
-    expected_logprobs = -5.42e-05
-    expected_result = {
-        "name": [expected_logprobs] * 6,
-        "age": [expected_logprobs],
-        "nationality": [expected_logprobs] * 2,
-    }
-    result = extract_logprobs_from_indices(
-        expected_value_indices, token_logprobs_list
-    )
-
-    assert result == expected_result
-
-
-# TODO: test extract_from_file
-
-
+    assert result == expected_output
+    
 # TODO: test extract_from_file
