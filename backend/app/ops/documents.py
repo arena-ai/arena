@@ -65,7 +65,7 @@ class AsText(Op[tuple[User, str], str]):
                         input, start_page=start_page, end_page=end_page
                     ),
                 )
-            elif content_type == "application/xlsx":
+            elif content_type == "application/vnd.ms-excel":
                 df = pd.read_excel(input)
                 documents.puts(
                     path_as_text,
@@ -103,10 +103,7 @@ class AsPng(Op[tuple[User, str], str]):
                         byte_stream
                         ),
             else:
-                documents.puts(path, "Error: Could not read as png")
-# should I output anything? 
-        #output = 
-        #return output.read().decode("utf8")
+                documents.puts(path_as_png, "Error: Could not read as png")
 
 
 as_png = AsPng()

@@ -59,7 +59,7 @@ class PDFReader:
             for page_num, page in enumerate(doc)
             if page_num >= start_page and (not end_page or page_num < end_page)
         ]
-        buffers = []
+        page_buffer_pairs = []
 
         for page_num in pages:
             page = doc.load_page(page_num)
@@ -67,9 +67,9 @@ class PDFReader:
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
             buffer = BytesIO()
             img.save(buffer, format="PNG", optimize=True, compress_level=0)
-            buffers.append((page_num, buffer))
+            page_buffer_pairs.append((page_num, buffer))
 
-        return buffers
+        return page_buffer_pairs
 
 
 # A default instance

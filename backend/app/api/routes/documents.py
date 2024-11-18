@@ -95,7 +95,7 @@ async def read_file_as_text(
     return await as_text(current_user, name, start_page, end_page).evaluate()
 
 @router.get("/{name}/as_png")
-async def read_file_as_text(
+async def read_file_as_png(
     *,
     current_user: CurrentUser,
     name: str,
