@@ -6,7 +6,8 @@ from pydantic import BaseModel
 
 from app.api.deps import CurrentUser
 from app.services.object_store import documents
-from app.ops.documents import path, paths, as_text
+from app.ops.documents import path, paths, as_text, as_png
+
 from app.models import Message
 
 
@@ -92,3 +93,13 @@ async def read_file_as_text(
     end_page: int | None = None,
 ) -> str:
     return await as_text(current_user, name, start_page, end_page).evaluate()
+
+@router.get("/{name}/as_png")
+async def read_file_as_text(
+    *,
+    current_user: CurrentUser,
+    name: str,
+    start_page: int = 0,
+    end_page: int | None = None,
+) -> None:
+    return await as_png(current_user, name, start_page, end_page).evaluate()
