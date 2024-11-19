@@ -1,4 +1,5 @@
 from io import BytesIO
+import pandas as pd
 
 from app.models import User
 from app.ops import Op
@@ -54,6 +55,7 @@ class AsText(Op[tuple[User, str], str]):
             path_as_text = f"{source_path}as_text_from_page_{start_page}"
         else:
             path_as_text = f"{source_path}as_text"
+
         if not documents.exists(path_as_text):
             # The doc should be created
             if content_type == "application/pdf":
@@ -63,6 +65,12 @@ class AsText(Op[tuple[User, str], str]):
                         input, start_page=start_page, end_page=end_page
                     ),
                 )
+            elif content_type == "application/vnd.ms-excel":
+                df = pd.read_excel(input)
+                documents.puts(
+                    path_as_text,
+                    df.to_csv(index=False)
+                    )
             else:
                 documents.puts(path_as_text, "Error: Could not read as text")
         # output the file
@@ -71,3 +79,31 @@ class AsText(Op[tuple[User, str], str]):
 
 
 as_text = AsText()
+
+
+class AsPng(Op[tuple[User, str], str]):
+    async def call(
+        self,
+        user: User,
+        name: str,
+        start_page: int = 0,
+        end_page: int | None = None,
+    ) -> None:
+        source_path = await path.call(user, name)
+        input = BytesIO(documents.get(f"{source_path}data").read())
+        content_type = documents.gets(f"{source_path}content_type")
+
+        pages_bytes = pdf_reader.as_png(input, start_page=start_page, end_page=end_page)
+
+        for page, byte_stream in pages_bytes:
+            path_as_png = f"{source_path}as_png_page_{page}"
+            if content_type == "application/pdf":
+                documents.put(
+                        path_as_png,
+                        byte_stream
+                        ),
+            else:
+                documents.puts(path_as_png, "Error: Could not read as png")
+
+
+as_png = AsPng()
