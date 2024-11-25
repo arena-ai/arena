@@ -1,11 +1,11 @@
 from io import BytesIO
-import pandas as pd
-
+from typing import BinaryIO
 from app.models import User
 from app.ops import Op
 from app.services.object_store import documents
 from app.services.pdf_reader import pdf_reader
-
+from app.services.excel_reader import excel_reader
+from app.services.png_reader import png_reader
 
 class Paths(Op[User, list[str]]):
     async def call(self, user: User) -> list[str]:
@@ -66,10 +66,9 @@ class AsText(Op[tuple[User, str], str]):
                     ),
                 )
             elif content_type == "application/vnd.ms-excel":
-                df = pd.read_excel(input)
                 documents.puts(
                     path_as_text,
-                    df.to_csv(index=False)
+                    excel_reader.as_csv(input)
                     )
             else:
                 documents.puts(path_as_text, "Error: Could not read as text")
@@ -80,7 +79,7 @@ class AsText(Op[tuple[User, str], str]):
 
 as_text = AsText()
 
-
+        
 class AsPng(Op[tuple[User, str], str]):
     async def call(
         self,
@@ -88,22 +87,33 @@ class AsPng(Op[tuple[User, str], str]):
         name: str,
         start_page: int = 0,
         end_page: int | None = None,
-    ) -> None:
+    ) -> list[BinaryIO]:
         source_path = await path.call(user, name)
         input = BytesIO(documents.get(f"{source_path}data").read())
         content_type = documents.gets(f"{source_path}content_type")
 
-        pages_bytes = pdf_reader.as_png(input, start_page=start_page, end_page=end_page)
-
-        for page, byte_stream in pages_bytes:
-            path_as_png = f"{source_path}as_png_page_{page}"
-            if content_type == "application/pdf":
+        path_as_png = f"{source_path}as_png"
+        binary_buffers = []
+        if content_type == "application/pdf":
+            page_buffer = pdf_reader.as_png(input, start_page=start_page, end_page=end_page)
+            for page, byte_stream in page_buffer:
+                specific_path_as_png = f"{path_as_png}_page_{page}"
                 documents.put(
+                            specific_path_as_png,
+                            byte_stream
+                            ),
+                binary_buffers.append(byte_stream)
+            return binary_buffers
+        
+        elif content_type == "image/png":  
+            page, byte_stream = png_reader.as_png(input)
+            documents.put(
                         path_as_png,
                         byte_stream
                         ),
-            else:
-                documents.puts(path_as_png, "Error: Could not read as png")
-
-
+            return [byte_stream]
+        else:
+            documents.puts(path_as_png, "Error: Could not read as png")
+            return [BytesIO(b"Error: Could not read as png")] 
+         
 as_png = AsPng()

@@ -16,9 +16,11 @@ from app.lm.models import (
 )
 from app.services.object_store import documents
 from app.services.pdf_reader import pdf_reader
+from app.services.excel_reader import excel_reader
+from app.services.png_reader import png_reader
 from app.lm.handlers import ArenaHandler
 from app.ops import tup
-from app.ops.documents import as_text
+from app.ops.documents import as_text, as_png
 from app.models import (
     Message,
     DocumentDataExtractorCreate,
@@ -32,6 +34,7 @@ from app.models import (
     DocumentDataExampleOut,
 )
 from openai.lib._pydantic import to_strict_json_schema
+from app.handler import full_prompt_from_text, full_prompt_from_image
 
 router = APIRouter()
 
@@ -426,48 +429,74 @@ async def extract_from_file(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="DocumentDataExtractor has no owner",
         )
-    # Build examples
-    examples = tup(
-        *(
-            tup(
-                as_text(
-                    document_data_extractor.owner,
-                    example.document_id,
-                    example.start_page,
-                    example.end_page,
-                ),
-                example.data,
-            )
-            for example in document_data_extractor.document_data_examples
-        )
-    )
-    # Pull data from the file
-    if upload.content_type != "application/pdf":
+        
+    allowed_mime_types = [
+        "application/pdf",                 # PDF files
+        "application/vnd.ms-excel",        # XLS 
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  # XLSX (new Excel format)
+        "image/png",                       # PNG images
+    ]
+    #### Pull data from the file
+    if upload.content_type not in allowed_mime_types:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This endpoint can only process pdfs",
         )
-
+    
     f = io.BytesIO(upload.file.read())
-    prompt = pdf_reader.as_text(f)
-    validate_extracted_text(prompt)
+#TODO pdf_reader.as_text or pdf_reader.as_png ?
+    if upload.content_type == "application/pdf" and document_data_extractor.type == "text":
+        prompt = pdf_reader.as_text(f)
+        validate_extracted_text(prompt) 
+    elif upload.content_type == "application/pdf" and document_data_extractor.type == "image":
+        prompt = pdf_reader.as_png(f)
+    elif upload.content_type == "application/vnd.ms-excel" or upload.content_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        prompt = excel_reader.as_csv(f)
+        validate_extracted_text(prompt) 
+    elif upload.content_type == "image/png":
+        prompt = png_reader.as_png(f)
+    
+    
+        
+    # Build examples
+#TODO add in the document_data_extractor the option to set the type image or text for pdfs
+    if (upload.content_type == "application/pdf" and document_data_extractor.type == "text") or upload.content_type == "application/vnd.ms-excel" or upload.content_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        examples = tup(
+            *(
+                tup(
+                    as_text(
+                        document_data_extractor.owner,
+                        example.document_id,
+                        example.start_page,
+                        example.end_page,
+                    ),
+                    example.data,
+                )
+                for example in document_data_extractor.document_data_examples
+            )
+        )
+    elif (upload.content_type == "application/pdf" and document_data_extractor.type == "image") or upload.content_type == "image/png":
+        examples = tup(
+            *(
+                tup(
+                    as_png(
+                        document_data_extractor.owner,
+                        example.document_id,
+                        example.start_page,
+                        example.end_page,
+                    ),
+                    example.data,
+                )
+                for example in document_data_extractor.document_data_examples
+            )
+        )
+    
     system_prompt = document_data_extractor.prompt
 
-    examples_text = ""
-    for input_text, output_text in await examples.evaluate():
-        validate_extracted_text(input_text)
-        examples_text += (
-            f"####\nINPUT: {input_text}\n\nOUTPUT: {output_text}\n\n"
-        )
-    full_system_content = f"{system_prompt}\n{examples_text}"
-
-    messages = [
-        ChatCompletionMessage(role="system", content=full_system_content),
-        ChatCompletionMessage(
-            role="user",
-            content=f"Maintenant, faites la même extraction sur un nouveau document d'input:\n####\nINPUT:{prompt}",
-        ),
-    ]
+    if document_data_extractor.type == "text":
+        messages = full_prompt_from_text(system_prompt, prompt, examples)
+    elif document_data_extractor.type == "image":
+        messages = full_prompt_from_image(system_prompt, prompt, examples)
 
     pydantic_reponse = create_pydantic_model(
         json.loads(document_data_extractor.response_template)
@@ -506,7 +535,6 @@ async def extract_from_file(
     regex_spans=find_value_spans(extracted_data)
     logprobs_sum=get_token_spans_and_logprobs(token_indices, regex_spans, extracted_data_token)
     return {"extracted_data": json.loads(json_string), "extracted_logprobs":logprobs_sum}
-
 
 def map_characters_to_token_indices(extracted_data_token: list[TokenLogprob]) -> list[int]:
     """
@@ -611,7 +639,7 @@ def create_pydantic_model(
     schema: dict[
         str,
         tuple[
-            Literal["str", "int", "bool", "float"],
+            Literal["str", "int", "bool", "float", "dict", "list"],
             Literal["required", "optional"],
         ],
     ],
@@ -625,12 +653,16 @@ def create_pydantic_model(
         "int": (int, ...),
         "float": (float, ...),
         "bool": (bool, ...),
+        "dict": (dict[str,float], ...),
+        "list": (list[dict[str,Any]], ...)
     }
     optional_field_types = {
         "str": (str | None, ...),  # ... means the field is required
         "int": (int | None, ...),
         "float": (float | None, ...),
         "bool": (bool | None, ...),
+        "dict": (dict[str,float], ...),
+        "list": (list[dict[str,Any]], ...)
     }
 
     # Dynamically create a Pydantic model using create_model

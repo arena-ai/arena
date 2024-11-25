@@ -343,7 +343,8 @@ class DocumentDataExtractorOut(DocumentDataExtractorBase):
     owner_id: int
     document_data_examples: list["DocumentDataExample"]
     response_template: str
-
+    type: str
+#migrate the database to add a new column (ask luca)
 
 class DocumentDataExtractorsOut(SQLModel):
     data: list[DocumentDataExtractorOut]
