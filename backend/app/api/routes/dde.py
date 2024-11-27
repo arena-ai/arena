@@ -21,6 +21,7 @@ from app.services.png_reader import png_reader
 from app.lm.handlers import ArenaHandler
 from app.ops import tup
 from app.ops.documents import as_text, as_png
+from app.ops.schema_converter import create_pydantic_model
 from app.models import (
     Message,
     DocumentDataExtractorCreate,
@@ -35,7 +36,13 @@ from app.models import (
 )
 from openai.lib._pydantic import to_strict_json_schema
 from app.handler import full_prompt_from_text, full_prompt_from_image
-
+from enum import Enum
+class ContentType(Enum):
+    PDF = "application/pdf"  # PDF files
+    XLS = "application/vnd.ms-excel"  # XLS files
+    XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"  # XLSX (new Excel format)
+    PNG = "image/png"  # PNG images
+    
 router = APIRouter()
 
 
@@ -429,82 +436,29 @@ async def extract_from_file(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="DocumentDataExtractor has no owner",
         )
-        
-    allowed_mime_types = [
-        "application/pdf",                 # PDF files
-        "application/vnd.ms-excel",        # XLS 
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  # XLSX (new Excel format)
-        "image/png",                       # PNG images
-    ]
-    #### Pull data from the file
-    if upload.content_type not in allowed_mime_types:
+    
+    try:
+        upload_content_type= ContentType(upload.content_type)     
+    except:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This endpoint can only process pdfs",
         )
     
     f = io.BytesIO(upload.file.read())
-#TODO pdf_reader.as_text or pdf_reader.as_png ?
-    if upload.content_type == "application/pdf" and document_data_extractor.type == "text":
-        prompt = pdf_reader.as_text(f)
-        validate_extracted_text(prompt) 
-    elif upload.content_type == "application/pdf" and document_data_extractor.type == "image":
-        prompt = pdf_reader.as_png(f)
-    elif upload.content_type == "application/vnd.ms-excel" or upload.content_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-        prompt = excel_reader.as_csv(f)
-        validate_extracted_text(prompt) 
-    elif upload.content_type == "image/png":
-        prompt = png_reader.as_png(f)
-    
-    
-        
-    # Build examples
-#TODO add in the document_data_extractor the option to set the type image or text for pdfs
-    if (upload.content_type == "application/pdf" and document_data_extractor.type == "text") or upload.content_type == "application/vnd.ms-excel" or upload.content_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-        examples = tup(
-            *(
-                tup(
-                    as_text(
-                        document_data_extractor.owner,
-                        example.document_id,
-                        example.start_page,
-                        example.end_page,
-                    ),
-                    example.data,
-                )
-                for example in document_data_extractor.document_data_examples
-            )
-        )
-    elif (upload.content_type == "application/pdf" and document_data_extractor.type == "image") or upload.content_type == "image/png":
-        examples = tup(
-            *(
-                tup(
-                    as_png(
-                        document_data_extractor.owner,
-                        example.document_id,
-                        example.start_page,
-                        example.end_page,
-                    ),
-                    example.data,
-                )
-                for example in document_data_extractor.document_data_examples
-            )
-        )
-    
-    system_prompt = document_data_extractor.prompt
-
-    if document_data_extractor.type == "text":
-        messages = full_prompt_from_text(system_prompt, prompt, examples)
-    elif document_data_extractor.type == "image":
-        messages = full_prompt_from_image(system_prompt, prompt, examples)
+    if  (upload_content_type == ContentType.PDF and document_data_extractor.process_as == "text") or upload_content_type == ContentType.XLSX or upload_content_type == ContentType.XLS:  
+        messages = full_prompt_from_text(f, document_data_extractor, upload_content_type)
+    if  (upload_content_type == ContentType.PDF and document_data_extractor.process_as == "image") or upload_content_type == ContentType.PNG:     
+        messages = full_prompt_from_image(f, document_data_extractor, upload_content_type)
 
     pydantic_reponse = create_pydantic_model(
         json.loads(document_data_extractor.response_template)
     )
+    
     format_response = {
         "type": "json_schema",
         "json_schema": {
-            "schema": to_strict_json_schema(pydantic_reponse),
+            "schema": pydantic_reponse,
             "name": "response",
             "strict": True,
         },
@@ -639,7 +593,7 @@ def create_pydantic_model(
     schema: dict[
         str,
         tuple[
-            Literal["str", "int", "bool", "float", "dict", "list"],
+            Literal["str", "int", "bool", "float"],
             Literal["required", "optional"],
         ],
     ],
@@ -653,16 +607,12 @@ def create_pydantic_model(
         "int": (int, ...),
         "float": (float, ...),
         "bool": (bool, ...),
-        "dict": (dict[str,float], ...),
-        "list": (list[dict[str,Any]], ...)
     }
     optional_field_types = {
         "str": (str | None, ...),  # ... means the field is required
         "int": (int | None, ...),
         "float": (float | None, ...),
         "bool": (bool | None, ...),
-        "dict": (dict[str,float], ...),
-        "list": (list[dict[str,Any]], ...)
     }
 
     # Dynamically create a Pydantic model using create_model
@@ -676,9 +626,4 @@ def create_pydantic_model(
     return dynamic_model
 
 
-def validate_extracted_text(text: str):
-    if text == "":
-        raise HTTPException(
-            status_code=500,
-            detail="The extracted text from the document is empty. Please check if the document is corrupted.",
-        )
+
