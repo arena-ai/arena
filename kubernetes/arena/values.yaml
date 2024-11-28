@@ -17,7 +17,7 @@ cluster:
   provider: AKS # AKS | EKS | GKE
   ingress: nginx
   host: arena.sarus.app
-  CIDR: 176.147.136.160, 195.154.25.38/24, 80.12.92.69
+  IP_FILTER_CIDR: 0.0.0.0/0
   tls:
     enabled: true
     issuer:
@@ -26,6 +26,7 @@ cluster:
       email: arena@sarus.app
       privateKeySecretRef: letsencrypt-prod # letsencrypt-staging | letsencrypt-prod
     secretName: letsencrypt-secret
+  secretHeader: "xxxx"
 
 # PostgreSQL configuration
 postgresql:
@@ -84,6 +85,7 @@ ingress-nginx:
   # namespaceOverride: sarus
   controller:
     replicaCount: 2
+    allowSnippetAnnotations: "true"
     publishService:
       enabled: true
     nodeSelector:
