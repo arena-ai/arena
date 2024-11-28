@@ -47,6 +47,7 @@ class AsText(Op[tuple[User, str], str]):
         source_path = await path.call(user, name)
         input = BytesIO(documents.get(f"{source_path}data").read())
         content_type = documents.gets(f"{source_path}content_type")
+
         if end_page:
             path_as_text = (
                 f"{source_path}as_text_from_page_{start_page}_to_{end_page}"
@@ -55,7 +56,7 @@ class AsText(Op[tuple[User, str], str]):
             path_as_text = f"{source_path}as_text_from_page_{start_page}"
         else:
             path_as_text = f"{source_path}as_text"
-
+            
         if not documents.exists(path_as_text):
             # The doc should be created
             if content_type == "application/pdf":
@@ -65,7 +66,7 @@ class AsText(Op[tuple[User, str], str]):
                         input, start_page=start_page, end_page=end_page
                     ),
                 )
-            elif content_type == "application/vnd.ms-excel":
+            elif content_type == "application/vnd.ms-excel" or content_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
                 documents.puts(
                     path_as_text,
                     excel_reader.as_csv(input)
@@ -106,12 +107,12 @@ class AsPng(Op[tuple[User, str], str]):
             return binary_buffers
         
         elif content_type == "image/png":  
-            page, byte_stream = png_reader.as_png(input)
+            buffer = png_reader.as_png(input)
             documents.put(
                         path_as_png,
-                        byte_stream
+                        buffer
                         ),
-            return [byte_stream]
+            return [buffer]
         else:
             documents.puts(path_as_png, "Error: Could not read as png")
             return [BytesIO(b"Error: Could not read as png")] 
