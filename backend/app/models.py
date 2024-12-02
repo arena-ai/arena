@@ -300,6 +300,7 @@ class DocumentDataExtractorCreate(DocumentDataExtractorBase):
             Literal["required", "optional"],
         ],
     ]
+    process_as: str | None
 
 
 # Properties to receive on DocumentDataExtractor update
@@ -316,6 +317,7 @@ class DocumentDataExtractorUpdate(DocumentDataExtractorBase):
         ]
         | None
     ) = None
+    process_as: str | None
 
 
 class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
@@ -334,7 +336,7 @@ class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
         back_populates="document_data_extractor",
         sa_relationship_kwargs={"cascade": "all, delete"},
     )
-
+    process_as: str | None
 
 # Properties to return via API, id is always required
 class DocumentDataExtractorOut(DocumentDataExtractorBase):
