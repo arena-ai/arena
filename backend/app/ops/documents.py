@@ -6,6 +6,7 @@ from app.services.object_store import documents
 from app.services.pdf_reader import pdf_reader
 from app.services.excel_reader import excel_reader
 from app.services.png_reader import png_reader
+from app.models import ContentType
 
 class Paths(Op[User, list[str]]):
     async def call(self, user: User) -> list[str]:
@@ -16,9 +17,7 @@ class Paths(Op[User, list[str]]):
             for path in documents.list(prefix=prefix)
         ]
 
-
 paths = Paths()
-
 
 class Path(Op[tuple[User, str], str]):
     async def call(self, user: User, name: str) -> str:
@@ -31,7 +30,6 @@ class Path(Op[tuple[User, str], str]):
             )
         else:
             return f"{user.id}/{name}/"
-
 
 path = Path()
 
@@ -59,14 +57,14 @@ class AsText(Op[tuple[User, str], str]):
             
         if not documents.exists(path_as_text):
             # The doc should be created
-            if content_type == "application/pdf":
+            if content_type == ContentType.PDF:
                 documents.puts(
                     path_as_text,
                     pdf_reader.as_text(
                         input, start_page=start_page, end_page=end_page
                     ),
                 )
-            elif content_type == "application/vnd.ms-excel" or content_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+            elif content_type == ContentType.XLS or content_type == ContentType.XLSX:
                 documents.puts(
                     path_as_text,
                     excel_reader.as_csv(input)
@@ -79,8 +77,7 @@ class AsText(Op[tuple[User, str], str]):
 
 
 as_text = AsText()
-
-        
+     
 class AsPng(Op[tuple[User, str], str]):
     async def call(
         self,
@@ -95,7 +92,7 @@ class AsPng(Op[tuple[User, str], str]):
 
         path_as_png = f"{source_path}as_png"
         binary_buffers = []
-        if content_type == "application/pdf":
+        if content_type == ContentType.PDF:
             page_buffer = pdf_reader.as_png(input, start_page=start_page, end_page=end_page)
             for page, byte_stream in page_buffer:
                 specific_path_as_png = f"{path_as_png}_page_{page}"
@@ -106,7 +103,7 @@ class AsPng(Op[tuple[User, str], str]):
                 binary_buffers.append(byte_stream)
             return binary_buffers
         
-        elif content_type == "image/png":  
+        elif content_type == ContentType.PNG:  
             buffer = png_reader.as_png(input)
             documents.put(
                         path_as_png,

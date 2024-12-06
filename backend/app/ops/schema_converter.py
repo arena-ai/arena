@@ -1,46 +1,32 @@
-from pathlib import Path
-from tempfile import TemporaryDirectory
-from datamodel_code_generator import InputFileType, generate
-from datamodel_code_generator import DataModelType
-
-from typing import Any
+from datamodel_code_generator.model import DataModelSet, pydantic_v2
+from datamodel_code_generator.parser.jsonschema import JsonSchemaParser
+from pydantic import BaseModel, Field
 import json
-import importlib.util
-import sys
-from pydantic import BaseModel
+from typing import List
 
-def create_pydantic_model(response_template: dict[str, Any]) -> dict[str, Any]:
-  # Convert the input dictionary to JSON format to match the input requirements for the model generator.
-  json_schema = json.dumps(response_template)
-  #temporary directory to store intermediate files required for model generation
-  with TemporaryDirectory() as temporary_directory_name:
-    temporary_directory = Path(temporary_directory_name)
-    output = Path(temporary_directory / 'model.py')
+def create_pydantic_model(json_schema: str) -> BaseModel:
+      data_model_types=DataModelSet(
+                  data_model=pydantic_v2.BaseModel,
+                  root_model=pydantic_v2.RootModel,
+                  field_model=pydantic_v2.DataModelField,
+                  data_type_manager=pydantic_v2.DataTypeManager,
+                  dump_resolve_reference_action=pydantic_v2.dump_resolve_reference_action,
+            )
+      parser = JsonSchemaParser(
+      json_schema,
+      data_model_type=data_model_types.data_model,
+      data_model_root_type=data_model_types.root_model,
+      data_model_field_type=data_model_types.field_model,
+      data_type_manager_type=data_model_types.data_type_manager,
+      dump_resolve_reference_action=data_model_types.dump_resolve_reference_action,
+      class_name= "MainModel",              #name of the class to be generated
+      use_standard_collections=True,        #ensures that the parser uses standard Python collections
+      use_union_operator=True)              #allows the use of the modern `|` operator for type unions 
       
-    generate(
-          input_=json_schema,
-          input_file_type=InputFileType.JsonSchema,   # Specify that the input is a JSON schema.             
-          output=output,
-          output_model_type=DataModelType.PydanticV2BaseModel,   #use Pydantic v2
-    )
+      result = parser.parse()               #create a string out of the code
+      exec (result)                         #write all the functions that are in the string in the context dictionary
+      model=locals()['MainModel']
+      model.model_rebuild()                 #necessary because annotations are defined at runtime
+      return model
 
-      # import dynamically the Python module generated 
-    model_code = output.read_text()
-    print("model_code", model_code)
-    module_name = "dynamic_pydantic_model"
-    spec = importlib.util.spec_from_file_location(module_name, output)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-      # Collect all generated BaseModel classes
-    generated_models = [
-        cls for _, cls in vars(module).items() 
-        if isinstance(cls, type) and issubclass(cls, BaseModel) and cls != BaseModel
-    ]
-      # Combine JSON schemas for all models
-      # map the name of the class with its json schema
-    all_schemas = {model.__name__: model.model_json_schema() for model in generated_models}
-
-
-    return all_schemas
-
+      
