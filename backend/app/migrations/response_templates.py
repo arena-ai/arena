@@ -76,9 +76,9 @@ def migrate_response_templates(db_engine: Engine) -> None:
                 resp_template=dde.response_template
                 new_resp_template=convert_to_json_schema(resp_template) 
                 #update the dde with the new schema
-                dde.response_template=new_resp_template  
+                #dde.response_template=new_resp_template  
                 new_dde={
-                    "response_tempale":new_resp_template
+                    "response_template":new_resp_template
                 }
                 dde.sqlmodel_update(new_dde)
                 session.add(dde)

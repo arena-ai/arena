@@ -446,8 +446,10 @@ async def extract_from_file(
 
     if  (upload_content_type == ContentType.PDF and document_data_extractor.process_as == "text") or upload_content_type == ContentType.XLSX or upload_content_type == ContentType.XLS:  
         messages = await full_prompt_from_text(f, document_data_extractor, upload_content_type)
-    if  (upload_content_type == ContentType.PDF and document_data_extractor.process_as == "image") or upload_content_type == ContentType.PNG:     
+    elif  (upload_content_type == ContentType.PDF and document_data_extractor.process_as == "image") or upload_content_type == ContentType.PNG:     
         messages = await full_prompt_from_image(f, document_data_extractor, upload_content_type)
+    else:
+        raise NotImplementedError(f'Content type {upload_content_type} not supported')
 
     pydantic_reponse = create_pydantic_model(document_data_extractor.response_template)
     format_response = {
@@ -468,9 +470,11 @@ async def extract_from_file(
         top_logprobs=5,
         response_format=format_response,
     ).model_dump(exclude_unset=True)
+    
     chat_completion_response = await ArenaHandler(
         session, document_data_extractor.owner, chat_completion_request
     ).process_request()
+
     identifier = chat_completion_response.id
     extracted_data = chat_completion_response.choices[0].message.content
     extracted_data_token = chat_completion_response.choices[0].logprobs.content

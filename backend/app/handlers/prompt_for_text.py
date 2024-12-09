@@ -22,10 +22,12 @@ async def full_prompt_from_text(file: BinaryIO, document_data_extractor: Documen
     if upload_content_type == ContentType.PDF:
         prompt = pdf_reader.as_text(file)
         validate_extracted_text(prompt)
-    if upload_content_type == ContentType.XLSX or upload_content_type == ContentType.XLS: 
+    elif upload_content_type == ContentType.XLSX or upload_content_type == ContentType.XLS: 
         prompt = excel_reader.as_csv(file)
         validate_extracted_text(prompt)
-        
+    else:
+        raise NotImplementedError(f'Content type {upload_content_type} not supported')
+    
     system_prompt = document_data_extractor.prompt
 
     examples = tup(
