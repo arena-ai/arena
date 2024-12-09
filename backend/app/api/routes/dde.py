@@ -436,7 +436,7 @@ async def extract_from_file(
     
     try:
         upload_content_type= ContentType(upload.content_type)     
-    except:
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This endpoint can only process pdfs",
