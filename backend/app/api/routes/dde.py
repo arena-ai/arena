@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Any
 from fastapi import APIRouter, HTTPException, status, UploadFile
 from fastapi.responses import JSONResponse
 from sqlmodel import func, select
@@ -6,19 +6,17 @@ from sqlalchemy.exc import IntegrityError
 import json
 import io
 import re
-from pydantic import create_model, ValidationError
+from pydantic import ValidationError
 from app.api.deps import CurrentUser, SessionDep
 from app.services import crud
 from app.lm.models import (
     ChatCompletionRequest,
-    Message as ChatCompletionMessage,
+    Message,
     TokenLogprob,
 )
 from app.services.object_store import documents
-from app.services.pdf_reader import pdf_reader
 from app.lm.handlers import ArenaHandler
-from app.ops import tup
-from app.ops.documents import as_text
+from app.ops.schema_converter import create_pydantic_model
 from app.models import (
     Message,
     DocumentDataExtractorCreate,
@@ -32,9 +30,12 @@ from app.models import (
     DocumentDataExampleOut,
 )
 from openai.lib._pydantic import to_strict_json_schema
+from app.handlers.prompt_for_image import full_prompt_from_image
+from app.handlers.prompt_for_text import full_prompt_from_text
 
+from app.models import ContentType
+    
 router = APIRouter()
-
 
 @router.get("/", response_model=DocumentDataExtractorsOut)
 def read_document_data_extractors(
@@ -117,18 +118,21 @@ def create_document_data_extractor(
     """
     try:
         create_pydantic_model(document_data_extractor_in.response_template)
-    except KeyError:
+    except TypeError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Incorrect type in response template: {str(e)}",
+            )
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="received incorrect response template",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error: {str(e)}",
         )
     document_data_extractor = DocumentDataExtractor.model_validate(
         document_data_extractor_in,
         update={
             "owner_id": current_user.id,
-            "response_template": json.dumps(
-                document_data_extractor_in.response_template
-            ),
+            "response_template": document_data_extractor_in.response_template
         },
     )
     try:
@@ -169,12 +173,17 @@ def update_document_data_extractor(
     if pdyantic_dict is not None:
         try:
             create_pydantic_model(pdyantic_dict)
-        except KeyError:
+        except TypeError as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="received incorrect response template",
+                detail=f"Incorrect type in response template: {str(e)}",
             )
-    update_dict["response_template"] = json.dumps(pdyantic_dict)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Unexpected error: {str(e)}",
+            )
+    update_dict["response_template"] = pdyantic_dict 
     document_data_extractor.sqlmodel_update(update_dict)
     session.add(document_data_extractor)
     session.commit()
@@ -262,9 +271,7 @@ def create_document_data_example(
             detail="Not enough permissions",
         )
     # verify the example matches the template of the document data extractor
-    pyd_model = create_pydantic_model(
-        json.loads(document_data_extractor.response_template)
-    )
+    pyd_model = create_pydantic_model(document_data_extractor.response_template)
     try:
         pyd_model.model_validate(document_data_example_in.data)
     except ValidationError:
@@ -426,52 +433,25 @@ async def extract_from_file(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="DocumentDataExtractor has no owner",
         )
-    # Build examples
-    examples = tup(
-        *(
-            tup(
-                as_text(
-                    document_data_extractor.owner,
-                    example.document_id,
-                    example.start_page,
-                    example.end_page,
-                ),
-                example.data,
-            )
-            for example in document_data_extractor.document_data_examples
-        )
-    )
-    # Pull data from the file
-    if upload.content_type != "application/pdf":
+    
+    try:
+        upload_content_type= ContentType(upload.content_type)     
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This endpoint can only process pdfs",
         )
-
+    
     f = io.BytesIO(upload.file.read())
-    prompt = pdf_reader.as_text(f)
-    validate_extracted_text(prompt)
-    system_prompt = document_data_extractor.prompt
 
-    examples_text = ""
-    for input_text, output_text in await examples.evaluate():
-        validate_extracted_text(input_text)
-        examples_text += (
-            f"####\nINPUT: {input_text}\n\nOUTPUT: {output_text}\n\n"
-        )
-    full_system_content = f"{system_prompt}\n{examples_text}"
+    if  (upload_content_type == ContentType.PDF and document_data_extractor.process_as == "text") or upload_content_type == ContentType.XLSX or upload_content_type == ContentType.XLS:  
+        messages = await full_prompt_from_text(f, document_data_extractor, upload_content_type)
+    elif  (upload_content_type == ContentType.PDF and document_data_extractor.process_as == "image") or upload_content_type == ContentType.PNG:     
+        messages = await full_prompt_from_image(f, document_data_extractor, upload_content_type)
+    else:
+        raise NotImplementedError(f'Content type {upload_content_type} not supported')
 
-    messages = [
-        ChatCompletionMessage(role="system", content=full_system_content),
-        ChatCompletionMessage(
-            role="user",
-            content=f"Maintenant, faites la même extraction sur un nouveau document d'input:\n####\nINPUT:{prompt}",
-        ),
-    ]
-
-    pydantic_reponse = create_pydantic_model(
-        json.loads(document_data_extractor.response_template)
-    )
+    pydantic_reponse = create_pydantic_model(document_data_extractor.response_template)
     format_response = {
         "type": "json_schema",
         "json_schema": {
@@ -490,10 +470,12 @@ async def extract_from_file(
         top_logprobs=5,
         response_format=format_response,
     ).model_dump(exclude_unset=True)
-
+    
     chat_completion_response = await ArenaHandler(
         session, document_data_extractor.owner, chat_completion_request
     ).process_request()
+
+    identifier = chat_completion_response.id
     extracted_data = chat_completion_response.choices[0].message.content
     extracted_data_token = chat_completion_response.choices[0].logprobs.content
     # TODO: handle refusal or case in which content was not correctly done
@@ -505,8 +487,7 @@ async def extract_from_file(
     token_indices=map_characters_to_token_indices(extracted_data_token)
     regex_spans=find_value_spans(extracted_data)
     logprobs_sum=get_token_spans_and_logprobs(token_indices, regex_spans, extracted_data_token)
-    return {"extracted_data": json.loads(json_string), "extracted_logprobs":logprobs_sum}
-
+    return {"extracted_data": json.loads(json_string), "extracted_logprobs":logprobs_sum, "identifier": identifier}
 
 def map_characters_to_token_indices(extracted_data_token: list[TokenLogprob]) -> list[int]:
     """
@@ -607,46 +588,5 @@ def get_token_spans_and_logprobs(
     return logprobs_for_values
 
 
-def create_pydantic_model(
-    schema: dict[
-        str,
-        tuple[
-            Literal["str", "int", "bool", "float"],
-            Literal["required", "optional"],
-        ],
-    ],
-) -> Any:
-    """Creates a pydantic model from an input dictionary where
-    keys are names of entities to be retrieved, each value is a tuple specifying
-    the type of the entity and whether it is required or optional"""
-    # Convert string type names to actual Python types
-    field_types = {
-        "str": (str, ...),  # ... means the field is required
-        "int": (int, ...),
-        "float": (float, ...),
-        "bool": (bool, ...),
-    }
-    optional_field_types = {
-        "str": (str | None, ...),  # ... means the field is required
-        "int": (int | None, ...),
-        "float": (float | None, ...),
-        "bool": (bool | None, ...),
-    }
-
-    # Dynamically create a Pydantic model using create_model
-    fields = {
-        name: field_types[ftype[0]]
-        if ftype[1] == "required"
-        else optional_field_types[ftype[0]]
-        for name, ftype in schema.items()
-    }
-    dynamic_model = create_model("DataExtractorSchema", **fields)
-    return dynamic_model
 
 
-def validate_extracted_text(text: str):
-    if text == "":
-        raise HTTPException(
-            status_code=500,
-            detail="The extracted text from the document is empty. Please check if the document is corrupted.",
-        )
