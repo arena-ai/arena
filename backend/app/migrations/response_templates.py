@@ -35,7 +35,7 @@ def get_pydantic_model(
         "float": (float | None, ...),
         "bool": (bool | None, ...),
     }
-    print("schema",schema.items())
+
     # Dynamically create a Pydantic model using create_model
     fields = {
         name: field_types[ftype[0]]

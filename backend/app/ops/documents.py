@@ -92,8 +92,9 @@ class AsPng(Op[tuple[User, str], str]):
 
         path_as_png = f"{source_path}as_png"
         binary_buffers = []
+
         if content_type == ContentType.PDF:
-            page_buffer = pdf_reader.as_png(input, start_page=start_page, end_page=end_page)
+            page_buffer = pdf_reader.as_pngs(input, start_page=start_page, end_page=end_page)
             for page, byte_stream in page_buffer:
                 specific_path_as_png = f"{path_as_png}_page_{page}"
                 documents.put(

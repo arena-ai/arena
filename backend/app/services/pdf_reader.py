@@ -46,7 +46,7 @@ class PDFReader:
 
         return text
     
-    def as_png(
+    def as_pngs(
         self,
         pdf_data: BinaryIO,
         start_page: int = 0,
@@ -63,12 +63,12 @@ class PDFReader:
 
         for page_num in pages:
             page = doc.load_page(page_num)
-            pix = page.get_pixmap(dpi=96, colorspace="csRGB", alpha=False)      
+            pix = page.get_pixmap(dpi=96, colorspace="csRGB", alpha=False)     
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
             buffer = BytesIO()
             img.save(buffer, format="PNG", optimize=True, compress_level=0)
-            page_buffer_pairs.append((page_num, buffer))
-
+            buffer.seek(0)
+            page_buffer_pairs.append((page_num, buffer))  
         return page_buffer_pairs
 
 

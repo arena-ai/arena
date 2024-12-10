@@ -1,8 +1,8 @@
 from datamodel_code_generator.model import DataModelSet, pydantic_v2
 from datamodel_code_generator.parser.jsonschema import JsonSchemaParser
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 import json
-from typing import List
+from typing import List, Dict
 
 def create_pydantic_model(json_schema: str) -> BaseModel:
       data_model_types=DataModelSet(

@@ -44,6 +44,17 @@ class ChatCompletionToolParam(BaseModel):
     function: Function
     type: Literal["function"]
 
+class TextContent(TypedDict):
+    type: Literal["text"]
+    text: str
+class ImageUrl(TypedDict):
+    url: str
+    
+class ImageUrlContent(TypedDict):
+    type: Literal["image_url"]
+    image_url: ImageUrl
+
+ContentTypes = TextContent | ImageUrlContent
 
 class Message(BaseModel):
     """
@@ -53,7 +64,7 @@ class Message(BaseModel):
     https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message_param.py#L15
     """
 
-    content: str
+    content: str | list[ContentTypes]
     role: Literal["system", "user", "assistant", "tools"]
     name: str | None = None
     tool_calls: Sequence[ChatCompletionToolParam] | None = None

@@ -13,6 +13,7 @@ class PNGReader:
         img = Image.open(png_data)
         buffer = BytesIO()
         img.save(buffer, format="PNG", optimize=True, compress_level=0)
+        buffer.seek(0)
         return buffer
 
 # A default instance
