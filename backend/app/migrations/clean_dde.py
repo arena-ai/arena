@@ -59,8 +59,30 @@ def convert_to_json_schema(resp_template_old:str) -> str:
     }
     return json.dumps(json_schema)
 
-
-def migrate_response_templates(db_engine: Engine) -> None:
+def fix_response_template(session:Session, dde:DocumentDataExtractor):
+    #get the old schema
+    resp_template=dde.response_template
+    try:
+        get_pydantic_model(json.loads(resp_template))
+    except KeyError as e:
+        logger.info(f"skipping dde {dde.name}")
+        pass
+    else:
+        new_resp_template=convert_to_json_schema(resp_template) 
+        #update the dde with the new schema 
+        dde.sqlmodel_update({"response_template":new_resp_template})
+        session.add(dde)
+        session.commit()
+        session.refresh(dde) 
+    
+def fix_process_as(session:Session, dde:DocumentDataExtractor):
+    if dde.process_as not in ['text', 'image']:
+        dde.sqlmodel_update({"process_as":'text'})
+        session.add(dde)
+        session.commit()
+        session.refresh(dde) 
+    
+def migrate_dde(db_engine: Engine) -> None:
     """
     Migrates response templates stored in the database by converting them to a JSON Schema.
     """
@@ -72,28 +94,14 @@ def migrate_response_templates(db_engine: Engine) -> None:
                 )
             document_data_extractors = session.exec(statement).all()  # get all the objects from the db 
             for dde in document_data_extractors:
-                #get the old schema
-                resp_template=dde.response_template
-                try:
-                    get_pydantic_model(json.loads(resp_template))
-                except KeyError as e:
-                    logger.info(f"skipping dde {dde.name}")
-                    pass
-                else:
-                    new_resp_template=convert_to_json_schema(resp_template) 
-                    #update the dde with the new schema 
-                    new_dde={
-                        "response_template":new_resp_template
-                    }
-                    dde.sqlmodel_update(new_dde)
-                    session.add(dde)
-                    session.commit()
-                    session.refresh(dde)         
+                fix_response_template(session, dde)
+                fix_process_as(session, dde)
+                        
     except Exception as e:
             logger.error(e)
             raise e
 
 if __name__ == "__main__":
-    migrate_response_templates(engine)
+    migrate_dde(engine)
     
     
