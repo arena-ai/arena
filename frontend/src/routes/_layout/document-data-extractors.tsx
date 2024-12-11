@@ -85,8 +85,8 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
           <Tr bgColor={secBgColor}>
             <Th>Examples</Th>
             <Th>Document</Th>
-            <Th>Data</Th>
             <Th></Th>
+            <Th>Data</Th>
             <Th></Th>
           </Tr>
         </Thead>
