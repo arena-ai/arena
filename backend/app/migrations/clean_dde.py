@@ -10,7 +10,7 @@ from app.models import DocumentDataExtractor
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def get_pydantic_model(
+def get_old_pydantic_model(
     schema: dict[
         str,
         tuple[
@@ -49,7 +49,7 @@ def get_pydantic_model(
 
 def convert_to_json_schema(resp_template_old:str) -> str:
     # Get the JSON schema out of the pydantic model schema
-    dynamic_model = get_pydantic_model(json.loads(resp_template_old))
+    dynamic_model = get_old_pydantic_model(json.loads(resp_template_old))
     dynamic_model_properties = dynamic_model.schema()
     json_schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -63,8 +63,8 @@ def fix_response_template(session:Session, dde:DocumentDataExtractor):
     #get the old schema
     resp_template=dde.response_template
     try:
-        get_pydantic_model(json.loads(resp_template))
-    except KeyError as e:
+        get_old_pydantic_model(json.loads(resp_template))
+    except Exception as e:
         logger.info(f"skipping dde {dde.name}")
         pass
     else:
