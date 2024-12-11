@@ -124,6 +124,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
                 </NumberInput>
               </Flex>
             </Td>
+            <Td></Td>
             <Td>
               <Textarea placeholder="Data to Extract"
                 onChange={(e)=>setData(JSON.parse(e.target.value))}
@@ -136,7 +137,6 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
                 }).then(()=> queryClient.invalidateQueries({ queryKey: ['document_data_extractors'] }));
               }}>Add Example</Button>
             </Td>
-            <Td></Td>
           </Tr>
         </Tbody>
         <Tbody>
@@ -144,8 +144,8 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
             <Tr key={documentDataExample.id} bgColor={secBgColor}>
               <Td></Td>
               <Td><Tag><Link href={"/documents#"+documentDataExample.document_id}>{documentDataExample.document_id}</Link></Tag></Td>
-              <Td><Text whiteSpace="pre-wrap">{documentDataExample.data}</Text></Td>
               <Td></Td>
+              <Td><Text whiteSpace="pre-wrap">{documentDataExample.data}</Text></Td>
               <Td></Td>
             </Tr>
           ))}
