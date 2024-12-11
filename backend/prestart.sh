@@ -10,5 +10,5 @@ alembic upgrade head
 python /app/app/initial_data.py
 
 # Migrate the response template from the old to the new formalison
-python /app/app/migrations/response_templates.py
+python /app/app/migrations/clean_dde.py
 

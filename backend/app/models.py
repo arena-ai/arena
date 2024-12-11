@@ -283,7 +283,7 @@ class Attribute(SQLModel, table=True):
 class DocumentDataExtractorBase(SQLModel):
     name: str = Field(unique=True, index=True)
     prompt: str
-    process_as: str | None = None
+    process_as: str = 'text'    #TODO this can be an Enum to prevent error
     response_template: str
 
     @field_validator("name")
@@ -302,7 +302,6 @@ class DocumentDataExtractorUpdate(DocumentDataExtractorBase):
     process_as: str | None = None
     response_template: str | None = None
 
-
 class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     timestamp: datetime | None = Field(default=func.now())
@@ -314,12 +313,10 @@ class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
     owner: User | None = Relationship(
         back_populates="document_data_extractors"
     )
-    response_template: str
     document_data_examples: list["DocumentDataExample"] = Relationship(
         back_populates="document_data_extractor",
         sa_relationship_kwargs={"cascade": "all, delete"},
     )
-    process_as: str | None
 
 # Properties to return via API, id is always required
 class DocumentDataExtractorOut(DocumentDataExtractorBase):
