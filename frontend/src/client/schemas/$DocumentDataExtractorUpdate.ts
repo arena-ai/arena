@@ -20,15 +20,18 @@ export const $DocumentDataExtractorUpdate = {
                 type: 'null',
             }],
         },
+        process_as: {
+            type: 'any-of',
+            contains: [{
+                type: 'string',
+            }, {
+                type: 'null',
+            }],
+        },
         response_template: {
             type: 'any-of',
             contains: [{
-                type: 'dictionary',
-                contains: {
-                    type: 'any[]',
-                    maxItems: 2,
-                    minItems: 2,
-                },
+                type: 'string',
             }, {
                 type: 'null',
             }],

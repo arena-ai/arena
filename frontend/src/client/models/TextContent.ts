@@ -3,11 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Function } from './Function';
-
-export type ChatCompletionToolParam = {
-    id?: (string | null);
-    function: Function;
+export type TextContent = {
     type: string;
+    text: string;
 };
 

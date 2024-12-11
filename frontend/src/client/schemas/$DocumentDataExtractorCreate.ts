@@ -12,13 +12,11 @@ export const $DocumentDataExtractorCreate = {
             type: 'string',
             isRequired: true,
         },
+        process_as: {
+            type: 'string',
+        },
         response_template: {
-            type: 'dictionary',
-            contains: {
-                type: 'any[]',
-                maxItems: 2,
-                minItems: 2,
-            },
+            type: 'string',
             isRequired: true,
         },
     },

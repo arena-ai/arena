@@ -165,7 +165,8 @@ function DataExtractors() {
   const [selectedExtractor, selectExtractor] = useState("");
   const [name, setName] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [responseTemplate, setResponseTemplate] = useState<Record<string, any>>({});
+  const [processAs, setprocessAs] = useState("");
+  const [responseTemplate, setResponseTemplate] = useState("");
   const showToast = useCustomToast()
   // Pull document data extractors
   const {
@@ -217,13 +218,21 @@ function DataExtractors() {
                     />
                   </Td>
                   <Td>
+                    <Select placeholder="Process As"
+                      onChange={(e)=>setprocessAs(e.target.value)}
+                    >
+                      <option value="text">Text</option>
+                      <option value="image">Image</option>
+                    </Select>
+                  </Td>
+                  <Td>
                     <Textarea placeholder="Response Template"
-                      onChange={(e)=>setResponseTemplate(JSON.parse(e.target.value))}
+                      onChange={(e)=>setResponseTemplate(e.target.value)}
                     />
                   </Td>
                   <Td><Button colorScheme='teal' onClick={()=>{
                       DocumentDataExtractorsService.createDocumentDataExtractor({
-                        requestBody: {name: name, prompt: prompt, response_template: responseTemplate}
+                        requestBody: {name: name, prompt: prompt, process_as: processAs, response_template: responseTemplate}
                       }).then(()=> queryClient.invalidateQueries({ queryKey: ['document_data_extractors'] }));
                     }}>Add Extractor</Button>
                   </Td>

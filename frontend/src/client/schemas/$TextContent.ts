@@ -2,13 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ResponseFormatJSONSchema = {
+export const $TextContent = {
     properties: {
-        json_schema: {
-            type: 'JSONSchema',
+        type: {
+            type: 'string',
             isRequired: true,
         },
-        type: {
+        text: {
             type: 'string',
             isRequired: true,
         },

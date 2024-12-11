@@ -34,7 +34,7 @@ export const $app__lm__models__chat_completion__ChatCompletionResponse_Input = {
         object: {
             type: 'any-of',
             contains: [{
-                type: 'Enum',
+                type: 'string',
             }, {
                 type: 'null',
             }],

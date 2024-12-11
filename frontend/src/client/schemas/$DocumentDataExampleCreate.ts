@@ -11,12 +11,8 @@ export const $DocumentDataExampleCreate = {
         data: {
             type: 'dictionary',
             contains: {
-                type: 'any-of',
-                contains: [{
-                    type: 'string',
-                }, {
-                    type: 'null',
-                }],
+                properties: {
+                },
             },
             isRequired: true,
         },

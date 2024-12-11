@@ -31,7 +31,7 @@ export const $app__lm__models__openai__ChatCompletionResponse_Input = {
         object: {
             type: 'any-of',
             contains: [{
-                type: 'Enum',
+                type: 'string',
             }, {
                 type: 'null',
             }],

@@ -12,6 +12,13 @@ export const $DocumentDataExtractorOut = {
             type: 'string',
             isRequired: true,
         },
+        process_as: {
+            type: 'string',
+        },
+        response_template: {
+            type: 'string',
+            isRequired: true,
+        },
         id: {
             type: 'number',
             isRequired: true,
@@ -30,10 +37,6 @@ export const $DocumentDataExtractorOut = {
             contains: {
                 type: 'DocumentDataExample',
             },
-            isRequired: true,
-        },
-        response_template: {
-            type: 'string',
             isRequired: true,
         },
     },

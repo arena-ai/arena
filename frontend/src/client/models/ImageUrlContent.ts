@@ -3,11 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Function } from './Function';
+import type { ImageUrl } from './ImageUrl';
 
-export type ChatCompletionToolParam = {
-    id?: (string | null);
-    function: Function;
+export type ImageUrlContent = {
     type: string;
+    image_url: ImageUrl;
 };
 

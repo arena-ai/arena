@@ -121,4 +121,34 @@ export class DocumentsService {
         });
     }
 
+    /**
+     * Read File As Png
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static readFileAsPng({
+        name,
+        startPage,
+        endPage,
+    }: {
+        name: string,
+        startPage?: number,
+        endPage?: (number | null),
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/documents/{name}/as_png',
+            path: {
+                'name': name,
+            },
+            query: {
+                'start_page': startPage,
+                'end_page': endPage,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }

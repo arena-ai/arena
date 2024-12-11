@@ -2,14 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ResponseFormatJSONSchema = {
+export const $ImageUrlContent = {
     properties: {
-        json_schema: {
-            type: 'JSONSchema',
-            isRequired: true,
-        },
         type: {
             type: 'string',
+            isRequired: true,
+        },
+        image_url: {
+            type: 'ImageUrl',
             isRequired: true,
         },
     },

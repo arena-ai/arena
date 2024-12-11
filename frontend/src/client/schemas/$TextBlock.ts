@@ -8,7 +8,7 @@ export const $TextBlock = {
             type: 'string',
         },
         type: {
-            type: 'Enum',
+            type: 'string',
         },
     },
 } as const;

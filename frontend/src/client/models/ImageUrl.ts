@@ -3,10 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JSONSchema } from './JSONSchema';
-
-export type ResponseFormatJSONSchema = {
-    json_schema: JSONSchema;
-    type: string;
+export type ImageUrl = {
+    url: string;
 };
 

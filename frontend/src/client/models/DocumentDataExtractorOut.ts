@@ -8,10 +8,11 @@ import type { DocumentDataExample } from './DocumentDataExample';
 export type DocumentDataExtractorOut = {
     name: string;
     prompt: string;
+    process_as?: string;
+    response_template: string;
     id: number;
     timestamp: string;
     owner_id: number;
     document_data_examples: Array<DocumentDataExample>;
-    response_template: string;
 };
 

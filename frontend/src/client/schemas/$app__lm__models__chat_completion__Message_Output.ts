@@ -9,7 +9,10 @@ export const $app__lm__models__chat_completion__Message_Output = {
     https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/message_param.py#L15`,
     properties: {
         content: {
-            type: 'string',
+            type: 'any-of',
+            contains: [{
+                type: 'string',
+            }],
             isRequired: true,
         },
         role: {
