@@ -57,7 +57,7 @@ def convert_to_json_schema(resp_template_old:str) -> str:
         "properties": dynamic_model_properties['properties'],
         "required": dynamic_model_properties['required']
     }
-    return json.dumps(json_schema, indent=2)
+    return json.dumps(json_schema)
 
 
 def migrate_response_templates(db_engine: Engine) -> None:
@@ -74,16 +74,21 @@ def migrate_response_templates(db_engine: Engine) -> None:
             for dde in document_data_extractors:
                 #get the old schema
                 resp_template=dde.response_template
-                new_resp_template=convert_to_json_schema(resp_template) 
-                #update the dde with the new schema
-                #dde.response_template=new_resp_template  
-                new_dde={
-                    "response_template":new_resp_template
-                }
-                dde.sqlmodel_update(new_dde)
-                session.add(dde)
-                session.commit()
-                session.refresh(dde)         
+                try:
+                    get_pydantic_model(json.loads(resp_template))
+                except KeyError as e:
+                    logger.info(f"skipping dde {dde.name}")
+                    pass
+                else:
+                    new_resp_template=convert_to_json_schema(resp_template) 
+                    #update the dde with the new schema 
+                    new_dde={
+                        "response_template":new_resp_template
+                    }
+                    dde.sqlmodel_update(new_dde)
+                    session.add(dde)
+                    session.commit()
+                    session.refresh(dde)         
     except Exception as e:
             logger.error(e)
             raise e

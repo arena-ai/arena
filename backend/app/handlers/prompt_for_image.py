@@ -35,8 +35,7 @@ def fill_input_image(image_input: BytesIO | list[tuple[int, BytesIO]]) -> list[C
         return content_list
     else:
         raise ValueError("Invalid input type for image_input")
-    
-#TODO rewrite with ChatCompletionMessage
+
 #link to the OpenAI documentation specifying that only role 'user' is used for images:
 #https://platform.openai.com/docs/guides/vision
 async def full_prompt_from_image(file: BinaryIO, document_data_extractor: DocumentDataExtractor, upload_content_type: ContentType) -> list[ChatCompletionMessage]:
