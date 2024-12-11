@@ -75,8 +75,9 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
         <Tbody onClick={onClick}>
           <Tr key={documentDataExtractor.name} bgColor={secBgColor}>
             <Td><Tag bgColor="teal">{documentDataExtractor.name}</Tag></Td>
-            <Td><Text whiteSpace="pre">{documentDataExtractor.prompt}</Text></Td>
-            <Td><Text whiteSpace="pre">{documentDataExtractor.response_template}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.prompt}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.process_as}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.response_template}</Text></Td>
             <Td>{documentDataExtractor.timestamp}</Td>
           </Tr>
         </Tbody>
@@ -143,7 +144,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
             <Tr key={documentDataExample.id} bgColor={secBgColor}>
               <Td></Td>
               <Td><Tag><Link href={"/documents#"+documentDataExample.document_id}>{documentDataExample.document_id}</Link></Tag></Td>
-              <Td><Text whiteSpace="pre">{documentDataExample.data}</Text></Td>
+              <Td><Text whiteSpace="pre-wrap">{documentDataExample.data}</Text></Td>
               <Td></Td>
               <Td></Td>
             </Tr>
@@ -155,9 +156,9 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
         <Tbody onClick={onClick}>
           <Tr key={documentDataExtractor.name}>
             <Td><Tag>{documentDataExtractor.name}</Tag></Td>
-            <Td><Text whiteSpace="pre">{documentDataExtractor.prompt}</Text></Td>
-            <Td><Text whiteSpace="pre">{documentDataExtractor.process_as}</Text></Td>
-            <Td><Text whiteSpace="pre">{documentDataExtractor.response_template}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.prompt}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.process_as}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.response_template}</Text></Td>
             <Td>{documentDataExtractor.timestamp}</Td>
           </Tr>
         </Tbody>
@@ -248,7 +249,7 @@ function DataExtractors() {
                 <ExtractorExamples
                   documentDataExtractor={documentDataExtractor}
                   is_selected={documentDataExtractor.name===selectedExtractor}
-                  onClick={()=>{documentDataExtractor.name===selectedExtractor ? selectExtractor("") : selectExtractor(documentDataExtractor.name)}}/>
+                  onClick={()=>{selectExtractor(documentDataExtractor.name)}}/>
               ))}
             </Table>
           </TableContainer>
