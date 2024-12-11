@@ -67,6 +67,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
           <Tr bgColor={secBgColor}>
             <Th>Name</Th>
             <Th>Prompt</Th>
+            <Th>Process As</Th>
             <Th>Response Template</Th>
             <Th>Timestamp</Th>
           </Tr>
@@ -84,6 +85,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
             <Th>Examples</Th>
             <Th>Document</Th>
             <Th>Data</Th>
+            <Th></Th>
             <Th></Th>
           </Tr>
         </Thead>
@@ -133,6 +135,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
                 }).then(()=> queryClient.invalidateQueries({ queryKey: ['document_data_extractors'] }));
               }}>Add Example</Button>
             </Td>
+            <Td></Td>
           </Tr>
         </Tbody>
         <Tbody>
@@ -141,6 +144,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
               <Td></Td>
               <Td><Tag><Link href={"/documents#"+documentDataExample.document_id}>{documentDataExample.document_id}</Link></Tag></Td>
               <Td><Text whiteSpace="pre">{documentDataExample.data}</Text></Td>
+              <Td></Td>
               <Td></Td>
             </Tr>
           ))}
@@ -152,6 +156,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
           <Tr key={documentDataExtractor.name}>
             <Td><Tag>{documentDataExtractor.name}</Tag></Td>
             <Td><Text whiteSpace="pre">{documentDataExtractor.prompt}</Text></Td>
+            <Td><Text whiteSpace="pre">{documentDataExtractor.process_as}</Text></Td>
             <Td><Text whiteSpace="pre">{documentDataExtractor.response_template}</Text></Td>
             <Td>{documentDataExtractor.timestamp}</Td>
           </Tr>
@@ -201,6 +206,7 @@ function DataExtractors() {
                 <Tr>
                   <Th>Name</Th>
                   <Th>Prompt</Th>
+                  <Th>Process As</Th>
                   <Th>Response Template</Th>
                   <Th>Timestamp</Th>
                 </Tr>
