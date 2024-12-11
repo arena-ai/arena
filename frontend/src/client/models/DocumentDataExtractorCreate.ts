@@ -6,5 +6,7 @@
 export type DocumentDataExtractorCreate = {
     name: string;
     prompt: string;
+    process_as?: string;
+    response_template: string;
 };
 

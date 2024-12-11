@@ -21,7 +21,7 @@ export const $app__lm__models__anthropic__ChatCompletionResponse = {
             isRequired: true,
         },
         role: {
-            type: 'Enum',
+            type: 'string',
         },
         stop_reason: {
             type: 'any-of',
@@ -40,7 +40,7 @@ export const $app__lm__models__anthropic__ChatCompletionResponse = {
             }],
         },
         type: {
-            type: 'Enum',
+            type: 'string',
         },
         usage: {
             type: 'any-of',

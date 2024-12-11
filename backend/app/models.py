@@ -1,4 +1,4 @@
-from typing import Optional, Literal
+from typing import Optional, Literal, Any
 from datetime import datetime
 import re
 from sqlmodel import (
@@ -12,7 +12,7 @@ from sqlmodel import (
     ForeignKey,
 )
 from pydantic import field_validator
-
+from enum import Enum
 
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
@@ -283,6 +283,8 @@ class Attribute(SQLModel, table=True):
 class DocumentDataExtractorBase(SQLModel):
     name: str = Field(unique=True, index=True)
     prompt: str
+    process_as: str = 'text'    #TODO this can be an Enum to prevent error
+    response_template: str
 
     @field_validator("name")
     @classmethod
@@ -291,32 +293,14 @@ class DocumentDataExtractorBase(SQLModel):
 
 
 class DocumentDataExtractorCreate(DocumentDataExtractorBase):
-    name: str
-    prompt: str
-    response_template: dict[
-        str,
-        tuple[
-            Literal["str", "int", "bool", "float"],
-            Literal["required", "optional"],
-        ],
-    ]
-
+    pass
 
 # Properties to receive on DocumentDataExtractor update
 class DocumentDataExtractorUpdate(DocumentDataExtractorBase):
     name: str | None = None
     prompt: str | None = None
-    response_template: (
-        dict[
-            str,
-            tuple[
-                Literal["str", "int", "bool", "float"],
-                Literal["required", "optional"],
-            ],
-        ]
-        | None
-    ) = None
-
+    process_as: str | None = None
+    response_template: str | None = None
 
 class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -329,12 +313,10 @@ class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
     owner: User | None = Relationship(
         back_populates="document_data_extractors"
     )
-    response_template: str
     document_data_examples: list["DocumentDataExample"] = Relationship(
         back_populates="document_data_extractor",
         sa_relationship_kwargs={"cascade": "all, delete"},
     )
-
 
 # Properties to return via API, id is always required
 class DocumentDataExtractorOut(DocumentDataExtractorBase):
@@ -342,7 +324,6 @@ class DocumentDataExtractorOut(DocumentDataExtractorBase):
     timestamp: datetime
     owner_id: int
     document_data_examples: list["DocumentDataExample"]
-    response_template: str
 
 
 class DocumentDataExtractorsOut(SQLModel):
@@ -359,7 +340,7 @@ class DocumentDataExampleBase(SQLModel):
 
 class DocumentDataExampleCreate(DocumentDataExampleBase):
     document_id: str
-    data: dict[str, str | None]
+    data: dict[str, Any]  
     start_page: int = 0
     end_page: int | None = None
 
@@ -390,3 +371,9 @@ class DocumentDataExample(SQLModel, table=True):
 class DocumentDataExampleOut(DocumentDataExampleBase):
     id: int
     data: str
+
+class ContentType(str, Enum):
+    PDF = "application/pdf"  # PDF files
+    XLS = "application/vnd.ms-excel"  # XLS files
+    XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"  # XLSX (new Excel format)
+    PNG = "image/png"  # PNG images

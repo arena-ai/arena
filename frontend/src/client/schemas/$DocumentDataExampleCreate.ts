@@ -9,7 +9,11 @@ export const $DocumentDataExampleCreate = {
             isRequired: true,
         },
         data: {
-            type: 'string',
+            type: 'dictionary',
+            contains: {
+                properties: {
+                },
+            },
             isRequired: true,
         },
         document_data_extractor_id: {

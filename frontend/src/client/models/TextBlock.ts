@@ -5,6 +5,6 @@
 
 export type TextBlock = {
     text?: string;
-    type?: 'text';
+    type?: string;
 };
 

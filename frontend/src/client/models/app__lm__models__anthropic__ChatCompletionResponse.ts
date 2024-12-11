@@ -13,10 +13,10 @@ export type app__lm__models__anthropic__ChatCompletionResponse = {
     id: string;
     content: Array<TextBlock>;
     model: string;
-    role?: 'assistant';
+    role?: string;
     stop_reason?: ('end_turn' | 'max_tokens' | 'stop_sequence' | null);
     stop_sequence?: (string | null);
-    type?: 'message';
+    type?: string;
     usage?: (app__lm__models__anthropic__CompletionUsage | null);
 };
 

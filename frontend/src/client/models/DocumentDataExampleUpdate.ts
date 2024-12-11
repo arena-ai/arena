@@ -5,7 +5,7 @@
 
 export type DocumentDataExampleUpdate = {
     document_id?: (string | null);
-    data?: (string | null);
+    data?: (Record<string, (string | null)> | null);
     document_data_extractor_id?: (number | null);
     start_page?: (number | null);
     end_page?: (number | null);

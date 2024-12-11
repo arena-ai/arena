@@ -12,5 +12,12 @@ export const $DocumentDataExtractorCreate = {
             type: 'string',
             isRequired: true,
         },
+        process_as: {
+            type: 'string',
+        },
+        response_template: {
+            type: 'string',
+            isRequired: true,
+        },
     },
 } as const;

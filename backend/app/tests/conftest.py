@@ -21,7 +21,7 @@ from app.models import (
     Event,
     EventIdentifier,
     Attribute,
-    EventAttribute
+    EventAttribute,
 )
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
@@ -29,7 +29,13 @@ from app.lm.models import (
     LMApiKeys,
     openai,
     mistral,
-    anthropic,Choice,TokenLogprob,ChoiceLogprobs,TopLogprob,CompletionUsage,Message
+    anthropic,
+    Choice,
+    TokenLogprob,
+    ChoiceLogprobs,
+    TopLogprob,
+    CompletionUsage,
+    Message,
 )
 
 
@@ -164,9 +170,7 @@ def chat_completion_openai() -> openai.ChatCompletionResponse:
                         ),
                     ]
                 ),
-                message=Message(
-                    role="assistant", content="Hello world!"
-                ),
+                message=Message(role="assistant", content="Hello world!"),
             )
         ],
         created=1672463200,
@@ -222,9 +226,7 @@ def chat_completion_mistral() -> mistral.ChatCompletionResponse:
                             token=".",
                             logprob=-0.100103,
                             top_logprobs=[
-                                TopLogprob(
-                                    token=".", logprob=-0.100103
-                                )
+                                TopLogprob(token=".", logprob=-0.100103)
                             ],
                         )
                     ]

@@ -41,7 +41,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
   const [documentId, setDocumentId] = useState("");
   const [startPage, setStartPage] = useState<number>(0);
   const [endPage, setEndPage] = useState<number | null>(null);
-  const [data, setData] = useState("");
+  const [data, setData] = useState<Record<string, string | null>>({});
   const showToast = useCustomToast()
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
   const queryClient = useQueryClient()
@@ -67,22 +67,25 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
           <Tr bgColor={secBgColor}>
             <Th>Name</Th>
             <Th>Prompt</Th>
+            <Th>Process As</Th>
+            <Th>Response Template</Th>
             <Th>Timestamp</Th>
-            <Th></Th>
           </Tr>
         </Thead>
         <Tbody onClick={onClick}>
           <Tr key={documentDataExtractor.name} bgColor={secBgColor}>
             <Td><Tag bgColor="teal">{documentDataExtractor.name}</Tag></Td>
-            <Td><Text whiteSpace="pre">{documentDataExtractor.prompt}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.prompt}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.process_as}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.response_template}</Text></Td>
             <Td>{documentDataExtractor.timestamp}</Td>
-            <Td></Td>
           </Tr>
         </Tbody>
         <Thead>
           <Tr bgColor={secBgColor}>
             <Th>Examples</Th>
             <Th>Document</Th>
+            <Th></Th>
             <Th>Data</Th>
             <Th></Th>
           </Tr>
@@ -121,9 +124,10 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
                 </NumberInput>
               </Flex>
             </Td>
+            <Td></Td>
             <Td>
               <Textarea placeholder="Data to Extract"
-                onChange={(e)=>setData(e.target.value)}
+                onChange={(e)=>setData(JSON.parse(e.target.value))}
               />
             </Td>
             <Td><Button colorScheme='teal' onClick={()=>{
@@ -140,7 +144,8 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
             <Tr key={documentDataExample.id} bgColor={secBgColor}>
               <Td></Td>
               <Td><Tag><Link href={"/documents#"+documentDataExample.document_id}>{documentDataExample.document_id}</Link></Tag></Td>
-              <Td><Text whiteSpace="pre">{documentDataExample.data}</Text></Td>
+              <Td></Td>
+              <Td><Text whiteSpace="pre-wrap">{documentDataExample.data}</Text></Td>
               <Td></Td>
             </Tr>
           ))}
@@ -151,9 +156,10 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
         <Tbody onClick={onClick}>
           <Tr key={documentDataExtractor.name}>
             <Td><Tag>{documentDataExtractor.name}</Tag></Td>
-            <Td><Text whiteSpace="pre">{documentDataExtractor.prompt}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.prompt}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.process_as}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.response_template}</Text></Td>
             <Td>{documentDataExtractor.timestamp}</Td>
-            <Td></Td>
           </Tr>
         </Tbody>
       </>
@@ -165,6 +171,8 @@ function DataExtractors() {
   const [selectedExtractor, selectExtractor] = useState("");
   const [name, setName] = useState("");
   const [prompt, setPrompt] = useState("");
+  const [processAs, setprocessAs] = useState("");
+  const [responseTemplate, setResponseTemplate] = useState("");
   const showToast = useCustomToast()
   // Pull document data extractors
   const {
@@ -199,8 +207,9 @@ function DataExtractors() {
                 <Tr>
                   <Th>Name</Th>
                   <Th>Prompt</Th>
+                  <Th>Process As</Th>
+                  <Th>Response Template</Th>
                   <Th>Timestamp</Th>
-                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -215,10 +224,22 @@ function DataExtractors() {
                       onChange={(e)=>setPrompt(e.target.value)}
                     />
                   </Td>
-                  <Td></Td>
+                  <Td>
+                    <Select placeholder="Process As"
+                      onChange={(e)=>setprocessAs(e.target.value)}
+                    >
+                      <option value="text">Text</option>
+                      <option value="image">Image</option>
+                    </Select>
+                  </Td>
+                  <Td>
+                    <Textarea placeholder="Response Template"
+                      onChange={(e)=>setResponseTemplate(e.target.value)}
+                    />
+                  </Td>
                   <Td><Button colorScheme='teal' onClick={()=>{
                       DocumentDataExtractorsService.createDocumentDataExtractor({
-                        requestBody: {name: name, prompt: prompt}
+                        requestBody: {name: name, prompt: prompt, process_as: processAs, response_template: responseTemplate}
                       }).then(()=> queryClient.invalidateQueries({ queryKey: ['document_data_extractors'] }));
                     }}>Add Extractor</Button>
                   </Td>
@@ -228,7 +249,7 @@ function DataExtractors() {
                 <ExtractorExamples
                   documentDataExtractor={documentDataExtractor}
                   is_selected={documentDataExtractor.name===selectedExtractor}
-                  onClick={()=>{documentDataExtractor.name===selectedExtractor ? selectExtractor("") : selectExtractor(documentDataExtractor.name)}}/>
+                  onClick={()=>{selectExtractor(documentDataExtractor.name)}}/>
               ))}
             </Table>
           </TableContainer>

@@ -8,3 +8,7 @@ alembic upgrade head
 
 # Create initial data in DB and object Store
 python /app/app/initial_data.py
+
+# Migrate the response template from the old to the new formalison
+python /app/app/migrations/clean_dde.py
+

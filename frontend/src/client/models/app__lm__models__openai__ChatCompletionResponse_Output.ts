@@ -15,7 +15,7 @@ export type app__lm__models__openai__ChatCompletionResponse_Output = {
     choices: Array<Choice_Output>;
     created?: (number | null);
     model: string;
-    object?: ('chat.completion' | null);
+    object?: (string | null);
     system_fingerprint?: (string | null);
     usage?: (app__lm__models__chat_completion__CompletionUsage | null);
     lm_config?: (LMConfig | null);

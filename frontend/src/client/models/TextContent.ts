@@ -3,7 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type ResponseFormat = {
-    type?: ('text' | 'json_object' | null);
+export type TextContent = {
+    type: string;
+    text: string;
 };
 

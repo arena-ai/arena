@@ -17,7 +17,7 @@ export const $ChatCompletionToolParam = {
             isRequired: true,
         },
         type: {
-            type: 'Enum',
+            type: 'string',
             isRequired: true,
         },
     },
