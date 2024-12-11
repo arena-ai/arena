@@ -319,7 +319,7 @@ class DocumentDataExtractor(DocumentDataExtractorBase, table=True):
         back_populates="document_data_extractor",
         sa_relationship_kwargs={"cascade": "all, delete"},
     )
-    process_as: str | None
+    process_as: Literal['text', 'image'] = 'text'
 
 # Properties to return via API, id is always required
 class DocumentDataExtractorOut(DocumentDataExtractorBase):
