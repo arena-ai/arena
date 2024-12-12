@@ -464,7 +464,7 @@ async def extract_from_file(
     chat_completion_request = ChatCompletionRequest(
         model="gpt-4o-2024-08-06",
         messages=messages,
-        max_tokens=2000,
+        max_tokens=5000,
         temperature=0.1,
         logprobs=True,
         top_logprobs=5,
@@ -484,10 +484,10 @@ async def extract_from_file(
     json_string = extracted_data[
         extracted_data.find("{") : extracted_data.rfind("}") + 1
     ]
-    token_indices=map_characters_to_token_indices(extracted_data_token)
-    regex_spans=find_value_spans(extracted_data)
-    logprobs_sum=get_token_spans_and_logprobs(token_indices, regex_spans, extracted_data_token)
-    return {"extracted_data": json.loads(json_string), "extracted_logprobs":logprobs_sum, "identifier": identifier}
+    #token_indices=map_characters_to_token_indices(extracted_data_token)
+    #regex_spans=find_value_spans(extracted_data)
+    #logprobs_sum=get_token_spans_and_logprobs(token_indices, regex_spans, extracted_data_token)
+    return {"extracted_data": json.loads(json_string), "extracted_logprobs": {}, "identifier": identifier}
 
 def map_characters_to_token_indices(extracted_data_token: list[TokenLogprob]) -> list[int]:
     """
