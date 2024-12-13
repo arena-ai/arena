@@ -112,7 +112,7 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
                     for message in lm_request.content.messages:
                         if isinstance(message.content, str):
                             # The message content can be either a string (for text) or a list (for images). 
-                            # If it's not a string, PII should be avoided.
+                            # If it's not a string, PII removal should be avoided.
                             async def set_content(message=message):
                                 message.content = await masking(message.content).evaluate(session=self.session)
                             tg.start_soon(set_content)
