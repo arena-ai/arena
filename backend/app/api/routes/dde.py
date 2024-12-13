@@ -464,7 +464,7 @@ async def extract_from_file(
     chat_completion_request = ChatCompletionRequest(
         model="gpt-4o-2024-08-06",
         messages=messages,
-        max_tokens=5000,
+        max_tokens=10000,
         temperature=0.1,
         logprobs=True,
         top_logprobs=5,

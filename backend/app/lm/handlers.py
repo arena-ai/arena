@@ -110,20 +110,24 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
             if config.pii_removal == "masking":
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
-                        async def set_content(message=message):
-                            message.content = await masking(message.content).evaluate(session=self.session)
-                        tg.start_soon(set_content)
+                        if isinstance(message.content, str):
+                            # The message content can be either a string (for text) or a list (for images). 
+                            # If it's not a string, PII should be avoided.
+                            async def set_content(message=message):
+                                message.content = await masking(message.content).evaluate(session=self.session)
+                            tg.start_soon(set_content)
             if config.pii_removal == "replace":
                 async with create_task_group() as tg:
                     for message in lm_request.content.messages:
-                        async def set_content(message=message):
-                            message.content, mapping = await replace_masking(message.content).evaluate(session=self.session)
-                            if message.role == 'user':    
-                                # Update the mapping dictionary only with mappings from messages whose role is user
-                                # since the content needs to be replaced back only for these messages.
-                                # For system messages, we want to anonymyze but we do not want to replace back as we may leak some info of the examples to the user.
-                                mapping_dict.update(mapping)
-                        tg.start_soon(set_content)
+                        if isinstance(message.content, str):
+                            async def set_content(message=message):
+                                message.content, mapping = await replace_masking(message.content).evaluate(session=self.session)
+                                if message.role == 'user':    
+                                    # Update the mapping dictionary only with mappings from messages whose role is user
+                                    # since the content needs to be replaced back only for these messages.
+                                    # For system messages, we want to anonymyze but we do not want to replace back as we may leak some info of the examples to the user.
+                                    mapping_dict.update(mapping)
+                            tg.start_soon(set_content)
             # Log the request event
             lm_request_event = LogRequest(name="modified_request")(ses, usr, arena_request_event, lm_request)
         # compute the response
@@ -166,7 +170,7 @@ class ChatCompletionHandler(ABC, Generic[Req, Resp]):
             )
             evaluate.delay(judge_score.then(judge_score_event))
         
-        if  config.pii_removal == "replace":
+        if  config.pii_removal == "replace" and isinstance(message.content, str):
             chat_completion_with_real_entities = replace_back(chat_completion_response, mapping_dict)
             return chat_completion_with_real_entities
         
