@@ -10,7 +10,8 @@ class XLSXReader:
     ) -> str:
         
         df = pd.read_excel(pdf_data)
-        text = df.to_csv(index=False)
+        #formatting decimal numbers to 3 digits to reduce text length.
+        text = df.to_csv(index=False, float_format="%.3f")
         
         return text
 

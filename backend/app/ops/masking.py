@@ -63,7 +63,7 @@ class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
         analyzer = Analyzer()
         anonymizer = Anonymizer()
         #Passing only the relevant entities to the analyzer so the model searches for these specifically.
-        entities = ["LOCATION","PERSON"]
+        entities = ["PERSON"]
         analysis = await analyzer.analyze(AnalyzerRequest(text=input, entities=entities))
         anonymized = await anonymizer.anonymize(AnonymizerRequest(
             text=input,
@@ -80,9 +80,6 @@ class ReplaceMasking(Op[str, tuple[str, Mapping[str, str]]]):
             # Compute a replacement value
             if item.entity_type == "PERSON":
                 replacement = self.replace_person(item.text, input)
-            elif item.entity_type == "LOCATION":
-                replacement = self.replace_address(item.text, input)
-  
             mapping[replacement] = item.text
             anonymized.text = f"{anonymized.text[:item.start]}{replacement}{anonymized.text[item.end:]}"   
         return (anonymized.text, mapping)
