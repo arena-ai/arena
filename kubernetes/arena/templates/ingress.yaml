@@ -11,12 +11,15 @@ metadata:
     app.kubernetes.io/component: backend
   annotations:
     cert-manager.io/issuer: {{.Values.cluster.tls.issuer.name | quote}}
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
     # the following line is to enable IP filtering in the Ingress
     # nginx.ingress.kubernetes.io/whitelist-source-range: {{.Values.cluster.IP_FILTER_CIDR | quote}}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       if ($http_x_sarus_filter  != {{.Values.cluster.secretHeader | quote}}){
                 return 403;
                 }
+      gzip on;
+      gzip_types application/json;
 spec:
   ingressClassName: nginx
   {{ if .Values.cluster.tls.enabled -}}
