@@ -45,18 +45,18 @@ function format_event(e: EventOut) {
   }
 }
 
-function format_chat_request(content: { content: { model: string; messages: Array<{ role: string; content: string }> } }) {
+function format_chat_request(content: { content: { model: string; messages: Array<{ role: string; content: string | Array<object> }> } }) {
   return <Box>
     <b>model</b>: {content.content.model}
-    {content.content.messages.map((message: { role: string; content: string }, index: number) => <Text key={index}>
-      <b>{message.role}</b>: {message.content}
+    {content.content.messages.map((message: { role: string; content: string | Array<object> }, index: number) => <Text key={index}>
+      <b>{message.role}</b>: {Array.isArray(message.content) ? <Code>not displayable</Code> : message.content}
     </Text>)}</Box>;
 }
 
-function format_chat_response(content: { content: { choices: Array<{ message: { role: string; content: string } }> } }) {
+function format_chat_response(content: { content: { choices: Array<{ message: { role: string; content: string | Array<object> } }> } }) {
   return <Box>
     {content.content.choices.map((choice, index: number) => <Text key={index}>
-      <b>{choice.message.role}</b>: {choice.message.content}
+      <b>{choice.message.role}</b>: {Array.isArray(choice.message.content) ? <Code>not displayable</Code> : choice.message.content}
     </Text>)}</Box>;
 }
 
