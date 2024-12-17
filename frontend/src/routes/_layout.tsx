@@ -20,7 +20,7 @@ function Layout() {
   const { isLoading } = useAuth()
 
   return (
-    <Flex maxW="large" h="auto" position="relative">
+    <Flex minW="1600px" h="auto" position="relative">
       <Sidebar />
       {isLoading ? (
         <Flex justify="center" align="center" height="100vh" width="full">

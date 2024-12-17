@@ -29,14 +29,21 @@ export const Route = createFileRoute('/_layout/events')({
   component: Events,
 })
 
-function format_event(e: EventOut) {
+function clipText(text: string, maxLength: number = 10000): string {
+  if (text.length > maxLength) {
+      return text.slice(0, maxLength) + '...';
+  }
+  return text;
+}
+
+function formatEvent(e: EventOut) {
   try {
     if (e.name === "request" || e.name === "modified_request") {
-      return format_chat_request(JSON.parse(e.content));
+      return formatChatRequest(JSON.parse(e.content));
     } else if (e.name === "response" || e.name === "modified_response") {
-      return format_chat_response(JSON.parse(e.content));
+      return formatChatResponse(JSON.parse(e.content));
     } else if (e.name === "user_evaluation" || e.name === "lm_judge_evaluation") {
-      return format_evaluation(JSON.parse(e.content));
+      return formatEvaluation(JSON.parse(e.content));
     } else {
       return format_json(e.content || 'N/A');
     }
@@ -45,24 +52,24 @@ function format_event(e: EventOut) {
   }
 }
 
-function format_chat_request(content: { content: { model: string; messages: Array<{ role: string; content: string | Array<object> }> } }) {
+function formatChatRequest(content: { content: { model: string; messages: Array<{ role: string; content: string | Array<object> }> } }) {
   return <Box>
     <b>model</b>: {content.content.model}
-    {content.content.messages.map((message: { role: string; content: string | Array<object> }, index: number) => <Text key={index}>
-      <b>{message.role}</b>: {Array.isArray(message.content) ? <Code>not displayable</Code> : message.content}
+    {content.content.messages.map((message: { role: string; content: string | Array<object> }, index: number) => <Text whiteSpace="pre-wrap" key={index}>
+      <b>{message.role}</b>: {Array.isArray(message.content) ? <Code>not displayable</Code> : clipText(message.content)}
     </Text>)}</Box>;
 }
 
-function format_chat_response(content: { content: { choices: Array<{ message: { role: string; content: string | Array<object> } }> } }) {
+function formatChatResponse(content: { content: { choices: Array<{ message: { role: string; content: string | Array<object> } }> } }) {
   return <Box>
-    {content.content.choices.map((choice, index: number) => <Text key={index}>
-      <b>{choice.message.role}</b>: {Array.isArray(choice.message.content) ? <Code>not displayable</Code> : choice.message.content}
+    {content.content.choices.map((choice, index: number) => <Text whiteSpace="pre-wrap" key={index}>
+      <b>{choice.message.role}</b>: {Array.isArray(choice.message.content) ? <Code>not displayable</Code> : clipText(choice.message.content)}
     </Text>)}</Box>;
 }
 
-function format_evaluation(content: { type: string, value: number }) {
+function formatEvaluation(content: { type: string, value: number }) {
   return <Box>
-    <Text><b>{content.type}</b>: {content.value}</Text>
+    <Text whiteSpace="pre-wrap"><b>{content.type}</b>: {content.value}</Text>
   </Box>;
 }
 
@@ -166,7 +173,7 @@ function Events() {
                       <Td w={32}>{event.name}</Td>
                       <Td w={64}>{event.timestamp.slice(0, 19)}</Td>
                       <Td color={!event.content ? 'gray.400' : 'inherit'}>
-                        {format_event(event)}
+                        {formatEvent(event)}
                       </Td>
                       <Td w={32}>{event.parent_id}</Td>
                       <Td w={32}>{owners.get(event.owner_id) || "Unknown"}</Td>
