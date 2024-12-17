@@ -35,6 +35,7 @@ import useCustomToast from '@app/hooks/useCustomToast'
 export const Route = createFileRoute('/_layout/document-data-extractors')({
   component: DocumentDataExtractors,
 })
+import {clipText} from '@app/utils/helpers'
 
 function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {documentDataExtractor: DocumentDataExtractorOut, is_selected: boolean, onClick: MouseEventHandler}) {
   // Pull document data examples
@@ -77,7 +78,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
             <Td><Tag bgColor="teal">{documentDataExtractor.name}</Tag></Td>
             <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.prompt}</Text></Td>
             <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.process_as}</Text></Td>
-            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.response_template}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{clipText(documentDataExtractor.response_template)}</Text></Td>
             <Td>{documentDataExtractor.timestamp}</Td>
           </Tr>
         </Tbody>
@@ -145,7 +146,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
               <Td></Td>
               <Td><Tag><Link href={"/documents#"+documentDataExample.document_id}>{documentDataExample.document_id}</Link></Tag></Td>
               <Td></Td>
-              <Td><Text whiteSpace="pre-wrap">{documentDataExample.data}</Text></Td>
+              <Td><Text whiteSpace="pre-wrap">{clipText(documentDataExample.data)}</Text></Td>
               <Td></Td>
             </Tr>
           ))}
@@ -158,7 +159,7 @@ function ExtractorExamples({documentDataExtractor, is_selected, onClick}: {docum
             <Td><Tag>{documentDataExtractor.name}</Tag></Td>
             <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.prompt}</Text></Td>
             <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.process_as}</Text></Td>
-            <Td><Text whiteSpace="pre-wrap">{documentDataExtractor.response_template}</Text></Td>
+            <Td><Text whiteSpace="pre-wrap">{clipText(documentDataExtractor.response_template)}</Text></Td>
             <Td>{documentDataExtractor.timestamp}</Td>
           </Tr>
         </Tbody>

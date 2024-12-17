@@ -24,17 +24,11 @@ import { useQuery, useQueries } from '@tanstack/react-query'
 import { ApiError, EventOut, EventsService, UserOut, UsersService } from '@app/client'
 import useCustomToast from '@app/hooks/useCustomToast'
 import DownloadButton from '@app/components/Events/DownloadButton'
+import {clipText} from '@app/utils/helpers'
 
 export const Route = createFileRoute('/_layout/events')({
   component: Events,
 })
-
-function clipText(text: string, maxLength: number = 10000): string {
-  if (text.length > maxLength) {
-      return text.slice(0, maxLength) + '...';
-  }
-  return text;
-}
 
 function formatEvent(e: EventOut) {
   try {
