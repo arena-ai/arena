@@ -1,6 +1,6 @@
 import pytest
 from app.ops.schema_converter import create_pydantic_model
-from app.migrations.response_templates import convert_to_json_schema
+from app.migrations.clean_dde import convert_to_json_schema
 import json
 
 @pytest.fixture
