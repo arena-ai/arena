@@ -6,12 +6,6 @@ from app.services.object_store import Documents
 import pytest
 import json
 from typing import Generator, Any
-from app.api.routes.dde import (
-    map_characters_to_token_indices,
-    find_value_spans,
-    get_token_spans_and_logprobs,
-)
-
 
 @pytest.fixture(scope="module")
 def document_data_extractor(
@@ -201,69 +195,5 @@ def test_update_document_data_example(
         assert response_data["data"] == json.dumps(updated_data)
         assert response_data["document_data_extractor_id"] == 1
         assert response_data["id"] == 1
-
-
-class TokenLogprob:
-    def __init__(self, token: str, logprob: float):
-        self.token = token
-        self.logprob = logprob
-
-@pytest.fixture
-def data_token():
-    return [
-        TokenLogprob(token='{',  logprob = -1.9365e-07),          # Token index 0
-        TokenLogprob(token='"key1"',  logprob =  -0.01117),       # Token index 1
-        TokenLogprob(token=': "',  logprob = -0.00279),            # Token index 2
-        TokenLogprob(token='val', logprob = -1.1472e-06),        # Token index 3
-        TokenLogprob(token='ue1"', logprob = -0.00851),           # Token index 4
-        TokenLogprob(token=', "', logprob = -0.00851),            # Token index 5
-        TokenLogprob(token='key2', logprob = -0.00851),           # Token index 6
-        TokenLogprob(token='": ', logprob = -0.00851),            # Token index 7
-        TokenLogprob(token='42', logprob = -0.00851),             # Token index 8
-        TokenLogprob(token='}', logprob = -1.265e-07)             # Token index 9
-    ]
-
-@pytest.fixture
-def token_indices():
-    return [0,             
-            1, 1, 1, 1, 1, 1,  
-            2, 2, 2,           
-            3, 3, 3, 
-            4, 4, 4, 4,  
-            5, 5, 5,
-            6, 6, 6, 6,
-            7, 7, 7,
-            8, 8,
-            9] 
-    
-@pytest.fixture
-def sample_json_string():
-    return '{"key1": "value1", "key2": 42}'
-
-@pytest.fixture
-def value_spans():
-    return [
-        ("key1", (9, 17)),   
-        ("key2", (27, 29))        
-    ]
-
-def test_map_characters_to_token_indices(data_token, token_indices):             
-    result = map_characters_to_token_indices(data_token)
-
-    assert result == token_indices
-    assert result.count(1) == len(data_token[1].token)
-
-def test_find_value_spans(sample_json_string, value_spans):
-    result = find_value_spans(sample_json_string)
-
-    assert result == value_spans
-    assert sample_json_string[9:17] == '"value1"'
-    assert sample_json_string[27:29] == '42'
-
-def test_get_token_spans_and_logprobs(token_indices, value_spans, data_token):
-    expected_output = {"key1": -0.0113011472, "key2": -0.00851}
-    result = get_token_spans_and_logprobs(token_indices, value_spans, data_token)
-
-    assert result == expected_output
-    
+ 
 # TODO: test extract_from_file

@@ -133,7 +133,7 @@ class Extractor(Transformer):
     
 json_parser = Lark(json_grammar, parser="lalr", propagate_positions=True, maybe_placeholders=False)
 
-def extract_value_positions(json_string: str, tokens: list[TokenLogprob], token_indices: list[int]) -> dict[str,Any]:
+def extract_json_data(json_string: str, tokens: list[TokenLogprob], token_indices: list[int]) -> dict[str,Any]:
     tree = json_parser.parse(json_string)
     extractor = Extractor(tokens, token_indices)
     return extractor.transform(tree)

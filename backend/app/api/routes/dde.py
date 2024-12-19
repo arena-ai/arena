@@ -32,7 +32,7 @@ from app.models import (
 from openai.lib._pydantic import to_strict_json_schema
 from app.handlers.prompt_for_image import full_prompt_from_image
 from app.handlers.prompt_for_text import full_prompt_from_text
-from app.handlers.logprobs import map_characters_to_token_indices, extract_value_positions
+from app.handlers.logprobs import map_characters_to_token_indices, extract_json_data
 
 from app.models import ContentType
     
@@ -486,6 +486,6 @@ async def extract_from_file(
         extracted_data.find("{") : extracted_data.rfind("}") + 1
     ]
     token_indices=map_characters_to_token_indices(extracted_data_token)
-    extracted_data=extract_value_positions(json_string, extracted_data_token, token_indices)
+    extracted_data=extract_json_data(json_string, extracted_data_token, token_indices)
     return {"extracted_data": extracted_data, "identifier": identifier}
 
