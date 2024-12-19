@@ -32,6 +32,7 @@ from app.models import (
 from openai.lib._pydantic import to_strict_json_schema
 from app.handlers.prompt_for_image import full_prompt_from_image
 from app.handlers.prompt_for_text import full_prompt_from_text
+from app.handlers.logprobs import map_characters_to_token_indices, extract_json_data
 
 from app.models import ContentType
     
@@ -484,109 +485,7 @@ async def extract_from_file(
     json_string = extracted_data[
         extracted_data.find("{") : extracted_data.rfind("}") + 1
     ]
-    #token_indices=map_characters_to_token_indices(extracted_data_token)
-    #regex_spans=find_value_spans(extracted_data)
-    #logprobs_sum=get_token_spans_and_logprobs(token_indices, regex_spans, extracted_data_token)
-    return {"extracted_data": json.loads(json_string), "extracted_logprobs": {}, "identifier": identifier}
-
-def map_characters_to_token_indices(extracted_data_token: list[TokenLogprob]) -> list[int]:
-    """
-    Maps each character in the JSON string output to its corresponding token index.
-    
-    Args:
-    extracted_data_token : A list of `TokenLogprob` objects, where each object represents a token and its data (such as the logprobs)
-
-    Returns:
-    A list of integers where each position corresponds to a character in the concatenated JSON string,
-    and the integer at each position is the index of the token responsible for generating that specific character in the JSON string.
-    
-    Example:
-    --------
-    Given `extracted_data_token = [TokenLogprob(token='{'), TokenLogprob(token='"key1"'), TokenLogprob(token=': '), TokenLogprob(token='"value1"'), TokenLogprob(token='}')]`
-    the JSON output is : '{"key1": "value1"}' and the function will return the list [0, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4]
-    
-    """
-
-    json_output = "".join(token_data.token for token_data in extracted_data_token)
-                    
-    token_indices = [None] * len(json_output)
-    current_char_pos = 0
-
-    for token_idx, token_data in enumerate(extracted_data_token):
-        token_text = token_data.token
-        for char_pos in range(len(token_text)):
-            token_indices[current_char_pos] = token_idx
-            current_char_pos += 1
-
-    return token_indices
-
-def find_value_spans(json_string: str) -> list[tuple[str, tuple[int, int]]]:
-    """
-    Extracts spans (start and end positions) of values (both strings or numbers) within a JSON-formatted string.
-
-    Args:
-    json_string : A JSON-formatted string where values are paired with keys and separated by colons.
-    
-    Returns:
-    A list of tuples, where each tuple contains the matched value of the key and a tuple with two integers (start, end), representing the character span of the respective value within `json_string`.
-
-    Example:
-    --------
-    Given `json_string = '{"key1": "value1"}'`, the function will return:
-        [("key1", (9, 17))]
-    """
- 
-    pattern = r'"([^"\n}]+)"\s*:\s*("[^"\n]+"|[-0-9.eE]+)\s*'
-
-    matches = []
-    for match in re.finditer(pattern, json_string):
-        value = match.group(1)
-        start = match.start(2)  
-        end = match.end(2)      
-        matches.append((value, (start, end)))
-    return matches
-
-
-def get_token_spans_and_logprobs(
-    token_indices: list[int], 
-    value_spans: list[tuple[str, tuple[int, int]]], 
-    extracted_data_token: list[TokenLogprob]
-) -> dict[str,float]:
-    """
-    Identifies the token indices for each value span and extracts the log probabilities for these tokens, summing them to provide an overall log probability for each value span. 
-
-    Args:
-        token_indices : A list mapping each character in the json string to a token index
-        value_spans : A list of tuples, each containing the value of the key and the character sapn within the JSON string
-        extracted_data_token : A list of `TokenLogprob` objects, each containing a token and its log probability data, where the index of each item corresponds to its token index.
-
-    Returns:
-    A dictionary mapping each key to the summed log probability of all the tokens that cotntains part of its value.
-
-
-    Example:
-    --------
-    Given:
-      - `token_indices = [0, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4]`, which maps each character to a token index.
-      - `value_spans = [("key1", (9, 17))]`.
-      - `extracted_data_token = [TokenLogprob(token="{", logprob=-1.5), TokenLogprob(token="key1", logprob=-1), TokenLogprob(token=": ", logprob=-1), TokenLogprob(token="value1", logprob=-1.5), TokenLogprob(token="}", logprob=-0.8)]`
-   
-    The function will return:
-      {"key1": -1.5} 
-    """
-    logprobs_for_values = {}
-
-    for value, (start, end) in value_spans:
-        token_start = token_indices[start]
-        token_end = token_indices[end] 
-        logprobs = [
-            extracted_data_token[token_idx].logprob
-            for token_idx in range(token_start, token_end)
-        ]
-        logprobs_for_values[value] = sum(logprobs)
-
-    return logprobs_for_values
-
-
-
+    token_indices=map_characters_to_token_indices(extracted_data_token)
+    extracted_data=extract_json_data(json_string, extracted_data_token, token_indices)
+    return {"extracted_data": extracted_data, "identifier": identifier}
 
