@@ -23,8 +23,8 @@ class Masking(Op[str, str]):
             AnonymizerRequest(
                 text=input,
                 anonymizers=Anonymizers(
-                PERSON=Keep(),
-                EMAIL_ADDRESS=Keep()                                   
+                    PERSON=Replace(new_value="<PERSON>"),
+                    EMAIL_ADDRESS=Replace(new_value="<EMAIL>"),
                 ),
                 analyzer_results=analysis,
             )
