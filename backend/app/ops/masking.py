@@ -17,11 +17,15 @@ class Masking(Op[str, str]):
     async def call(self, input: str) -> str:
         analyzer = Analyzer()
         anonymizer = Anonymizer()
-        analysis = await analyzer.analyze(AnalyzerRequest(text=input))
+        entities = ["PERSON", "EMAIL_ADDRESS"]
+        analysis = await analyzer.analyze(AnalyzerRequest(text=input, entities=entities))
         anonymized = await anonymizer.anonymize(
             AnonymizerRequest(
                 text=input,
-                anonymizers=Anonymizers(DEFAULT=Replace()),
+                anonymizers=Anonymizers(
+                    PERSON=Replace(new_value="<PERSON>"),
+                    EMAIL_ADDRESS=Replace(new_value="<EMAIL>"),
+                ),
                 analyzer_results=analysis,
             )
         )
