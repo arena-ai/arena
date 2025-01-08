@@ -81,6 +81,7 @@ eksctl create iamserviceaccount \
   --name ebs-csi-controller-sa \
   --namespace kube-system \
   --cluster $CLUSTER_NAME \
+  --region $REGION \
   --role-name $IAM_ROLE_NAME \
   --role-only \
   --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
